@@ -1,8 +1,6 @@
 package constdp
 
-import (
-  "simplex/geom"
-)
+
 
 /*
  description update list of constraints with

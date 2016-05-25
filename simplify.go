@@ -1,21 +1,23 @@
 package constdp
 
 import (
-    . "simplex/dp"
+    "simplex/dp"
     "simplex/geom"
     "simplex/util/iter"
     "fmt"
-    "simplex/struct/rtree"
+    "simplex/struct/slist"
+    "golang.org/x/mobile/bind/testdata"
+    "simplex/struct/stack"
 )
 
 //constrained dp simplify
 func (self *ConstDP) Simplify(opts *Options) *ConstDP {
+    self.opts = opts
     self.Simple.Reset()
-    self.Filter(self.Root, opts.Threshold)
+    self.Filter(self.Root, self.opts.Threshold)
     for !(self.NodeSet.IsEmpty()) {
-        self.genints(opts)
+        self.genints()
     }
-
     return self
 }
 
@@ -25,7 +27,7 @@ func (self *ConstDP) Simplify(opts *Options) *ConstDP {
  param options
  private
  */
-func (self *ConstDP) genints(opts *Options) {
+func (self *ConstDP) genints() {
     var node = self.NodeSet.Shift().(*Node)
     var fixint = node.Ints.Last().(*Vertex).Index()
     //var nextint int
@@ -49,13 +51,13 @@ func (self *ConstDP) genints(opts *Options) {
 
     var polygeom    =   geom.NewLineString(poly)
     var subgeom     =   geom.NewLineString(subpoly)
-    var db     =   opts.Db
+    var db          =   self.opts.Db
 
     if node.Hull == nil {
         node.Hull = polygeom.ConvexHull()
     }
     var hull        =   node.Hull
-    var constlist []*rtree.Node
+    var constlist []geom.Geometry
 
     if db != nil {
         constlist = SearchDb(db, hull.BBox())
@@ -69,10 +71,8 @@ func (self *ConstDP) genints(opts *Options) {
     //add intersect points with neighbours as constraints
     //self.updateconsts(constlist, polygeom, node, options)
 
-    if opts.Consts && len(constlist) > 0  {
-      var comparators = self._cmptors(
-        polygeom, constlist, options,
-      )
+    if self.opts.Constraints != nil && len(constlist) > 0  {
+      var comparators = self._cmptors(polygeom, constlist)
       //intlist
       var intlist = self._intcandidates(node)
       var curints = (intlist.shift())()
@@ -125,55 +125,46 @@ func (self *ConstDP) genints(opts *Options) {
     }
 }
 
-///*
-// description
-// param node
-// return {Object}
-// private
-// */
-//func _childints(node) {
-//
-//
-//  var stack = struct.stack()
-//  var int = self.int
-//  var nextint = int.index(node.int)
-//  var intobj = {}
-//  var intlist = []
-//  //node stack
-//  node.right && stack.append(node.right)
-//  node.left && stack.append(node.left)
-//
-//  while !stack.isempty() {
-//    node = stack.pop()
-//    var _int = int.index(node.int)
-//    var _val = int.val(node.int)
-//    if nextint != _int && _val > 0.0 {
-//      if !intobj[_int] {
-//        intobj[_int] = true
-//        intlist.append([_int, _val])
-//      }
-//    }
-//    node.right && stack.append(node.right)
-//    node.left && stack.append(node.left)
-//  }
-//
-//  return _.chain(intlist)
-//    .sortBy(func (v) {return v[1]})
-//    .flatten()
-//    .value()
-//}
-//
-//
-///*
-// description int candidates
-// param node
-// returns {*[]}
-// private
-// */
-//func _intcandidates(node) {
-//  var self = self
-//  return [
-//    func () { return node.int },
-//    func () { return self._childints(node) }
-//  ]
-//}
+
+func (self *ConstDP) _childints(node *dp.Node) {
+
+  var stack = stack.NewStack()
+  var nextint = node.Ints.Last().(*Vertex).Index()
+  var intobj = {}
+  var intlist = []
+  //node stack
+    if node.
+  stack.append(node.right)
+  node.left && stack.append(node.left)
+
+  while !stack.isempty() {
+    node = stack.pop()
+    var _int = int.index(node.int)
+    var _val = int.val(node.int)
+    if nextint != _int && _val > 0.0 {
+      if !intobj[_int] {
+        intobj[_int] = true
+        intlist.append([_int, _val])
+      }
+    }
+    node.right && stack.append(node.right)
+    node.left && stack.append(node.left)
+  }
+
+  return _.chain(intlist)
+    .sortBy(func (v) {return v[1]})
+    .flatten()
+    .value()
+}
+
+
+/*
+ description int candidates
+ param node
+ returns {*[]}
+ */
+func (self *ConstDP) _intcandidates (node *Node) {
+   var node_ints  =     func () { return node.Ints }
+   var child_ints =     func () { return self._childints(node) }
+  return []*slist.SList{node_ints, child_ints}
+}
