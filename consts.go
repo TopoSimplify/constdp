@@ -1,15 +1,19 @@
 package constdp
 
-///*
-// description update list of constraints with
-// * intersection points with neighbours
-// param constlist
-// param subgeom
-// param node
-// param options{Object}
-// private
-// */
-//func (self *ConstDP) _updateconsts(constlist, subgeom, node, options) {
+import (
+  "simplex/geom"
+)
+
+/*
+ description update list of constraints with
+ * intersection points with neighbours
+ param constlist
+ param subgeom
+ param node
+ param options{Object}
+ private
+ */
+//func (self *ConstDP) updateconsts(constlist []geom.Geometry, subgeom geom.Geometry, node *Node, options) {
 //
 //  var interlist = [], xorplns = []
 //
