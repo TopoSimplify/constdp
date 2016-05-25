@@ -13,7 +13,7 @@ type ConstDP struct {
 }
 
 //Creates a new constrained DP Simplification instance
-func NewConstDP(options Options, build bool) *ConstDP{
+func NewConstDP(options *Options, build bool) *ConstDP{
     var self = &ConstDP{
         NewDP(options, false),
         make([]*Point, 0),
