@@ -8,10 +8,10 @@ import (
 /*
  description  build self
  */
-func (self *ConstDP) Build(process ...func(item Item)) *ConstDP {
+func (self *ConstDP) Build() *ConstDP {
     fn := self.processhull
-    if len(process) > 0 && process[0] != nil {
-        fn = process[0]
+    if self.opts.Process != nil {
+        fn = self.opts.Process
     }
     //use superclass simplify
     self.DP.Build(fn)
