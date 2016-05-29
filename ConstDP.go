@@ -19,6 +19,7 @@ func NewConstDP(options *Options, build bool) *ConstDP{
         NewDP(options, false),
         make([]*Point, 0),
         NewLineDeflection(),
+        options,
     }
 
     self.opts =  options
