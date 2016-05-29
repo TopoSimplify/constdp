@@ -4,14 +4,14 @@ import (
     "simplex/dp"
     "simplex/geom"
     "simplex/util/iter"
-    "fmt"
     "simplex/struct/slist"
-    "golang.org/x/mobile/bind/testdata"
     "simplex/struct/stack"
+    "simplex/struct/bst"
+    "sort"
 )
 
 //constrained dp simplify
-func (self *ConstDP) Simplify(opts *Options) *ConstDP {
+func (self *ConstDP) Simplify(opts *dp.Options) *ConstDP {
     self.opts = opts
     self.Simple.Reset()
     self.Filter(self.Root, self.opts.Threshold)
@@ -28,11 +28,9 @@ func (self *ConstDP) Simplify(opts *Options) *ConstDP {
  private
  */
 func (self *ConstDP) genints() {
-    var node = self.NodeSet.Shift().(*Node)
-    var fixint = node.Ints.Last().(*Vertex).Index()
-    //var nextint int
-
-    fmt.Println(fixint)
+    var n = self.AsBSTNode_Item(self.NodeSet.Shift())
+    var node = self.AsDPNode_BSTNode_Item(n)
+    var fixint = node.Ints.Last().(*dp.Vertex).Index()
 
     //early exit
     if node == nil {
@@ -40,121 +38,117 @@ func (self *ConstDP) genints() {
     }
 
     var subrange = []int{node.Key[0], node.Key[1]}
+    var i, j = subrange[0], subrange[1]
 
     var poly = self.subpoly(
-        iter.NewGenerator(subrange[0], subrange[1] + 1),
+        iter.NewGenerator(i, j + 1),
     )
-
     var subpoly = self.subpoly(
         iter.NewGenerator_AsVals(subrange...),
     )
 
-    var polygeom    =   geom.NewLineString(poly)
-    var subgeom     =   geom.NewLineString(subpoly)
-    var db          =   self.opts.Db
+    var polygeom    = geom.NewLineString(poly)
+    var subgeom     = geom.NewLineString(subpoly)
+    var db          = self.opts.Db
 
     if node.Hull == nil {
         node.Hull = polygeom.ConvexHull()
     }
-    var hull        =   node.Hull
+    var hull = node.Hull
     var constlist []geom.Geometry
 
     if db != nil {
         constlist = SearchDb(db, hull.BBox())
     }
 
-    fmt.Println(polygeom)
-    fmt.Println(subgeom)
-    fmt.Println(constlist)
-
-
     //add intersect points with neighbours as constraints
     //self.updateconsts(constlist, polygeom, node, options)
-
-    if self.opts.Constraints != nil && len(constlist) > 0  {
-      var comparators = self._cmptors(polygeom, constlist)
-      //intlist
-      var intlist = self._intcandidates(node)
-      var curints = (intlist.shift())()
-      //assume not valid
-      var isvalid = false
-      //proof otherwise
-      for  !isvalid {
-        if len(subpoly) == len(poly) {
-          dpfilter.intset.appendall(subrange)
-          isvalid = true
-          continue
-        }
-        //check if subgeom is valid
-        isvalid = self._isvalid(subgeom, comparators)
-
-        if isvalid {
-          dpfilter.intset.appendall(subrange)
-        } else {
-          intindex += 1
-          if 2 * intindex < len(curints) {
-            //index at end is -1
-            (intasc && intindex == 0) && (intindex = 1 )
-            nextint = self.int.index(curints, intindex)
-            subrange.append(nextint)
-            //nextint
-            subrange.sort(self._cmp)
-            //assumes subrange is sorted - binary search
-            self._filtersubrange(subrange, nextint, fixint)
-            subpoly = self._subpoly(subrange)
-            subgeom = new geom.LineString(subpoly)
-          } else {
-            //reset
-            if len(intlist) {
-              intindex = -1
-              subrange = node[node._key].slice(0)
-              nextint = self.int.index(node.int, intindex)
-              subrange.append(nextint) //keep top level node int
-              curints = (intlist.shift())()
-            }  else {
-              //go to original
-              subrange = polyrange
-              subpoly = poly
+    var nextint int
+    if self.opts.Relations != nil && len(constlist) > 0 {
+        var comparators = self._cmptors(polygeom, constlist)
+        //intlist
+        var intfuncs = self._intcandidates(n)
+        var intfn  func() *slist.SList
+        intfn, intfuncs = intfuncs[0], intfuncs[1:]
+        var curints *slist.SList = intfn()
+        //assume not valid
+        var isvalid = false
+        //proof otherwise
+        for !isvalid {
+            if len(subpoly) == len(poly) {
+                self.Simple.Add(subrange...)
+                isvalid = true
+                continue
             }
-          }
+            //check if subgeom is valid
+            isvalid = self._isvalid(subgeom, comparators)
+
+            if isvalid {
+                self.Simple.Add(subrange...)
+            } else {
+                if !curints.IsEmpty() {
+                    //index at end is -1
+                    intobj := curints.Pop().(*dp.Vertex)
+                    nextint = intobj.Index()
+                    subrange = append(subrange, nextint)
+                    sort.Ints(subrange)
+                    //assumes subrange is sorted - binary search
+                    self.filter_subrange(subrange, nextint, fixint)
+                    subpoly = self.subpoly(iter.NewGenerator_AsVals(subrange...))
+                    subgeom = geom.NewLineString(subpoly)
+                } else {
+                    //reset
+                    if len(intfuncs) > 0 {
+                        subrange = []int{node.Key[0], node.Key[1]}
+                        nextint = node.Ints.Last().(*dp.Vertex).Index()
+                        subrange = append(subrange, nextint) //keep top level node int
+                        curints, intfuncs = intfuncs[0](), intfuncs[1:]
+                    } else {
+                        //go to original
+                        subrange = iter.NewGenerator(i, j + 1).Values()
+                        subpoly = poly
+                    }
+                }
+            }
         }
-      }
-    }  else {
-      //keep range interesting index
-      dpfilter.intset.appendall(subrange)
+    } else {
+        //keep range interesting index
+        self.Simple.Add(subrange...)
     }
 }
 
+func (self *ConstDP) _childints(n *bst.Node) *slist.SList {
+    var node = self.AsDPNode(n)
+    var stack = stack.NewStack()
+    var nextint = node.Ints.Last().(*dp.Vertex).Index()
+    var intlist = slist.NewSList(len(self.Pln))
+    var intobj    *dp.Vertex
 
-func (self *ConstDP) _childints(node *dp.Node) {
+    //node stack
+    if n.Right != nil {
+        stack.Add(n.Right)
 
-  var stack = stack.NewStack()
-  var nextint = node.Ints.Last().(*Vertex).Index()
-  var intobj = {}
-  var intlist = []
-  //node stack
-    if node.
-  stack.append(node.right)
-  node.left && stack.append(node.left)
-
-  while !stack.isempty() {
-    node = stack.pop()
-    var _int = int.index(node.int)
-    var _val = int.val(node.int)
-    if nextint != _int && _val > 0.0 {
-      if !intobj[_int] {
-        intobj[_int] = true
-        intlist.append([_int, _val])
-      }
     }
-    node.right && stack.append(node.right)
-    node.left && stack.append(node.left)
-  }
+    if n.Left != nil {
+        stack.Add(n.Left)
+    }
 
-  return _.chain(intlist)
-    .sortBy(func (v) {return v[1]})
-    .flatten()
-    .value()
+    for !stack.IsEmpty() {
+        node = self.AsDPNode_BSTNode_Any(stack.Pop())
+        intobj = node.Ints.Last().(*dp.Vertex)
+
+        if nextint != intobj.Index() && intobj.Value() > 0.0 {
+            intlist.Add(intobj)
+        }
+        if n.Right != nil {
+            stack.Add(n.Right)
+        }
+        if n.Left != nil {
+            stack.Add(n.Left)
+        }
+    }
+
+    return intlist
 }
 
 
@@ -163,8 +157,13 @@ func (self *ConstDP) _childints(node *dp.Node) {
  param node
  returns {*[]}
  */
-func (self *ConstDP) _intcandidates (node *Node) {
-   var node_ints  =     func () { return node.Ints }
-   var child_ints =     func () { return self._childints(node) }
-  return []*slist.SList{node_ints, child_ints}
+func (self *ConstDP) _intcandidates(n *bst.Node) []func() *slist.SList {
+    var node = self.AsDPNode(n)
+    var node_ints = func() *slist.SList {
+        return node.Ints
+    }
+    var child_ints = func() *slist.SList {
+        return self._childints(n)
+    }
+    return []func() *slist.SList{node_ints, child_ints}
 }
