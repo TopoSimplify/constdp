@@ -92,7 +92,7 @@ func (self *ConstDP) genints() {
                     nextint = intobj.Index()
                     subrange = append(subrange, nextint)
                     sort.Ints(subrange)
-                    //assumes subrange is sorted - binary search
+                    //subrange is sorted
                     self.filter_subrange(subrange, nextint, fixint)
                     subpoly = self.subpoly(iter.NewGenerator_AsVals(subrange...))
                     subgeom = geom.NewLineString(subpoly)
