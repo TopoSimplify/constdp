@@ -1,5 +1,10 @@
 package constdp
 
+import (
+    . "simplex/geom"
+    "simplex/dp"
+)
+
 
 
 /*
@@ -43,3 +48,14 @@ package constdp
 //  constlist.append.apply(constlist, interlist)
 //  constlist.append.apply(constlist, xorplns)
 //}
+
+
+func (self *ConstDP) context_neighbours(node *dp.Node) []Geometry {
+    var db = self.opts.Db
+    var hull = node.Hull
+    var neighbours = make([]Geometry, 0)
+    if db != nil {
+        neighbours = SearchDb(db, hull.BBox())
+    }
+    return neighbours;
+}

@@ -5,7 +5,7 @@ import (
     "simplex/dp"
     . "simplex/geom"
     . "simplex/constdp"
-    "simplex/constrelate"
+    . "simplex/relations"
 )
 
 func main() {
@@ -15,10 +15,10 @@ func main() {
     data := NewLineStringFromWKT(ln).Coordinates()
 
     var opts = &dp.Options{Polyline: data, Threshold: 0}
-    opts.Relations = []constrelate.Relation{
-        constrelate.NewGeometryRelate(),
-        constrelate.NewQuadRelate(),
-        constrelate.NewMinDistanceRelate(0),
+    opts.Relations = []Relations{
+        NewGeometryRelate(),
+        NewQuadRelate(),
+        NewMinDistanceRelate(0),
     }
     opts.Db = LoadConstDBFromFile(NewConstDB(), fname)
 
