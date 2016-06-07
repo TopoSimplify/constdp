@@ -4,7 +4,7 @@ import (
     "simplex/dp"
     "simplex/geom"
     "simplex/util/iter"
-    "simplex/struct/slist"
+    "simplex/struct/heap"
     "simplex/struct/stack"
     "simplex/struct/bst"
     "sort"
@@ -30,7 +30,7 @@ func (self *ConstDP) Simplify(opts *dp.Options) *ConstDP {
 func (self *ConstDP) genints() {
     var n = self.AsBSTNode_Item(self.NodeSet.Shift())
     var node = self.AsDPNode_BSTNode_Item(n)
-    var fixint = node.Ints.Last().(*dp.Vertex).Index()
+    var fixint = node.Ints.Peek().(*dp.Vertex).Index()
 
     //early exit
     if node == nil {
@@ -47,19 +47,9 @@ func (self *ConstDP) genints() {
         iter.NewGenerator_AsVals(subrange...),
     )
 
-    var polygeom    = geom.NewLineString(poly)
-    var subgeom     = geom.NewLineString(subpoly)
-    var db          = self.opts.Db
-
-    if node.Hull == nil {
-        node.Hull = polygeom.ConvexHull()
-    }
-    var hull = node.Hull
-    var constlist []geom.Geometry
-
-    if db != nil {
-        constlist = SearchDb(db, hull.BBox())
-    }
+    var polygeom = geom.NewLineString(poly)
+    var subgeom = geom.NewLineString(subpoly)
+    var constlist = self.context_neighbours(node)
 
     //add intersect points with neighbours as constraints
     //self.updateconsts(constlist, polygeom, node, options)
@@ -68,9 +58,9 @@ func (self *ConstDP) genints() {
         var comparators = self._cmptors(polygeom, constlist)
         //intlist
         var intfuncs = self._intcandidates(n)
-        var intfn  func() *slist.SList
+        var intfn  func() *heap.Heap
         intfn, intfuncs = intfuncs[0], intfuncs[1:]
-        var curints *slist.SList = intfn()
+        var curints *heap.Heap = intfn()
         //assume not valid
         var isvalid = false
         //proof otherwise
@@ -100,7 +90,7 @@ func (self *ConstDP) genints() {
                     //reset
                     if len(intfuncs) > 0 {
                         subrange = []int{node.Key[0], node.Key[1]}
-                        nextint = node.Ints.Last().(*dp.Vertex).Index()
+                        nextint = node.Ints.Peek().(*dp.Vertex).Index()
                         subrange = append(subrange, nextint) //keep top level node int
                         curints, intfuncs = intfuncs[0](), intfuncs[1:]
                     } else {
@@ -117,11 +107,11 @@ func (self *ConstDP) genints() {
     }
 }
 
-func (self *ConstDP) _childints(n *bst.Node) *slist.SList {
+func (self *ConstDP) _childints(n *bst.Node) *heap.Heap  {
     var node = self.AsDPNode(n)
     var stack = stack.NewStack()
-    var nextint = node.Ints.Last().(*dp.Vertex).Index()
-    var intlist = slist.NewSList(len(self.Pln))
+    var nextint = node.Ints.Peek().(*dp.Vertex).Index()
+    var intlist = heap.NewHeap(heap.NewHeapType().AsMax())
     var intobj    *dp.Vertex
 
     //node stack
@@ -135,10 +125,10 @@ func (self *ConstDP) _childints(n *bst.Node) *slist.SList {
 
     for !stack.IsEmpty() {
         node = self.AsDPNode_BSTNode_Any(stack.Pop())
-        intobj = node.Ints.Last().(*dp.Vertex)
+        intobj = node.Ints.Peek().(*dp.Vertex)
 
         if nextint != intobj.Index() && intobj.Value() > 0.0 {
-            intlist.Add(intobj)
+            intlist.Push(intobj)
         }
         if n.Right != nil {
             stack.Add(n.Right)
@@ -157,13 +147,13 @@ func (self *ConstDP) _childints(n *bst.Node) *slist.SList {
  param node
  returns {*[]}
  */
-func (self *ConstDP) _intcandidates(n *bst.Node) []func() *slist.SList {
+func (self *ConstDP) _intcandidates(n *bst.Node) []func() *heap.Heap {
     var node = self.AsDPNode(n)
-    var node_ints = func() *slist.SList {
+    var node_ints = func() *heap.Heap {
         return node.Ints
     }
-    var child_ints = func() *slist.SList {
+    var child_ints = func() *heap.Heap {
         return self._childints(n)
     }
-    return []func() *slist.SList{node_ints, child_ints}
+    return []func() *heap.Heap{node_ints, child_ints}
 }
