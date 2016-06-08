@@ -20,7 +20,9 @@ func main() {
         NewQuadRelate(),
         NewMinDistanceRelate(0),
     }
+    //opts.Relations = []Relations{ }
     opts.Db = LoadConstDBFromFile(NewConstDB(), fname)
+    //opts.Db = NewConstDB()
 
     var tree = NewConstDP(opts, true)
 
