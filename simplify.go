@@ -5,8 +5,8 @@ import (
     "simplex/struct/heap"
     "simplex/struct/stack"
     "simplex/struct/bst"
-    . "simplex/interest"
     "simplex/geom"
+    . "simplex/interest"
 )
 
 //constrained dp simplify
@@ -20,7 +20,6 @@ func (self *ConstDP) Simplify(opts *dp.Options) *ConstDP {
     self.Simple.Reset()
     self.Filter(self.Root, self.opts.Threshold)
 
-
     for !(self.NodeSet.IsEmpty()) {
         n = self.AsBSTNode_Item(self.NodeSet.Shift())
         node = self.AsDPNode_BSTNode_Item(n)
@@ -29,7 +28,13 @@ func (self *ConstDP) Simplify(opts *dp.Options) *ConstDP {
             break
         }
 
+        var i, j  =  node.Key[0], node.Key[1]
+        var polygeom = geom.NewLineString(self.Pln[i: j + 1])
+
+
         constlist = self.context_neighbours(node)
+        //add intersect points with neighbours as constraints
+        constlist = self.updateconsts(constlist, polygeom, node);
 
         //var comparators = self._cmptors(polygeom, constlist)
         candidates = self.int_candidates(n)
@@ -41,7 +46,7 @@ func (self *ConstDP) Simplify(opts *dp.Options) *ConstDP {
                 candidates,
                 self.opts.Relations,
                 constlist,
-            ).FindSpatialFit(node.Key[0], node.Key[1]),
+            ).FindSpatialFit(i, j),
         )
     }
     return self
