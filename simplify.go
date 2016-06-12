@@ -33,7 +33,7 @@ func (self *ConstDP) Simplify(opts *dp.Options) *ConstDP {
 
 
         constlist = self.context_neighbours(node)
-        //add intersect points with neighbours as constraints
+        //update constraints based on self intersection and complex geom type
         constlist = self.updateconsts(constlist, polygeom, node);
 
         //var comparators = self._cmptors(polygeom, constlist)
