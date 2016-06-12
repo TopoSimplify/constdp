@@ -41,7 +41,7 @@ func (self *ConstDP) _subpolyline(indxs []int) []*Point {
 }
 
 //Perturb boundary at point vertex b
-//returns a point close to b but not b along segment a---b 
+//returns a point close to b but not b along segment a---b
 func (self *ConstDP) Perturb(a , b *Point) *Point {
     eps := 1e-8
     a, b = a.Clone(), b.Clone()
