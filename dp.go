@@ -20,11 +20,11 @@ type ConstDP struct {
 //Creates a new constrained DP Simplification instance
 func NewConstDP(options *Options, build bool) *ConstDP {
     var self = &ConstDP{
-        NewDP(options, false),
-        make([]*Point, 0),
-        NewLineDeflection(),
-        options,
-        NewHomotopy(
+        DP              : NewDP(options, false),
+        intersections   : make([]*Point, 0),
+        defln           : NewLineDeflection(),
+        opts            : options,
+        homos           : NewHomotopy(
             []*Point{}, &IntCandidates{},
             []Relations{}, []Geometry{},
         ),
