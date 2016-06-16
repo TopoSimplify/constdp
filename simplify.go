@@ -2,126 +2,72 @@ package constdp
 
 import (
     "simplex/dp"
-    "simplex/geom"
-    "simplex/util/iter"
-    "simplex/struct/slist"
+    "simplex/struct/heap"
     "simplex/struct/stack"
     "simplex/struct/bst"
-    "sort"
+    "simplex/geom"
+    . "simplex/interest"
 )
 
 //constrained dp simplify
 func (self *ConstDP) Simplify(opts *dp.Options) *ConstDP {
+    var n *bst.Node
+    var node *dp.Node
+    var constlist []geom.Geometry
+    var candidates *IntCandidates
+
     self.opts = opts
     self.Simple.Reset()
     self.Filter(self.Root, self.opts.Threshold)
+
     for !(self.NodeSet.IsEmpty()) {
-        self.genints()
+        n = self.AsBSTNode_Item(self.NodeSet.Shift())
+        node = self.AsDPNode_BSTNode_Item(n)
+
+        var i, j  =  node.Key[0], node.Key[1]
+        var polygeom = geom.NewLineString(self.Pln[i: j + 1])
+
+
+        constlist = self.context_neighbours(node)
+        //update constraints based on self intersection and complex geom type
+        constlist = self.updateconsts(constlist, polygeom, node);
+
+        //var comparators = self._cmptors(polygeom, constlist)
+        candidates = self.int_candidates(n)
+
+        //update homos
+        self.Simple.AddSet(
+            self.homos.UpdateHomotopy(
+                self.Pln,
+                candidates,
+                self.opts.Relations,
+                constlist,
+            ).FindSpatialFit(i, j),
+        )
     }
     return self
 }
 
-/*
- description generalize ints
- param dpfilter
- param options
- private
- */
-func (self *ConstDP) genints() {
-    var n = self.AsBSTNode_Item(self.NodeSet.Shift())
-    var node = self.AsDPNode_BSTNode_Item(n)
-    var fixint = node.Ints.Last().(*dp.Vertex).Index()
 
-    //early exit
-    if node == nil {
-        return
+//lazy evaluation of int candidates
+func (self *ConstDP) int_candidates(n *bst.Node) *IntCandidates {
+    var node = self.AsDPNode(n)
+    var node_ints = func() *heap.Heap {
+        return node.Ints
     }
-
-    var subrange = []int{node.Key[0], node.Key[1]}
-    var i, j = subrange[0], subrange[1]
-
-    var poly = self.subpoly(
-        iter.NewGenerator(i, j + 1),
-    )
-    var subpoly = self.subpoly(
-        iter.NewGenerator_AsVals(subrange...),
-    )
-
-    var polygeom    = geom.NewLineString(poly)
-    var subgeom     = geom.NewLineString(subpoly)
-    var db          = self.opts.Db
-
-    if node.Hull == nil {
-        node.Hull = polygeom.ConvexHull()
+    var child_ints = func() *heap.Heap {
+        return self._childints(n)
     }
-    var hull = node.Hull
-    var constlist []geom.Geometry
-
-    if db != nil {
-        constlist = SearchDb(db, hull.BBox())
-    }
-
-    //add intersect points with neighbours as constraints
-    //self.updateconsts(constlist, polygeom, node, options)
-    var nextint int
-    if self.opts.Relations != nil && len(constlist) > 0 {
-        var comparators = self._cmptors(polygeom, constlist)
-        //intlist
-        var intfuncs = self._intcandidates(n)
-        var intfn  func() *slist.SList
-        intfn, intfuncs = intfuncs[0], intfuncs[1:]
-        var curints *slist.SList = intfn()
-        //assume not valid
-        var isvalid = false
-        //proof otherwise
-        for !isvalid {
-            if len(subpoly) == len(poly) {
-                self.Simple.Add(subrange...)
-                isvalid = true
-                continue
-            }
-            //check if subgeom is valid
-            isvalid = self._isvalid(subgeom, comparators)
-
-            if isvalid {
-                self.Simple.Add(subrange...)
-            } else {
-                if !curints.IsEmpty() {
-                    //index at end is -1
-                    intobj := curints.Pop().(*dp.Vertex)
-                    nextint = intobj.Index()
-                    subrange = append(subrange, nextint)
-                    sort.Ints(subrange)
-                    //assumes subrange is sorted - binary search
-                    self.filter_subrange(subrange, nextint, fixint)
-                    subpoly = self.subpoly(iter.NewGenerator_AsVals(subrange...))
-                    subgeom = geom.NewLineString(subpoly)
-                } else {
-                    //reset
-                    if len(intfuncs) > 0 {
-                        subrange = []int{node.Key[0], node.Key[1]}
-                        nextint = node.Ints.Last().(*dp.Vertex).Index()
-                        subrange = append(subrange, nextint) //keep top level node int
-                        curints, intfuncs = intfuncs[0](), intfuncs[1:]
-                    } else {
-                        //go to original
-                        subrange = iter.NewGenerator(i, j + 1).Values()
-                        subpoly = poly
-                    }
-                }
-            }
-        }
-    } else {
-        //keep range interesting index
-        self.Simple.Add(subrange...)
-    }
+    var functors = []IntFunctor{ node_ints, child_ints, }
+    return NewIntCandidates(functors)
 }
 
-func (self *ConstDP) _childints(n *bst.Node) *slist.SList {
+
+func (self *ConstDP) _childints(n *bst.Node) *heap.Heap {
     var node = self.AsDPNode(n)
     var stack = stack.NewStack()
-    var nextint = node.Ints.Last().(*dp.Vertex).Index()
-    var intlist = slist.NewSList(len(self.Pln))
+    var nextint = node.Ints.Peek().(*dp.Vertex).Index()
+    var intlist = heap.NewHeap(heap.NewHeapType().AsMax())
     var intobj    *dp.Vertex
 
     //node stack
@@ -135,10 +81,10 @@ func (self *ConstDP) _childints(n *bst.Node) *slist.SList {
 
     for !stack.IsEmpty() {
         node = self.AsDPNode_BSTNode_Any(stack.Pop())
-        intobj = node.Ints.Last().(*dp.Vertex)
+        intobj = node.Ints.Peek().(*dp.Vertex)
 
         if nextint != intobj.Index() && intobj.Value() > 0.0 {
-            intlist.Add(intobj)
+            intlist.Push(intobj)
         }
         if n.Right != nil {
             stack.Add(n.Right)
@@ -149,21 +95,4 @@ func (self *ConstDP) _childints(n *bst.Node) *slist.SList {
     }
 
     return intlist
-}
-
-
-/*
- description int candidates
- param node
- returns {*[]}
- */
-func (self *ConstDP) _intcandidates(n *bst.Node) []func() *slist.SList {
-    var node = self.AsDPNode(n)
-    var node_ints = func() *slist.SList {
-        return node.Ints
-    }
-    var child_ints = func() *slist.SList {
-        return self._childints(n)
-    }
-    return []func() *slist.SList{node_ints, child_ints}
 }

@@ -19,8 +19,12 @@ func (self *ConstDP) Build() *ConstDP {
 
 //process hull
 func (self *ConstDP) processhull(n Item) {
-    node := n.(*dp.Node)
-    var pln = self.Coordinates()[node.Key[0]: node.Key[1] + 1]
+    process_hull(self.Coordinates(), n.(*dp.Node))
+}
+
+//process hull
+func process_hull(pln []*geom.Point, node *dp.Node){
+    pln = pln[node.Key[0]: node.Key[1] + 1]
     if len(pln) > 1 {
         node.Hull = geom.NewPolygon(geom.ConvexHull(pln))
     }
