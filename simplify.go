@@ -23,10 +23,6 @@ func (self *ConstDP) Simplify(opts *dp.Options) *ConstDP {
     for !(self.NodeSet.IsEmpty()) {
         n = self.AsBSTNode_Item(self.NodeSet.Shift())
         node = self.AsDPNode_BSTNode_Item(n)
-        //early exit
-        if node == nil {
-            break
-        }
 
         var i, j  =  node.Key[0], node.Key[1]
         var polygeom = geom.NewLineString(self.Pln[i: j + 1])
@@ -51,6 +47,21 @@ func (self *ConstDP) Simplify(opts *dp.Options) *ConstDP {
     }
     return self
 }
+
+
+//lazy evaluation of int candidates
+func (self *ConstDP) int_candidates(n *bst.Node) *IntCandidates {
+    var node = self.AsDPNode(n)
+    var node_ints = func() *heap.Heap {
+        return node.Ints
+    }
+    var child_ints = func() *heap.Heap {
+        return self._childints(n)
+    }
+    var functors = []IntFunctor{ node_ints, child_ints, }
+    return NewIntCandidates(functors)
+}
+
 
 func (self *ConstDP) _childints(n *bst.Node) *heap.Heap {
     var node = self.AsDPNode(n)
@@ -84,18 +95,4 @@ func (self *ConstDP) _childints(n *bst.Node) *heap.Heap {
     }
 
     return intlist
-}
-
-
-//lazy evaluation of int candidates
-func (self *ConstDP) int_candidates(n *bst.Node) *IntCandidates {
-    var node = self.AsDPNode(n)
-    var node_ints = func() *heap.Heap {
-        return node.Ints
-    }
-    var child_ints = func() *heap.Heap {
-        return self._childints(n)
-    }
-    var functors = []IntFunctor{node_ints, child_ints, }
-    return NewIntCandidates(functors)
 }

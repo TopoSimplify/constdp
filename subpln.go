@@ -31,14 +31,6 @@ func (self *ConstDP) xor_subpln(i, j, N int) []Geometry {
     return geometries
 }
 
-func (self *ConstDP) _subpolyline(indxs []int) []*Point {
-    //generates sub polyline from generator indices
-    var ln = make([]*Point, 0)
-    for _, i := range indxs {
-        ln = append(ln, self.Pln[i])
-    }
-    return ln
-}
 
 //Perturb boundary at point vertex b
 //returns a point close to b but not b along segment a---b
