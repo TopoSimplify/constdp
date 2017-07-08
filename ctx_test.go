@@ -1,9 +1,9 @@
 package constdp
 
 import (
-	"github.com/franela/goblin"
 	"testing"
 	"simplex/geom"
+	"github.com/franela/goblin"
 )
 
 func TestCtx(t *testing.T) {
