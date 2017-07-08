@@ -5,44 +5,66 @@ import (
 	"simplex/geom/mbr"
 )
 
+//Polyline Type
 type Polyline struct {
 	coords []*geom.Point
 	geom   *geom.LineString
-	segs   map[[2]int]*geom.Segment
+	segs   map[[2]int]*Seg
 }
 
+//construct new polyline
 func NewPolyline(coords []*geom.Point) *Polyline {
 	coords = geom.CloneCoordinates(coords)
-	return &Polyline{
+	pln := &Polyline{
 		coords: coords,
 		geom:   geom.NewLineString(coords, false),
 	}
+	pln.buildSegments()
+	return pln
 }
 
+//Bounding box of polyline
 func (ln *Polyline) BBox() *mbr.MBR {
 	return ln.geom.BBox()
 }
 
+//Coordinates at index i
 func (ln *Polyline) Coordinate(i int) *geom.Point {
 	return ln.coords[i]
 }
 
-func (ln *Polyline) Segments(rng *Range) {
-	for idx := 0; idx < ln.len()-1; idx++ {
-		i, j := idx, idx+1
-		ln.segs[[2]int{i, j}] = geom.NewSegment(
-			ln.coords[i], ln.coords[j],
+//build polyline segments
+func (ln *Polyline) buildSegments() {
+	for i := 0; i < ln.len()-1; i++ {
+		j := i + 1
+		ln.segs[[2]int{i, j}] = NewSeg(
+			ln.coords[i], ln.coords[j], i, j,
 		)
 	}
 }
 
-func (ln *Polyline) Segment(rng *Range) *geom.Segment {
-	return geom.NewSegment(
+//Polyline segments
+func (ln *Polyline) Segments() []*Seg {
+	lst := make([]*Seg, 0)
+	for i := 0; i < ln.len()-1; i++ {
+		lst = append(lst, ln.segs[[2]int{i, i + 1}])
+	}
+	return lst
+}
+
+//Segment given range
+func (ln *Polyline) Segment(rng *Range) *Seg {
+	if rng.Size() == 1 {
+		return ln.segs[[2]int{rng.i, rng.j}]
+	}
+	return NewSeg(
 		ln.coords[rng.i],
 		ln.coords[rng.j],
+		rng.i, rng.j,
 	)
 }
 
+//Length of coordinates in polyline
 func (ln *Polyline) len() int {
 	return len(ln.coords)
 }

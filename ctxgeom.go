@@ -29,7 +29,6 @@ type CtxGeom struct {
 }
 
 func NewCtxGeom(g geom.Geometry, i , j int) *CtxGeom {
-
 	return &CtxGeom{
 		Geom: g,
 		Type: ctx.Self,
