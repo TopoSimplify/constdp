@@ -1,13 +1,13 @@
 package constdp
 
 import (
-    "simplex/struct/rtree"
-    "simplex/geom/mbr"
-    "simplex/geom"
+    "io"
+    "log"
     "bufio"
     "strings"
-    "log"
-    "io"
+    "simplex/geom"
+    "simplex/geom/mbr"
+    "simplex/struct/rtree"
 )
 
 

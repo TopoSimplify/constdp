@@ -1,8 +1,8 @@
 package main
 
 import (
-    "simplex/geom"
     "fmt"
+    "simplex/geom"
     "simplex/struct/rtree"
 )
 

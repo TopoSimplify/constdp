@@ -1,4 +1,6 @@
 .idea/
 sandbox/
+node_modules/
 data/
+.directory
 *.iml
