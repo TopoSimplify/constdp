@@ -1,8 +1,8 @@
 package constdp
 
 import (
-	"simplex/geom/mbr"
 	"simplex/geom"
+	"simplex/geom/mbr"
 )
 
 var ctx = struct {

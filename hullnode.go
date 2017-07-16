@@ -4,7 +4,6 @@ import (
 	"simplex/geom"
 	"simplex/geom/mbr"
 	"simplex/struct/sset"
-	"simplex/struct/item"
 	"simplex/util/math"
 )
 
@@ -12,9 +11,8 @@ type HPt struct {
 	*geom.Point
 }
 
-// requires an item and returns an int ( -1, 0 , 1 )
-func (o *HPt) Compare(item item.Item) int {
-	pt := item.(*HPt)
+//implements item.Item
+func (o *HPt) Compare(pt *HPt) int {
 	d := o.Point[2] - pt.Point[2]
 	if math.FloatEqual(d, 0.0) {
 		return 0
@@ -35,7 +33,6 @@ type HullNode struct {
 	Range  *Range
 	PRange *Range
 	Geom   geom.Geometry
-	BBox   *mbr.MBR
 	PtSet  *sset.SSet
 }
 
@@ -53,7 +50,7 @@ func NewHullNode(pln *Polyline, rng, prng *Range) *HullNode {
 	cvxhull := geom.ConvexHull(coords, false)
 	hull_g := hull_geom(cvxhull)
 
-	ptset := sset.NewSSet()
+	ptset := sset.NewSSet(hpt_cmp)
 	for _, pt := range cvxhull {
 		ptset.Add(&HPt{pt})
 	}
@@ -63,11 +60,16 @@ func NewHullNode(pln *Polyline, rng, prng *Range) *HullNode {
 		Range:  rng,
 		PRange: prng,
 		Geom:   hull_g,
-		BBox:   hull_g.BBox(),
 	}
 	return self
 }
 
+//bbox interface
+func (h *HullNode) BBox() *mbr.MBR {
+	return h.Geom.BBox()
+}
+
+//stringer interface
 func (h *HullNode) String() string {
 	return h.Geom.WKT()
 }

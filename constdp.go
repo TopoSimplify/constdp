@@ -24,10 +24,10 @@ type ConstDP struct {
 func NewConstDP(coordinates []*geom.Point, constraints []geom.Geometry, opts *Opts,
 	maximum_offset func(Linear, *Range) (int, float64)) *ConstDP {
 	cdp := &ConstDP{
-		Simple:        sset.NewSSet(),
+		Simple:        sset.NewSSet(geom.PointCmp),
 		Opts:          opts,
 		Hulls:         queue.NewQueue(),
-		Ints:          sset.NewSSet(),
+		Ints:          sset.NewSSet(geom.PointCmp),
 		MaximumOffset: maximum_offset,
 		Pln:           NewPolyline(coordinates),
 		CtxDB:         rtree.NewRTree(8),

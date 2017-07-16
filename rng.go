@@ -31,6 +31,11 @@ func (o *Range) J() int {
 	return o.j
 }
 
+//as segment
+func (o *Range) Contains(idx int) bool {
+	return idx ==  o.i || idx == o.j
+}
+
 //As Array
 func (o *Range) AsArray() []int {
 	return []int{o.i, o.j}

@@ -9,8 +9,12 @@ func NewDBItem(g geom.Geometry) *CtxGeom {
 	return NewCtxGeom(g, 0, -1).AsContextNeighbour()
 }
 
-func dbIntersection(db *rtree.RTree, g geom.Geometry, opts *Opts) []rtree.BoxObj {
+func dbSearch(db *rtree.RTree, g geom.Geometry, opts *Opts) []rtree.BoxObj {
 	return db.KNN(g, -1, score, predicate(opts.MinDist))
+}
+
+func dbKNN(db *rtree.RTree, g geom.Geometry, mindist float64) []rtree.BoxObj {
+	return db.KNN(g, -1, score, predicate(mindist))
 }
 
 func score(qg, item rtree.BoxObj) float64 {
