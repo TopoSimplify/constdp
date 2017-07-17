@@ -67,12 +67,12 @@ func (ln *Polyline) Segment(rng *Range) *Seg {
 }
 
 //generates sub polyline from generator indices
-func (self *Polyline) SubPolyline(rng *Range) *geom.LineString {
+func (self *Polyline) SubPolyline(rng *Range) *Polyline {
 	var poly = make([]*geom.Point, 0)
 	for _, i := range rng.Stride() {
 		poly = append(poly, self.coords[i])
 	}
-	return geom.NewLineString(poly)
+	return NewPolyline(poly)
 }
 
 //Length of coordinates in polyline

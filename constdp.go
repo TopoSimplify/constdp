@@ -9,7 +9,7 @@ import (
 
 //Type DP
 type ConstDP struct {
-	Simple        *sset.SSet
+	Simple        []*HullNode
 	Opts          *Opts
 	Hulls         *deque.Deque
 	Ints          *sset.SSet
@@ -24,7 +24,7 @@ type ConstDP struct {
 func NewConstDP(coordinates []*geom.Point, constraints []geom.Geometry, opts *Opts,
 	maximum_offset func(Linear, *Range) (int, float64)) *ConstDP {
 	cdp := &ConstDP{
-		Simple:        sset.NewSSet(geom.PointCmp),
+		Simple:        []*HullNode{},
 		Opts:          opts,
 		Hulls:         deque.NewDeque(),
 		Ints:          sset.NewSSet(geom.PointCmp),

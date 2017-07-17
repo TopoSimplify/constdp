@@ -10,8 +10,8 @@ func sel_deform_hull(a, b *HullNode, opts *Opts) []*HullNode {
 	aseg := a.Pln.Segment(a.Range)
 	bseg := b.Pln.Segment(b.Range)
 
-	aln := a.Pln.SubPolyline(a.Range)
-	bln := b.Pln.SubPolyline(b.Range)
+	aln := a.Pln.SubPolyline(a.Range).geom
+	bln := b.Pln.SubPolyline(b.Range).geom
 
 	aseg_inters_bseg := aseg.Intersects(bseg)
 	aseg_inters_bln := aseg.Intersects(bln)

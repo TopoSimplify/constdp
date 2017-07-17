@@ -3,6 +3,7 @@ package constdp
 import (
 	"simplex/geom"
 	"simplex/geom/mbr"
+	"simplex/struct/sset"
 )
 
 var ctx = struct {
@@ -21,19 +22,29 @@ var ctx = struct {
 	ContextNeighbour: "context_neighbour",
 }
 
+type ctxMeta struct {
+	SelfVertices    *sset.SSet
+	SelfNonVertices *sset.SSet
+}
+
 type CtxGeom struct {
 	Geom geom.Geometry
 	Type string
 	I    int
 	J    int
+	Meta *ctxMeta
 }
 
-func NewCtxGeom(g geom.Geometry, i , j int) *CtxGeom {
+func NewCtxGeom(g geom.Geometry, i, j int) *CtxGeom {
 	return &CtxGeom{
 		Geom: g,
 		Type: ctx.Self,
 		I:    i,
 		J:    j,
+		Meta: &ctxMeta{
+			SelfVertices:    sset.NewSSet(IntCmp),
+			SelfNonVertices: sset.NewSSet(IntCmp),
+		},
 	}
 }
 
