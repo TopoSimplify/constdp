@@ -18,6 +18,7 @@ func NewPolyline(coords []*geom.Point) *Polyline {
 	pln := &Polyline{
 		coords: coords,
 		geom:   geom.NewLineString(coords, false),
+		segs:   make(map[[2]int]*Seg, 0),
 	}
 	pln.buildSegments()
 	return pln
@@ -47,7 +48,8 @@ func (ln *Polyline) buildSegments() {
 func (ln *Polyline) Segments() []*Seg {
 	lst := make([]*Seg, 0)
 	for i := 0; i < ln.len()-1; i++ {
-		lst = append(lst, ln.segs[[2]int{i, i + 1}])
+		j := i + 1
+		lst = append(lst, ln.segs[[2]int{i, j}])
 	}
 	return lst
 }
@@ -62,6 +64,15 @@ func (ln *Polyline) Segment(rng *Range) *Seg {
 		ln.coords[rng.j],
 		rng.i, rng.j,
 	)
+}
+
+//generates sub polyline from generator indices
+func (self *Polyline) SubPolyline(rng *Range) *geom.LineString {
+	var poly = make([]*geom.Point, 0)
+	for _, i := range rng.Stride() {
+		poly = append(poly, self.coords[i])
+	}
+	return geom.NewLineString(poly)
 }
 
 //Length of coordinates in polyline

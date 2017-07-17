@@ -6,18 +6,23 @@ import (
 	"simplex/struct/sset"
 )
 
-type HullSideTangent struct {
-	aseg *Seg
-	bseg *Seg
-	rtan *Seg
-	ltan *Seg
-	hull *sset.SSet
-	side *HullCollapseSidedness
-}
-
 type HullCollapseSidedness struct {
 	hullset *sset.SSet
 	keys    *sset.SSet
+}
+
+//Hull collapse sidedness measures the correctness of a contiguous
+//hull collaps - goal is to prevent line flips against preceeding hull
+func NewHullCollapseSidedness(hull_ptset *sset.SSet) *HullCollapseSidedness {
+	indx_set := sset.NewSSet(IntCmp)
+	for _, o := range hull_ptset.Values() {
+		p := o.(*geom.Point)
+		indx_set.Add(int(p[2]))
+	}
+	return &HullCollapseSidedness{
+		hullset: hull_ptset,
+		keys:    indx_set,
+	}
 }
 
 func (self *HullCollapseSidedness) index(i int) int {
@@ -25,19 +30,7 @@ func (self *HullCollapseSidedness) index(i int) int {
 }
 
 func (self *HullCollapseSidedness) PtAt(i int) *geom.Point {
-	hpt := self.hullset.Get(i).(*HPt)
-	return hpt.Point
-}
-
-//Hull collapse sidedness measures the correctness of a contiguous
-//hull collaps - goal is to prevent line flips against preceeding hull
-func NewHullCollapseSidedness(hull_ptset *sset.SSet) *HullCollapseSidedness {
-	indx_set := sset.NewSSet(int_cmp)
-	for _, o := range hull_ptset.Values() {
-		p := o.(*HPt).Point
-		indx_set.Add(int(p[2]))
-	}
-	return &HullCollapseSidedness{hullset: hull_ptset, keys: indx_set}
+	return self.hullset.Get(i).(*geom.Point)
 }
 
 func (self *HullCollapseSidedness) key_knn(key int) (int, int) {
@@ -52,10 +45,10 @@ func (self *HullCollapseSidedness) key_knn(key int) (int, int) {
 	if idx_next > (n - 1) {
 		idx_next = 0
 	}
+	prev := self.hullset.Get(idx_prev).(*geom.Point)
+	next := self.hullset.Get(idx_next).(*geom.Point)
 
-	prev, next := self.hullset.Get(idx_prev).(*HPt), self.hullset.Get(idx_next).(*HPt)
-
-	return int(prev.Point[2]), int(next.Point[2])
+	return int(prev[2]), int(next[2])
 }
 
 func (self *HullCollapseSidedness) index_of_key(key int) int {
@@ -64,11 +57,12 @@ func (self *HullCollapseSidedness) index_of_key(key int) int {
 
 func (self *HullCollapseSidedness) _side_tangents(pt *geom.Point, hull *sset.SSet) *HullSideTangent {
 	n := hull.Size()
-	hpts := make([]*HPt, n)
+	hpts := make([]*geom.Point, n)
 	coords := make([]*geom.Point, hull.Size())
 	for i, o := range hull.Values() {
-		hpts[i] = o.(*HPt)
-		coords[i] = hpts[i].Point
+		pt = o.(*geom.Point)
+		hpts[i] = pt
+		coords[i] = pt
 	}
 
 	pt_key := int(pt[2])
@@ -76,22 +70,22 @@ func (self *HullCollapseSidedness) _side_tangents(pt *geom.Point, hull *sset.SSe
 
 	if r == 0 && l == 0 {
 		hpt := hpts[0] //hull A and B starts at pt
-		if math.FloatEqual(pt[0], hpt.Point[0]) && math.FloatEqual(pt[1], hpt.Point[1]) {
+		if math.FloatEqual(pt[0], hpt[0]) && math.FloatEqual(pt[1], hpt[1]) {
 			r, l = 1, n-1
 		} else { //hull A ends and B starts at pt
 			r, l = 0, n-2
 		}
 
 		rpt, lpt := hpts[r], hpts[l]
-		hseg := NewSeg(pt, rpt.Point, 0, -1)
-		s := hseg.SideOf(lpt.Point)
+		hseg := NewSeg(pt, rpt, 0, -1)
+		s := hseg.SideOf(lpt)
 		if s.IsRight() { // if lpt is on right then swap
 			r, l = l, r
 		}
 	}
 
-	rtan := NewSeg(pt, hpts[r].Point, 0, -1)
-	ltan := NewSeg(pt, hpts[l].Point, 0, -1)
+	rtan := NewSeg(pt, hpts[r], 0, -1)
+	ltan := NewSeg(pt, hpts[l], 0, -1)
 
 	prv, nxt := self.key_knn(pt_key)
 
@@ -116,11 +110,18 @@ func (self *HullCollapseSidedness) _side_tangents(pt *geom.Point, hull *sset.SSe
 //checks if hullsidedness of self line(i---j)
 //is consistent with original hullset and hull
 func (self *HullCollapseSidedness) IsValid(hull *sset.SSet) bool {
-	sa, sb := self.hullset.First().(*HPt).Point, self.hullset.Last().(*HPt).Point
-	ha, hb := hull.First().(*HPt).Point, hull.Last().(*HPt).Point
+	sa := self.hullset.First().(*geom.Point)
+	sb := self.hullset.Last().(*geom.Point)
+
+	ha := hull.First().(*geom.Point)
+	hb := hull.Last().(*geom.Point)
+
 	var pt *geom.Point
 	var feq = math.FloatEqual
-	if (feq(sa[0], ha[0]) && feq(sa[1], ha[1])) || (feq(sa[0], hb[0]) && feq(sa[1], hb[1])) {
+	bln := (feq(sa[0], ha[0]) && feq(sa[1], ha[1])) ||
+		(feq(sa[0], hb[0]) && feq(sa[1], hb[1]))
+
+	if bln {
 		pt = sa
 	} else {
 		pt = sb
@@ -140,4 +141,3 @@ func (self *HullCollapseSidedness) IsValid(hull *sset.SSet) bool {
 	}
 	return true
 }
-

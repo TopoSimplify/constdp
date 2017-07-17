@@ -3,15 +3,15 @@ package constdp
 import (
 	"simplex/geom"
 	"simplex/struct/sset"
-	"simplex/struct/queue"
 	"simplex/struct/rtree"
+	"simplex/struct/deque"
 )
 
 //Type DP
 type ConstDP struct {
 	Simple        *sset.SSet
 	Opts          *Opts
-	Hulls         *queue.Queue
+	Hulls         *deque.Deque
 	Ints          *sset.SSet
 	MaximumOffset func(Linear, *Range) (int, float64)
 	Pln           *Polyline
@@ -26,7 +26,7 @@ func NewConstDP(coordinates []*geom.Point, constraints []geom.Geometry, opts *Op
 	cdp := &ConstDP{
 		Simple:        sset.NewSSet(geom.PointCmp),
 		Opts:          opts,
-		Hulls:         queue.NewQueue(),
+		Hulls:         deque.NewDeque(),
 		Ints:          sset.NewSSet(geom.PointCmp),
 		MaximumOffset: maximum_offset,
 		Pln:           NewPolyline(coordinates),
@@ -36,27 +36,27 @@ func NewConstDP(coordinates []*geom.Point, constraints []geom.Geometry, opts *Op
 	return cdp.build_segs_db().build_context_db(constraints)
 }
 
-func (cdp *ConstDP) Coordinates() []*geom.Point {
-	return cdp.Pln.coords
+func (self *ConstDP) Coordinates() []*geom.Point {
+	return self.Pln.coords
 }
 
 //creates constraint db from geometries
-func (cdp *ConstDP) build_context_db(geoms []geom.Geometry) *ConstDP {
+func (self *ConstDP) build_context_db(geoms []geom.Geometry) *ConstDP {
 	lst := make([]rtree.BoxObj, 0)
 	for _, g := range geoms {
 		cg := NewCtxGeom(g, 0, -1).AsContextNeighbour()
 		lst = append(lst, cg)
 	}
-	cdp.CtxDB.Clear().Load(lst)
-	return cdp
+	self.CtxDB.Clear().Load(lst)
+	return self
 }
 
 //creates constraint db from geometries
-func (cdp *ConstDP) build_segs_db() *ConstDP {
+func (self *ConstDP) build_segs_db() *ConstDP {
 	lst := make([]rtree.BoxObj, 0)
-	for _, s := range cdp.Pln.Segments() {
+	for _, s := range self.Pln.Segments() {
 		lst = append(lst, NewCtxGeom(s, s.I, s.J).AsSelfSegment())
 	}
-	cdp.SegsDB.Clear().Load(lst)
-	return cdp
+	self.SegsDB.Clear().Load(lst)
+	return self
 }

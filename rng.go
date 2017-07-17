@@ -37,7 +37,12 @@ func (o *Range) Contains(idx int) bool {
 }
 
 //As Array
-func (o *Range) AsArray() []int {
+func (o *Range) AsArray() [2]int {
+	return [2]int{o.i, o.j}
+}
+
+//As Slice
+func (o *Range) AsSlice() []int {
 	return []int{o.i, o.j}
 }
 

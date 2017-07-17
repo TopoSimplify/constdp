@@ -13,7 +13,7 @@ var ctx = struct {
 	SelfNonVertex    string
 	ContextNeighbour string
 }{
-	Self:             "cdp",
+	Self:             "self",
 	SelfVertex:       "self_vertex",
 	SelfSegment:      "self_segment",
 	SelfSimple:       "self_simple",

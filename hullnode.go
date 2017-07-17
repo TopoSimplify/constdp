@@ -4,28 +4,7 @@ import (
 	"simplex/geom"
 	"simplex/geom/mbr"
 	"simplex/struct/sset"
-	"simplex/util/math"
 )
-
-type HPt struct {
-	*geom.Point
-}
-
-//implements item.Item
-func (o *HPt) Compare(pt *HPt) int {
-	d := o.Point[2] - pt.Point[2]
-	if math.FloatEqual(d, 0.0) {
-		return 0
-	} else if d < 0 {
-		return -1
-	}
-	return 1
-}
-
-//String - implements stringer
-func (o *HPt) String() string {
-	return o.Point.WKT()
-}
 
 //constructs a hull node
 type HullNode struct {
@@ -36,32 +15,29 @@ type HullNode struct {
 	PtSet  *sset.SSet
 }
 
+//New Hull Node
 func NewHullNode(pln *Polyline, rng, prng *Range) *HullNode {
-	x, y := 0, 1
-	coords := pln.coords
-	hull_coords := make([]*geom.Point, 0)
+	coords := make([]*geom.Point, 0)
 	for _, i := range rng.Stride() {
-		hull_coords = append(
-			hull_coords,
-			geom.NewPointXYZ(coords[i][x], coords[i][y], float64(i)),
-		)
+		x, y, idx := pln.coords[i][0], pln.coords[i][1], float64(i)
+		coords = append(coords, geom.NewPointXYZ(x, y, idx))
 	}
 
-	cvxhull := geom.ConvexHull(coords, false)
-	hull_g := hull_geom(cvxhull)
+	convex_hull := geom.ConvexHull(coords, false)
 
-	ptset := sset.NewSSet(hpt_cmp)
-	for _, pt := range cvxhull {
-		ptset.Add(&HPt{pt})
+	ptset := sset.NewSSet(PointIndexCmp)
+	for _, pt := range convex_hull {
+		ptset.Add(pt)
 	}
 
-	self := &HullNode{
+	g := hull_geom(convex_hull)
+	return &HullNode{
 		Pln:    pln,
 		Range:  rng,
 		PRange: prng,
-		Geom:   hull_g,
+		Geom:   g,
+		PtSet:  ptset,
 	}
-	return self
 }
 
 //bbox interface
@@ -74,16 +50,23 @@ func (h *HullNode) String() string {
 	return h.Geom.WKT()
 }
 
+//stringer interface
+func (h *HullNode) Coordinates() []*geom.Point {
+	return h.Pln.coords
+}
+
 //as segment
 func (h *HullNode) Segment() *Seg {
-	coords := h.Pln.coords
+	coords := h.Coordinates()
 	i, j := h.Range.i, h.Range.j
 	return NewSeg(coords[i], coords[j], i, j)
 }
 
+//hull geom
 func hull_geom(coords []*geom.Point) geom.Geometry {
 	var g geom.Geometry
 	coords = coords[:]
+
 	if len(coords) > 2 {
 		g = geom.NewPolygon(coords)
 	} else if len(coords) == 2 {

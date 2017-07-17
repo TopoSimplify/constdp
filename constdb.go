@@ -13,7 +13,7 @@ import (
 
 //in-memory rtree
 func NewConstDB() *rtree.RTree {
-    return rtree.NewRTree(16)
+    return rtree.NewRTree(8)
 }
 
 func LoadConstDBFromGeometries(db *rtree.RTree, geoms []geom.Geometry) *rtree.RTree {

@@ -1,18 +1,24 @@
 package constdp
 
-import "simplex/geom"
+import (
+	"simplex/geom"
+	"simplex/util/math"
+)
 
-//default comparator
-func PtIdxCmp(a, b interface{}) int {
-	_a, _b := a.(*geom.Point), b.(*geom.Point)
-	return int(_a[2] - _b[2])
-}
-
-//default comparator
-func int_cmp(a, b interface{}) int {
+//int cmp
+func IntCmp(a, b interface{}) int {
 	return a.(int) - b.(int)
 }
 
-func hpt_cmp(a, b interface{}) int {
-	return a.(*HPt).Compare(b.(*HPt))
+//hullpt compare
+func PointIndexCmp(a interface{} , b interface{}) int {
+	self, other := a.(*geom.Point), b.(*geom.Point)
+	d := self[2] - other[2]
+	if math.FloatEqual(d, 0.0) {
+		return 0
+	} else if d < 0 {
+		return -1
+	}
+	return 1
 }
+

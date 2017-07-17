@@ -21,8 +21,11 @@ func TestRange(t *testing.T) {
 			g.Assert(rng.ExclusiveStride(1)).Equal([]int{4, 5, 6,})
 			g.Assert(rng.ExclusiveStride(2)).Equal([]int{4,  6,})
 
-			g.Assert(rng.AsArray()).Equal([]int{3, 7})
-			g.Assert(rng.AsArray()).Equal([]int{3, 7})
+			g.Assert(rng.AsArray()).Equal([2]int{3, 7})
+			g.Assert(rng.AsArray()).Equal([2]int{3, 7})
+
+			g.Assert(rng.AsSlice()).Equal([]int{3, 7})
+			g.Assert(rng.AsSlice()).Equal([]int{3, 7})
 			g.Assert(rng.String()).Equal("Range(i=3, j=7)")
 		})
 	})
