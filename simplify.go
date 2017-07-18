@@ -14,8 +14,7 @@ func (self *ConstDP) split_hulls_at_selfintersects(dphulls *deque.Deque) *deque.
 	self_inters := LinearSelfIntersection(self.Pln)
 	data := make([]rtree.BoxObj, 0)
 	for _, v := range *dphulls.DataView() {
-		h := v.(*HullNode)
-		data = append(data, h)
+		data = append(data, v.(*HullNode))
 	}
 	db.Load(data)
 	at_vertex_set := sset.NewSSet(IntCmp)

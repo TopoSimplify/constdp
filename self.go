@@ -5,9 +5,10 @@ import (
 	"simplex/struct/sset"
 	"simplex/struct/rtree"
 )
+
 const (
-	x=0
-	y=1
+	x = 0
+	y = 1
 )
 
 type kvCount struct {
@@ -20,35 +21,37 @@ type selfInter struct {
 	point  *geom.Point
 }
 
-func LinearSelfIntersection(pln *Polyline) []*CtxGeom {
-	tree        := *rtree.NewRTree(8)
-	coord_dict  := make(map[[2]float64]*kvCount)
-
-	update := func(o *geom.Point, index int) {
-		key := [2]float64{o[x], o[y]}
-		dict_key, ok := coord_dict[key]
-		if !ok {
-			dict_key = &kvCount{
-				count: 0, indxset: sset.NewSSet(IntCmp),
-			}
+func update(dict map[[2]float64]*kvCount, o *geom.Point, index int) {
+	k := [2]float64{o[x], o[y]}
+	v, ok := dict[k]
+	if !ok {
+		v = &kvCount{
+			count:   0,
+			indxset: sset.NewSSet(IntCmp,8),
 		}
-		dict_key.indxset.Add(index)
-		dict_key.count += 1
-		coord_dict[key] = dict_key
+		dict[k] = v
 	}
+	v.indxset.Add(index)
+	v.count += 1
+}
 
-	data := make([]rtree.BoxObj, 0)
+func LinearSelfIntersection(pln *Polyline) []*CtxGeom {
+	var tree = *rtree.NewRTree(8)
+	var dict = make(map[[2]float64]*kvCount)
+
+	var data = make([]rtree.BoxObj, 0)
 	for _, seg := range pln.Segments() {
 		data = append(data, seg)
 	}
 	tree.Load(data)
+
 	self_intersects := make(map[string]*selfInter, 0)
 
 	for _, d := range data {
 		seg := d.(*Seg)
 		res := tree.Search(seg.BBox())
-		update(seg.A, seg.I)
-		update(seg.B, seg.J)
+		update(dict, seg.A, seg.I)
+		update(dict, seg.B, seg.J)
 
 		for _, node := range res {
 			other_seg := node.GetItem().(*Seg)
@@ -59,34 +62,37 @@ func LinearSelfIntersection(pln *Polyline) []*CtxGeom {
 			seg_g, other_seg_g := seg.Segment, other_seg.Segment
 			intersects := seg_g.Intersection(other_seg_g)
 
-			if len(intersects) > 0 {
+			if len(intersects) == 0 {
 				continue
 			}
 
-			for _, pnt := range intersects {
-				if seg.A.Equals2D(pnt) || seg.B.Equals2D(pnt) {
+			for _, pt := range intersects {
+				if seg.A.Equals2D(pt) || seg.B.Equals2D(pt) {
 					continue
 				}
-				skey := sset.NewSSet(IntCmp).Extend(seg.I, seg.J, other_seg.I, other_seg.J)
+				skey := sset.NewSSet(IntCmp,8).Extend(seg.I, seg.J, other_seg.I, other_seg.J)
+
 				k := skey.String()
-				dict_val, ok := self_intersects[k]
+				v, ok := self_intersects[k]
 				if !ok {
-					dict_val = &selfInter{keyset: skey, point: pnt}
+					v = &selfInter{
+						keyset: skey,
+						point:  pt,
+					}
 				}
-				self_intersects[k] = dict_val
+				self_intersects[k] = v
 			}
 		}
 	}
 
 	results := make([]*CtxGeom, 0)
-	for /*key*/ _, val := range self_intersects {
-		pt := val.point
-		cg := NewCtxGeom(pt, 0, -1).AsSelfNonVertex()
-		//cg.Meta = key
+	for _, val := range self_intersects {
+		cg := NewCtxGeom(val.point, 0, -1).AsSelfNonVertex()
+		cg.Meta.SelfNonVertices = val.keyset
 		results = append(results, cg)
 	}
 
-	for k, v := range coord_dict {
+	for k, v := range dict {
 		if v.count > 2 {
 			cg := NewCtxGeom(geom.NewPoint(k[:]), 0, -1).AsSelfVertex()
 			cg.Meta.SelfVertices = v.indxset
