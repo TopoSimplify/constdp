@@ -10,13 +10,19 @@ func sel_deform_hull(a, b *HullNode, opts *Opts) []*HullNode {
 	aseg := a.Pln.Segment(a.Range)
 	bseg := b.Pln.Segment(b.Range)
 
-	aln := a.Pln.SubPolyline(a.Range).geom
-	bln := b.Pln.SubPolyline(b.Range).geom
+	aln := a.Pln.SubPolyline(a.Range)
+	bln := b.Pln.SubPolyline(b.Range)
 
-	aseg_inters_bseg := aseg.Intersects(bseg)
-	aseg_inters_bln := aseg.Intersects(bln)
-	bseg_inters_aln := bseg.Intersects(aln)
-	aln_inters_bln := aln.Intersects(bln)
+    aseg_geom := aseg.Segment
+    bseg_geom := bseg.Segment
+
+    aln_geom := aln.Geom
+    bln_geom := bln.Geom
+
+    aseg_inters_bseg := aseg_geom.Intersects(bseg_geom)
+    aseg_inters_bln  := aseg_geom.Intersects(bln_geom)
+    bseg_inters_aln  := bseg_geom.Intersects(aln_geom)
+    aln_inters_bln   :=  aln_geom.Intersects(bln_geom)
 
 	if aseg_inters_bseg && aseg_inters_bln && (!aln_inters_bln) {
 		return []*HullNode{a}
@@ -26,7 +32,7 @@ func sel_deform_hull(a, b *HullNode, opts *Opts) []*HullNode {
 
 		// find out whether is a shared vertex or overlap
 		// is aseg inter bset  --- dist --- aln inter bln > relax dist
-		pt_lns := aln.Intersection(bln)
+		pt_lns := aln_geom.Intersection(bln_geom)
 		at_seg := aseg.Intersection(bseg)
 
 		// if segs are disjoint but lines intersect, deform a&b
@@ -58,11 +64,11 @@ func is_hull_contiguous_at_vertex(a, b *HullNode) (bool, bool, int) {
 	if bln {
 		interpts := ga.Intersection(gb)
 
-		ai_pt := pln.coords[a.Range.i]
-		aj_pt := pln.coords[a.Range.j]
+		ai_pt := pln.Coords[a.Range.i]
+		aj_pt := pln.Coords[a.Range.j]
 
-		bi_pt := pln.coords[b.Range.i]
-		bj_pt := pln.coords[b.Range.j]
+		bi_pt := pln.Coords[b.Range.i]
+		bj_pt := pln.Coords[b.Range.j]
 
 		inter_count = len(interpts)
 

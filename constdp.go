@@ -37,7 +37,7 @@ func NewConstDP(coordinates []*geom.Point, constraints []geom.Geometry, opts *Op
 }
 
 func (self *ConstDP) Coordinates() []*geom.Point {
-	return self.Pln.coords
+	return self.Pln.Coords
 }
 
 //creates constraint db from geometries

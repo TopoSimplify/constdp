@@ -7,18 +7,18 @@ import (
 
 //Polyline Type
 type Polyline struct {
-	coords []*geom.Point
-	geom   *geom.LineString
-	segs   map[[2]int]*Seg
+	Coords []*geom.Point
+	Geom   *geom.LineString
+	Segs   map[[2]int]*Seg
 }
 
 //construct new polyline
 func NewPolyline(coords []*geom.Point) *Polyline {
 	coords = geom.CloneCoordinates(coords)
 	pln := &Polyline{
-		coords: coords,
-		geom:   geom.NewLineString(coords, false),
-		segs:   make(map[[2]int]*Seg, 0),
+		Coords: coords,
+		Geom:   geom.NewLineString(coords, false),
+		Segs:   make(map[[2]int]*Seg, 0),
 	}
 	pln.buildSegments()
 	return pln
@@ -26,20 +26,20 @@ func NewPolyline(coords []*geom.Point) *Polyline {
 
 //Bounding box of polyline
 func (ln *Polyline) BBox() *mbr.MBR {
-	return ln.geom.BBox()
+	return ln.Geom.BBox()
 }
 
 //Coordinates at index i
 func (ln *Polyline) Coordinate(i int) *geom.Point {
-	return ln.coords[i]
+	return ln.Coords[i]
 }
 
 //build polyline segments
 func (ln *Polyline) buildSegments() {
 	for i := 0; i < ln.len()-1; i++ {
 		j := i + 1
-		ln.segs[[2]int{i, j}] = NewSeg(
-			ln.coords[i], ln.coords[j], i, j,
+		ln.Segs[[2]int{i, j}] = NewSeg(
+			ln.Coords[i], ln.Coords[j], i, j,
 		)
 	}
 }
@@ -49,7 +49,7 @@ func (ln *Polyline) Segments() []*Seg {
 	lst := make([]*Seg, 0)
 	for i := 0; i < ln.len()-1; i++ {
 		j := i + 1
-		lst = append(lst, ln.segs[[2]int{i, j}])
+		lst = append(lst, ln.Segs[[2]int{i, j}])
 	}
 	return lst
 }
@@ -57,11 +57,11 @@ func (ln *Polyline) Segments() []*Seg {
 //Segment given range
 func (ln *Polyline) Segment(rng *Range) *Seg {
 	if rng.Size() == 1 {
-		return ln.segs[[2]int{rng.i, rng.j}]
+		return ln.Segs[[2]int{rng.i, rng.j}]
 	}
 	return NewSeg(
-		ln.coords[rng.i],
-		ln.coords[rng.j],
+		ln.Coords[rng.i],
+		ln.Coords[rng.j],
 		rng.i, rng.j,
 	)
 }
@@ -70,12 +70,12 @@ func (ln *Polyline) Segment(rng *Range) *Seg {
 func (self *Polyline) SubPolyline(rng *Range) *Polyline {
 	var poly = make([]*geom.Point, 0)
 	for _, i := range rng.Stride() {
-		poly = append(poly, self.coords[i])
+		poly = append(poly, self.Coords[i])
 	}
 	return NewPolyline(poly)
 }
 
 //Length of coordinates in polyline
 func (ln *Polyline) len() int {
-	return len(ln.coords)
+	return len(ln.Coords)
 }

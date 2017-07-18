@@ -19,7 +19,7 @@ type HullNode struct {
 func NewHullNode(pln *Polyline, rng, prng *Range) *HullNode {
 	coords := make([]*geom.Point, 0)
 	for _, i := range rng.Stride() {
-		x, y, idx := pln.coords[i][0], pln.coords[i][1], float64(i)
+		x, y, idx := pln.Coords[i][0], pln.Coords[i][1], float64(i)
 		coords = append(coords, geom.NewPointXYZ(x, y, idx))
 	}
 
@@ -52,7 +52,7 @@ func (h *HullNode) String() string {
 
 //stringer interface
 func (h *HullNode) Coordinates() []*geom.Point {
-	return h.Pln.coords
+	return h.Pln.Coords
 }
 
 //as segment

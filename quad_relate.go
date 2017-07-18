@@ -1,11 +1,11 @@
 package constdp
 
 import (
-	"simplex/geom"
-	"simplex/struct/rtree"
-	"simplex/util/math"
-	"simplex/geom/mbr"
 	"strings"
+	"simplex/geom"
+	"simplex/geom/mbr"
+	"simplex/util/math"
+	"simplex/struct/rtree"
 )
 
 func DirectionRelate(pln *Polyline, g geom.Geometry) string {
@@ -39,26 +39,52 @@ func DirectionRelate(pln *Polyline, g geom.Geometry) string {
 	lx, ly, ux, uy := extbox.MinX(), extbox.MinY(), extbox.MaxX(), extbox.MaxY()
 	glx, gly, gux, guy := gbox.MinX(), gbox.MinY(), gbox.MaxX(), gbox.MaxY()
 
-	nw := mbr.NewMBR(lx, guy, glx, uy)
-	nn := mbr.NewMBR(glx, guy, gux, uy)
-	ne := mbr.NewMBR(gux, guy, ux, uy)
+	nw := asPolygon(mbr.NewMBR(lx, guy, glx, uy))
+	nn := asPolygon(mbr.NewMBR(glx, guy, gux, uy))
+	ne := asPolygon(mbr.NewMBR(gux, guy, ux, uy))
 
-	iw := mbr.NewMBR(lx, gly, glx, guy)
-	ii := mbr.NewMBR(glx, gly, gux, guy)
-	ie := mbr.NewMBR(gux, gly, ux, guy)
+	iw := asPolygon(mbr.NewMBR(lx, gly, glx, guy))
+	ii := asPolygon(mbr.NewMBR(glx, gly, gux, guy))
+	ie := asPolygon(mbr.NewMBR(gux, gly, ux, guy))
 
-	sw := mbr.NewMBR(lx, ly, glx, gly)
-	ss := mbr.NewMBR(glx, ly, gux, gly)
-	se := mbr.NewMBR(gux, ly, ux, gly)
+	sw := asPolygon(mbr.NewMBR(lx, ly, glx, gly))
+	ss := asPolygon(mbr.NewMBR(glx, ly, gux, gly))
+	se := asPolygon(mbr.NewMBR(gux, ly, ux, gly))
 
 	quads := make([]string, 0)
-	for _, q := range []*mbr.MBR{nw, nn, ne, iw, ii, ie, sw, ss, se} {
-		res := segdb.Search(q)
+	for _, q := range []*geom.Polygon{nw, nn, ne, iw, ii, ie, sw, ss, se} {
+		res := segdb.Search(q.BBox())
 		if len(res) > 0 {
-			quads = append(quads, "T")
+			if intersects_quad(q, res) {
+				quads = append(quads, "T")
+			} else {
+				quads = append(quads, "F")
+			}
 		} else {
 			quads = append(quads, "F")
 		}
 	}
 	return strings.Join(quads, "")
+}
+
+func asPolygon(box *mbr.MBR) *geom.Polygon {
+	array := box.AsPolyArray()
+	coords := make([]*geom.Point, 0)
+	for _, arr := range array {
+		coords = append(coords, geom.NewPoint(arr[:]))
+	}
+	return geom.NewPolygon(coords)
+}
+
+func intersects_quad(q geom.Geometry, res []*rtree.Node) bool {
+	bln := false
+	for _, node := range res {
+		ctx := node.GetItem().(*CtxGeom)
+		seg := ctx.Geom.(*Seg)
+		if q.Intersects(seg.Segment) {
+			bln = true
+			break
+		}
+	}
+	return bln
 }

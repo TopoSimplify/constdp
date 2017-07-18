@@ -5,6 +5,10 @@ import (
 	"simplex/struct/sset"
 	"simplex/struct/rtree"
 )
+const (
+	x=0
+	y=1
+)
 
 type kvCount struct {
 	count   int
@@ -21,12 +25,11 @@ func LinearSelfIntersection(pln *Polyline) []*CtxGeom {
 	coord_dict  := make(map[[2]float64]*kvCount)
 
 	update := func(o *geom.Point, index int) {
-		key := [2]float64{o[1], o[2]}
+		key := [2]float64{o[x], o[y]}
 		dict_key, ok := coord_dict[key]
 		if !ok {
 			dict_key = &kvCount{
-				count:   0,
-				indxset: sset.NewSSet(IntCmp),
+				count: 0, indxset: sset.NewSSet(IntCmp),
 			}
 		}
 		dict_key.indxset.Add(index)
@@ -53,8 +56,8 @@ func LinearSelfIntersection(pln *Polyline) []*CtxGeom {
 			if seg == other_seg {
 				continue
 			}
-
-			intersects := seg.Intersection(other_seg)
+			seg_g, other_seg_g := seg.Segment, other_seg.Segment
+			intersects := seg_g.Intersection(other_seg_g)
 
 			if len(intersects) > 0 {
 				continue
