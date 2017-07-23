@@ -6,13 +6,22 @@ import (
 	"simplex/struct/sset"
 )
 
+type HullSideTangent struct {
+	aseg *Seg
+	bseg *Seg
+	rtan *Seg
+	ltan *Seg
+	hull *sset.SSet
+	side *HullCollapseSidedness
+}
+
 type HullCollapseSidedness struct {
 	hullset *sset.SSet
 	keys    *sset.SSet
 }
 
 //Hull collapse sidedness measures the correctness of a contiguous
-//hull collaps - goal is to prevent line flips against preceeding hull
+//hull collapse - goal is to prevent line flips against preceeding hull
 func NewHullCollapseSidedness(hull_ptset *sset.SSet) *HullCollapseSidedness {
 	indx_set := sset.NewSSet(IntCmp)
 	for _, o := range hull_ptset.Values() {

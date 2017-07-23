@@ -34,11 +34,11 @@ func init(){
 
 func main(){
 	opts := &Opts{
-        Threshold                : 50.0,
-        MinDist                  : 20.0,
-        RelaxDist                : 30.0,
+        Threshold               : 50.0,
+        MinDist                 : 20.0,
+        RelaxDist               : 30.0,
         KeepSelfIntersects      : true,
-        AvoidNewSelfIntersects : true,
+        AvoidNewSelfIntersects  : true,
         GeomRelation            : true,
         DistRelation            : false,
         DirRelation             : false,
@@ -50,7 +50,7 @@ func main(){
         constraints = append(constraints, g)
     }
 
-    wkt := linear_wkt[2]
+    wkt := linear_wkt[0]
     fmt.Println(wkt)
 
     coords := geom.NewLineStringFromWKT(wkt).Coordinates()
@@ -58,3 +58,5 @@ func main(){
     homo.Simplify(opts)
     //ptset = SSet()
 }
+
+

@@ -6,7 +6,7 @@ import (
 	"simplex/struct/sset"
 )
 
-//constructs a hull node
+//hull node
 type HullNode struct {
 	Pln    *Polyline
 	Range  *Range

@@ -1,17 +1,8 @@
 package constdp
 
 import (
-	"simplex/geom"
 	"simplex/struct/rtree"
 )
-
-func NewDBItem(g geom.Geometry) *CtxGeom {
-	return NewCtxGeom(g, 0, -1).AsContextNeighbour()
-}
-
-func dbSearch(db *rtree.RTree, g geom.Geometry, opts *Opts) []rtree.BoxObj {
-	return db.KNN(g, -1, score, predicate(opts.MinDist))
-}
 
 func dbKNN(db *rtree.RTree, g rtree.BoxObj, mindist float64) []rtree.BoxObj {
 	return db.KNN(g, -1, score, predicate(mindist))

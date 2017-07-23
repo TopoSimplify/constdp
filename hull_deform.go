@@ -33,7 +33,7 @@ func sel_deform_hull(a, b *HullNode, opts *Opts) []*HullNode {
 		// find out whether is a shared vertex or overlap
 		// is aseg inter bset  --- dist --- aln inter bln > relax dist
 		pt_lns := aln_geom.Intersection(bln_geom)
-		at_seg := aseg.Intersection(bseg)
+		at_seg := aseg.Intersection(bseg_geom)
 
 		// if segs are disjoint but lines intersect, deform a&b
 		if len(at_seg) == 0 && len(pt_lns) > 0 {

@@ -6,6 +6,22 @@ import (
 	"simplex/struct/rtree"
 	"simplex/struct/deque"
 )
+//Opts
+type Opts struct {
+	Threshold              float64
+	MinDist                float64
+	RelaxDist              float64
+	KeepSelfIntersects     bool
+	AvoidNewSelfIntersects bool
+	GeomRelation           bool
+	DistRelation           bool
+	DirRelation            bool
+}
+
+//Linear interface
+type Linear interface {
+	Coordinates() []*geom.Point
+}
 
 //Type DP
 type ConstDP struct {

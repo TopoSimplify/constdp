@@ -1,12 +1,12 @@
 package main
 
 import (
-	"simplex/geom"
-	"simplex/constdp"
 	"fmt"
+	"simplex/constdp"
+	"simplex/geom"
 )
 
-func main() {
+func mainx() {
 	wkt := "LINESTRING ( 400 560, 520 660, 620 600, 720 640, 760 500, 680 460, 720 420, 780 400, 720 360, 580 340, 440 400, 380 440, 440 500, 400 560 )"
 	ctx := geom.NewLineStringFromWKT(wkt)
 
@@ -16,8 +16,7 @@ func main() {
 	pln_b := polyln(wkt_b)
 
 	//fmt.Println(constdp.DirectionRelate(pln_a, ctx))//.Equal("TTTTFTTFT")
-	fmt.Println(constdp.DirectionRelate(pln_b, ctx))//.Equal("FTFTTFFFF")
-
+	fmt.Println(constdp.DirectionRelate(pln_b, ctx)) //.Equal("FTFTTFFFF")
 
 }
 
