@@ -1,10 +1,12 @@
 package constdp
 
 import (
-	"github.com/franela/goblin"
-	"testing"
 	"fmt"
+	"testing"
 	"simplex/geom"
+	"simplex/constdp/offset"
+	"github.com/franela/goblin"
+	"simplex/constdp/opts"
 )
 
 func TestConstDP(t *testing.T) {
@@ -32,7 +34,7 @@ func TestConstDP(t *testing.T) {
 	g.Describe("const dp", func() {
 		g.It("should test constraint dp algorithm", func() {
 
-			opts := &Opts{
+			options := &opts.Opts{
 				Threshold:              50.0,
 				MinDist:                20.0,
 				RelaxDist:              30.0,
@@ -53,8 +55,8 @@ func TestConstDP(t *testing.T) {
 			fmt.Println(wkt)
 
 			coords := geom.NewLineStringFromWKT(wkt).Coordinates()
-			homo := NewConstDP(coords, constraints, opts, MaxOffset)
-			homo.Simplify(opts)
+			homo := NewConstDP(coords, constraints, options, offset.MaxOffset)
+			homo.Simplify(options)
 			//ptset = SSet()
 		})
 	})
@@ -62,7 +64,7 @@ func TestConstDP(t *testing.T) {
 	g.Describe("const sed", func() {
 		g.It("should test constraint sed algorithm", func() {
 
-			opts := &Opts{
+			options := &opts.Opts{
 				Threshold:              1.0,
 				MinDist:                20.0,
 				RelaxDist:              30.0,
@@ -81,8 +83,8 @@ func TestConstDP(t *testing.T) {
 
 
 			coords  := []*geom.Point{{3.0, 1.6, 0.0}, {3.0, 2.0, 1.0}, {2.4, 2.8, 3.0}, {0.5, 3.0, 4.5}, {1.2, 3.2, 5.0}, {1.4, 2.6, 6.0}, {2.0, 3.5, 10.0}}
-			homo := NewConstDP(coords, constraints, opts, MaxSEDOffset)
-			homo.Simplify(opts)
+			homo := NewConstDP(coords, constraints, options, offset.MaxSEDOffset)
+			homo.Simplify(options)
 		})
 	})
 }

@@ -1,4 +1,4 @@
-package constdp
+package cmp
 
 import (
 	"simplex/geom"

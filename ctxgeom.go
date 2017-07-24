@@ -4,6 +4,7 @@ import (
 	"simplex/geom"
 	"simplex/geom/mbr"
 	"simplex/struct/sset"
+	"simplex/constdp/cmp"
 )
 
 var ctx = struct {
@@ -42,8 +43,8 @@ func NewCtxGeom(g geom.Geometry, i, j int) *CtxGeom {
 		I:    i,
 		J:    j,
 		Meta: &ctxMeta{
-			SelfVertices:    sset.NewSSet(IntCmp),
-			SelfNonVertices: sset.NewSSet(IntCmp),
+			SelfVertices:    sset.NewSSet(cmp.IntCmp),
+			SelfNonVertices: sset.NewSSet(cmp.IntCmp),
 		},
 	}
 }

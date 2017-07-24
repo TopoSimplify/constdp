@@ -1,12 +1,14 @@
-package constdp
+package hl
 
 import (
 	"sort"
 	"simplex/struct/rtree"
+	"simplex/constdp/opts"
+	"simplex/constdp/db"
 )
 
 //select deform hull
-func sel_deform_hull(a, b *HullNode, opts *Opts) []*HullNode {
+func sel_deform_hull(a, b *HullNode, opts *opts.Opts) []*HullNode {
 	aseg := a.Pln.Segment(a.Range)
 	bseg := b.Pln.Segment(b.Range)
 
@@ -64,11 +66,11 @@ func is_hull_contiguous_at_vertex(a, b *HullNode) (bool, bool, int) {
 	if bln {
 		interpts := ga.Intersection(gb)
 
-		ai_pt := pln.Coords[a.Range.i]
-		aj_pt := pln.Coords[a.Range.j]
+		ai_pt := pln.Coords[a.Range.I()]
+		aj_pt := pln.Coords[a.Range.J()]
 
-		bi_pt := pln.Coords[b.Range.i]
-		bj_pt := pln.Coords[b.Range.j]
+		bi_pt := pln.Coords[b.Range.I()]
+		bj_pt := pln.Coords[b.Range.J()]
 
 		inter_count = len(interpts)
 
@@ -92,7 +94,7 @@ func is_hull_contiguous_at_vertex(a, b *HullNode) (bool, bool, int) {
 	return bln, bln_at_vertex, inter_count
 }
 
-func select_hulls_to_deform(a, b *HullNode, opts *Opts) []*HullNode {
+func select_hulls_to_deform(a, b *HullNode, opts *opts.Opts) []*HullNode {
 	deformlist := make([]*HullNode, 0)
 	intersects, at_contig_vertex, n := is_hull_contiguous_at_vertex(a, b)
 
@@ -118,8 +120,8 @@ func select_hulls_to_deform(a, b *HullNode, opts *Opts) []*HullNode {
 }
 
 //find context deformation list
-func find_hull_deformation_list(hulldb *rtree.RTree, hull *HullNode, opts *Opts) []*HullNode {
-	ctxs := dbKNN(hulldb, hull, 1.e-5)
+func FindHullDeformationList(hulldb *rtree.RTree, hull *HullNode, opts *opts.Opts) []*HullNode {
+	ctxs := db.KNN(hulldb, hull, 1.e-5)
 	selections := make(map[[2]int]*HullNode, 0)
 
 	// for each item in the context list

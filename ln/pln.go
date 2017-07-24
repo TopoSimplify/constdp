@@ -1,15 +1,24 @@
-package constdp
+package ln
 
 import (
 	"simplex/geom"
 	"simplex/geom/mbr"
+	"simplex/constdp/seg"
+	"simplex/constdp/rng"
 )
+
+//Linear interface
+type Linear interface {
+	Coordinates() []*geom.Point
+	Polyline() *Polyline
+	MaximumOffset(Linear, *rng.Range) (int, float64)
+}
 
 //Polyline Type
 type Polyline struct {
 	Coords []*geom.Point
 	Geom   *geom.LineString
-	Segs   map[[2]int]*Seg
+	Segs   map[[2]int]*seg.Seg
 }
 
 //construct new polyline
@@ -18,7 +27,7 @@ func NewPolyline(coords []*geom.Point) *Polyline {
 	pln := &Polyline{
 		Coords: coords,
 		Geom:   geom.NewLineString(coords, false),
-		Segs:   make(map[[2]int]*Seg, 0),
+		Segs:   make(map[[2]int]*seg.Seg, 0),
 	}
 	pln.buildSegments()
 	return pln
@@ -29,6 +38,16 @@ func (ln *Polyline) BBox() *mbr.MBR {
 	return ln.Geom.BBox()
 }
 
+//polyline
+func (ln *Polyline) Polyline() *Polyline {
+	return ln
+}
+
+//Coordinates at index i
+func (ln *Polyline) Coordinates(i int) []*geom.Point {
+	return ln.Coords
+}
+
 //Coordinates at index i
 func (ln *Polyline) Coordinate(i int) *geom.Point {
 	return ln.Coords[i]
@@ -36,18 +55,18 @@ func (ln *Polyline) Coordinate(i int) *geom.Point {
 
 //build polyline segments
 func (ln *Polyline) buildSegments() {
-	for i := 0; i < ln.len()-1; i++ {
+	for i := 0; i < ln.Len()-1; i++ {
 		j := i + 1
-		ln.Segs[[2]int{i, j}] = NewSeg(
+		ln.Segs[[2]int{i, j}] = seg.NewSeg(
 			ln.Coords[i], ln.Coords[j], i, j,
 		)
 	}
 }
 
 //Polyline segments
-func (ln *Polyline) Segments() []*Seg {
-	lst := make([]*Seg, 0)
-	for i := 0; i < ln.len()-1; i++ {
+func (ln *Polyline) Segments() []*seg.Seg {
+	lst := make([]*seg.Seg, 0)
+	for i := 0; i < ln.Len()-1; i++ {
 		j := i + 1
 		lst = append(lst, ln.Segs[[2]int{i, j}])
 	}
@@ -55,19 +74,19 @@ func (ln *Polyline) Segments() []*Seg {
 }
 
 //Segment given range
-func (ln *Polyline) Segment(rng *Range) *Seg {
+func (ln *Polyline) Segment(rng *rng.Range) *seg.Seg {
 	if rng.Size() == 1 {
-		return ln.Segs[[2]int{rng.i, rng.j}]
+		return ln.Segs[[2]int{rng.I(), rng.J()}]
 	}
-	return NewSeg(
-		ln.Coords[rng.i],
-		ln.Coords[rng.j],
-		rng.i, rng.j,
+	return seg.NewSeg(
+		ln.Coords[rng.I()],
+		ln.Coords[rng.J()],
+		rng.I(), rng.J(),
 	)
 }
 
 //generates sub polyline from generator indices
-func (self *Polyline) SubPolyline(rng *Range) *Polyline {
+func (self *Polyline) SubPolyline(rng *rng.Range) *Polyline {
 	var poly = make([]*geom.Point, 0)
 	for _, i := range rng.Stride() {
 		poly = append(poly, self.Coords[i])
@@ -76,6 +95,6 @@ func (self *Polyline) SubPolyline(rng *Range) *Polyline {
 }
 
 //Length of coordinates in polyline
-func (ln *Polyline) len() int {
+func (ln *Polyline) Len() int {
 	return len(ln.Coords)
 }

@@ -7,17 +7,22 @@ import (
 	"simplex/struct/rtree"
 	"simplex/struct/deque"
 	"simplex/struct/sset"
+	"simplex/constdp/cmp"
+	"simplex/constdp/hl"
+	"simplex/constdp/ln"
+	"simplex/constdp/db"
+	"simplex/constdp/opts"
 )
 
 func (self *ConstDP) split_hulls_at_selfintersects(dphulls *deque.Deque) *deque.Deque {
-	db := rtree.NewRTree(8)
+	tree := rtree.NewRTree(8)
 	self_inters := LinearSelfIntersection(self.Pln)
 	data := make([]rtree.BoxObj, 0)
 	for _, v := range *dphulls.DataView() {
-		data = append(data, v.(*HullNode))
+		data = append(data, v.(*hl.HullNode))
 	}
-	db.Load(data)
-	at_vertex_set := sset.NewSSet(IntCmp)
+	tree.Load(data)
+	at_vertex_set := sset.NewSSet(cmp.IntCmp)
 
 	for _, inter := range self_inters {
 		if inter.IsSelfVertex() {
@@ -30,39 +35,39 @@ func (self *ConstDP) split_hulls_at_selfintersects(dphulls *deque.Deque) *deque.
 			continue
 		}
 
-		hulls := dbKNN(db, inter, 1.e-5)
+		hulls := db.KNN(tree, inter, 1.e-5)
 		for _, h := range hulls {
-			hull := h.(*HullNode)
+			hull := h.(*hl.HullNode)
 			idxs := inter.Meta.SelfVertices.Values()
 			indices := make([]int, 0)
 			for _, o := range idxs {
 				indices = append(indices, o.(int))
 			}
-			hsubs := self.split_hull_at_index(hull, indices)
+			hsubs := hl.SplitHullAtIndex(self, hull, indices)
 
 			if len(hsubs) > 0 {
-				db.Remove(hull)
+				tree.Remove(hull)
 			}
 
-			keep, rm := self.merge_contig_fragments(
-				hsubs, db, at_vertex_set,
+			keep, rm := hl.MergeContigFragments(
+				self, hsubs, tree, at_vertex_set,
 			)
 
 			for _, h := range rm {
-				db.Remove(h)
+				tree.Remove(h)
 			}
 
 			for _, h := range keep {
-				db.Insert(h)
+				tree.Insert(h)
 			}
 		}
 	}
 
-	hdata := make([]*HullNode, 0)
-	for _, h := range db.All() {
-		hdata = append(hdata, h.GetItem().(*HullNode))
+	hdata := make([]*hl.HullNode, 0)
+	for _, h := range tree.All() {
+		hdata = append(hdata, h.GetItem().(*hl.HullNode))
 	}
-	sort.Sort(HullNodes(hdata))
+	sort.Sort(hl.HullNodes(hdata))
 	hulls := deque.NewDeque()
 	for _, hn := range hdata {
 		hulls.Append(hn)
@@ -71,8 +76,8 @@ func (self *ConstDP) split_hulls_at_selfintersects(dphulls *deque.Deque) *deque.
 }
 
 //homotopic simplification at a given threshold
-func (self *ConstDP) Simplify(opts *Opts) *ConstDP {
-	self.Simple = make([]*HullNode, 0)
+func (self *ConstDP) Simplify(opts *opts.Opts) *ConstDP {
+	self.Simple = make([]*hl.HullNode, 0)
 	self.Hulls = self.dp_decompose(opts.Threshold)
 
 	// split hulls by self intersects
@@ -90,14 +95,14 @@ func (self *ConstDP) Simplify(opts *Opts) *ConstDP {
 		bln := true
 
 		// pop hull in queue
-		hull := self.Hulls.PopLeft().(*HullNode)
+		hull := self.Hulls.PopLeft().(*hl.HullNode)
 
 		// insert hull into hull db
 		hulldb.Insert(hull)
 
 		if bln && self.Opts.AvoidNewSelfIntersects {
 			// find hull neighbours
-			hlist := find_hull_deformation_list(hulldb, hull, self.Opts)
+			hlist := hl.FindHullDeformationList(hulldb, hull, self.Opts)
 			for _, h := range hlist {
 				bln = !(h == hull)
 				self.deform_hull(hulldb, h)
@@ -109,7 +114,7 @@ func (self *ConstDP) Simplify(opts *Opts) *ConstDP {
 		}
 
 		// find context neighbours - if valid
-		ctxs := dbKNN(self.CtxDB, hull, self.Opts.MinDist)
+		ctxs := db.KNN(self.CtxDB, hull, self.Opts.MinDist)
 		i := 0
 		for bln && i < len(ctxs) {
 			ctx := ctxs[i].(*CtxGeom)
@@ -132,26 +137,26 @@ func (self *ConstDP) Simplify(opts *Opts) *ConstDP {
 			self.deform_hull(hulldb, hull)
 		}
 	}
-	hdata := make([]*HullNode, 0)
+	hdata := make([]*hl.HullNode, 0)
 	for _, h := range hulldb.All() {
-		hdata = append(hdata, h.GetItem().(*HullNode))
+		hdata = append(hdata, h.GetItem().(*hl.HullNode))
 	}
-	sort.Sort(HullNodes(hdata))
+	sort.Sort(hl.HullNodes(hdata))
 	self.Simple = hdata
 	return self
 }
 
-func (self *ConstDP) deform_hull(hulldb *rtree.RTree, hull *HullNode) {
+func (self *ConstDP) deform_hull(hulldb *rtree.RTree, hull *hl.HullNode) {
 	// split hull at maximum_offset offset
-	ha, hb := self.split_hull(hull)
+	ha, hb := hl.SplitHull(self, hull)
 	hulldb.Remove(hull)
 
 	self.Hulls.AppendLeft(hb)
 	self.Hulls.AppendLeft(ha)
 }
 
-func (self *ConstDP) is_geom_relate_valid(hull *HullNode, ctx *CtxGeom) bool {
-	seg := self.HullSegment(hull)
+func (self *ConstDP) is_geom_relate_valid(hull *hl.HullNode, ctx *CtxGeom) bool {
+	seg := hl.HullSegment(self, hull)
 	subpln := self.Pln.SubPolyline(hull.Range)
 
 	ln_geom := subpln.Geom
@@ -172,9 +177,9 @@ func (self *ConstDP) is_geom_relate_valid(hull *HullNode, ctx *CtxGeom) bool {
 }
 
 //is distance relate valid ?
-func (self *ConstDP) is_dist_relate_valid(hull *HullNode, ctx *CtxGeom) bool {
+func (self *ConstDP) is_dist_relate_valid(hull *hl.HullNode, ctx *CtxGeom) bool {
 	mindist := self.Opts.MinDist
-	seg := self.HullSegment(hull)
+	seg := hl.HullSegment(self, hull)
 	ln_geom := hull.Pln.Geom
 
 	seg_geom := seg
@@ -190,14 +195,14 @@ func (self *ConstDP) is_dist_relate_valid(hull *HullNode, ctx *CtxGeom) bool {
 	return bln
 }
 
-func (self *ConstDP) is_dir_relate_valid(hull *HullNode, ctx *CtxGeom) bool {
+func (self *ConstDP) is_dir_relate_valid(hull *hl.HullNode, ctx *CtxGeom) bool {
 	subpln := self.Pln.SubPolyline(hull.Range)
-	segment := NewPolyline([]*geom.Point{
-		self.Pln.Coords[hull.Range.i],
-		self.Pln.Coords[hull.Range.j],
+	segment := ln.NewPolyline([]*geom.Point{
+		self.Pln.Coords[hull.Range.I()],
+		self.Pln.Coords[hull.Range.J()],
 	})
 
-	lnr := DirectionRelate(subpln, ctx.Geom)
+	lnr  := DirectionRelate(subpln, ctx.Geom)
 	segr := DirectionRelate(segment, ctx.Geom)
 
 	return lnr == segr

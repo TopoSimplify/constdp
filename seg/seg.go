@@ -1,4 +1,4 @@
-package constdp
+package seg
 
 import "simplex/geom"
 

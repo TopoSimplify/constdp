@@ -1,4 +1,4 @@
-package constdp
+package rng
 
 import (
 	"github.com/franela/goblin"
@@ -12,6 +12,8 @@ func TestRange(t *testing.T) {
 			rng := NewRange(3, 7)
 			g.Assert(rng.I()).Equal(3)
 			g.Assert(rng.J()).Equal(7)
+			g.Assert(rng.Contains(7)).IsTrue()
+			g.Assert(rng.Contains(8)).IsFalse()
 			g.Assert(rng.Size()).Equal(4)
 			g.Assert(rng.Stride()).Equal([]int{3, 4, 5, 6, 7})
 			g.Assert(rng.Stride(1)).Equal([]int{3, 4, 5, 6, 7})

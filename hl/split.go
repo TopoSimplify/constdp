@@ -1,32 +1,35 @@
-package constdp
+package hl
 
 import (
-	"simplex/struct/rtree"
-	"simplex/struct/sset"
 	"sort"
+	"simplex/struct/sset"
+	"simplex/constdp/rng"
+	"simplex/struct/rtree"
+	"simplex/constdp/db"
+	"simplex/constdp/ln"
 )
 
 //split hull at vertex with
 //maximum_offset offset -- k
-func (self *ConstDP) split_hull(hull *HullNode) (*HullNode, *HullNode) {
-	i, j := hull.Range.i, hull.Range.j
+func  SplitHull(self ln.Linear, hull *HullNode) (*HullNode, *HullNode) {
+	i, j := hull.Range.I(), hull.Range.J()
 	k, _ := self.MaximumOffset(self, hull.Range)
 	// -------------------------------------------
 	// i..[ha]....k...[hb].....j
-	ha := NewHullNode(self.Pln, NewRange(i, k), NewRange(i, j))
-	hb := NewHullNode(self.Pln, NewRange(k, j), NewRange(i, j))
+	ha := NewHullNode(self.Polyline(), rng.NewRange(i, k), rng.NewRange(i, j))
+	hb := NewHullNode(self.Polyline(), rng.NewRange(k, j), rng.NewRange(i, j))
 	// -------------------------------------------
 	return ha, hb
 }
 
 //	split hull at indexes (index, index, ...)
-func (self *ConstDP) split_hull_at_index(hull *HullNode, idxs []int) []*HullNode {
-	pln := self.Pln
-	i, j := hull.Range.i, hull.Range.j
+func  SplitHullAtIndex(self ln.Linear, hull *HullNode, idxs []int) []*HullNode {
+	pln := self.Polyline()
+	i, j := hull.Range.I(), hull.Range.J()
 	subhulls := make([]*HullNode, 0)
 	for _, k := range idxs {
 		if i < k && k < j {
-			ar, br, pr := NewRange(i, k), NewRange(k, j), NewRange(i, j)
+			ar, br, pr := rng.NewRange(i, k), rng.NewRange(k, j), rng.NewRange(i, j)
 			ha := NewHullNode(pln, ar, pr)
 			hb := NewHullNode(pln, br, pr)
 			subhulls = append(subhulls, ha)
@@ -38,17 +41,18 @@ func (self *ConstDP) split_hull_at_index(hull *HullNode, idxs []int) []*HullNode
 }
 
 //merge contig hulls after split - merge line segment fragments
-func (self *ConstDP) merge_contig_fragments(
+func  MergeContigFragments(
+	self ln.Linear,
 	hulls []*HullNode,
-	db *rtree.RTree,
+	tree *rtree.RTree,
 	vertex_set *sset.SSet,
 ) ([]*HullNode, []*HullNode) {
 
-	pln := self.Pln
+	pln := self.Polyline()
 	keep, rm := make([]*HullNode, 0), make([]*HullNode, 0)
 
 	for _, h := range hulls {
-		hs := dbKNN(db, h.Geom, 1.0e-5)
+		hs := db.KNN(tree, h.Geom, 1.0e-5)
 		hr := h.Range
 		m := h
 
@@ -56,14 +60,14 @@ func (self *ConstDP) merge_contig_fragments(
 			for _, _s := range hs {
 				s := _s.(*HullNode)
 				sr := s.Range
-				bln := (hr.j == sr.i && vertex_set.Contains(sr.i)) ||
-					(hr.i == sr.j && vertex_set.Contains(sr.j))
+				bln := (hr.J() == sr.I() && vertex_set.Contains(sr.I())) ||
+					(hr.I() == sr.J() && vertex_set.Contains(sr.J()))
 
-				if !bln && (hr.Contains(sr.i) || hr.Contains(sr.j)) {
-					l := []int{sr.i, sr.j, hr.i, hr.j}
+				if !bln && (hr.Contains(sr.I()) || hr.Contains(sr.J())) {
+					l := []int{sr.I(), sr.J(), hr.I(), hr.J()}
 					sort.Ints(l)
 
-					r := NewRange(l[0], l[len(l)-1])
+					r := rng.NewRange(l[0], l[len(l)-1])
 					m = NewHullNode(pln, r, r)
 
 					// add to remove list to remove , after merge

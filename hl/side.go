@@ -1,16 +1,18 @@
-package constdp
+package hl
 
 import (
 	"simplex/geom"
 	"simplex/util/math"
 	"simplex/struct/sset"
+	"simplex/constdp/seg"
+	"simplex/constdp/cmp"
 )
 
 type HullSideTangent struct {
-	aseg *Seg
-	bseg *Seg
-	rtan *Seg
-	ltan *Seg
+	aseg *seg.Seg
+	bseg *seg.Seg
+	rtan *seg.Seg
+	ltan *seg.Seg
 	hull *sset.SSet
 	side *HullCollapseSidedness
 }
@@ -23,7 +25,7 @@ type HullCollapseSidedness struct {
 //Hull collapse sidedness measures the correctness of a contiguous
 //hull collapse - goal is to prevent line flips against preceeding hull
 func NewHullCollapseSidedness(hull_ptset *sset.SSet) *HullCollapseSidedness {
-	indx_set := sset.NewSSet(IntCmp)
+	indx_set := sset.NewSSet(cmp.IntCmp)
 	for _, o := range hull_ptset.Values() {
 		p := o.(*geom.Point)
 		indx_set.Add(int(p[2]))
@@ -86,15 +88,15 @@ func (self *HullCollapseSidedness) _side_tangents(pt *geom.Point, hull *sset.SSe
 		}
 
 		rpt, lpt := hpts[r], hpts[l]
-		hseg := NewSeg(pt, rpt, 0, -1)
+		hseg := seg.NewSeg(pt, rpt, 0, -1)
 		s := hseg.SideOf(lpt)
 		if s.IsRight() { // if lpt is on right then swap
 			r, l = l, r
 		}
 	}
 
-	rtan := NewSeg(pt, hpts[r], 0, -1)
-	ltan := NewSeg(pt, hpts[l], 0, -1)
+	rtan := seg.NewSeg(pt, hpts[r], 0, -1)
+	ltan := seg.NewSeg(pt, hpts[l], 0, -1)
 
 	prv, nxt := self.key_knn(pt_key)
 
@@ -106,8 +108,8 @@ func (self *HullCollapseSidedness) _side_tangents(pt *geom.Point, hull *sset.SSe
 		nk, pk = pk, nk
 	}
 
-	aseg := NewSeg(self.PtAt(fk), self.PtAt(nk), 0, -1)
-	bseg := NewSeg(self.PtAt(fk), self.PtAt(pk), 0, -1)
+	aseg := seg.NewSeg(self.PtAt(fk), self.PtAt(nk), 0, -1)
+	bseg := seg.NewSeg(self.PtAt(fk), self.PtAt(pk), 0, -1)
 
 	return &HullSideTangent{
 		aseg: aseg, bseg: bseg,

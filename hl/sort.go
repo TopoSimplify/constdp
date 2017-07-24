@@ -1,4 +1,4 @@
-package constdp
+package hl
 
 type HullNodes []*HullNode
 
@@ -11,5 +11,5 @@ func (s HullNodes) Swap(i, j int) {
 }
 
 func (s HullNodes) Less(i, j int) bool {
-	return s[i].Range.i < s[j].Range.i
+	return s[i].Range.I() < s[j].Range.I()
 }

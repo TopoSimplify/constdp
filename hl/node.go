@@ -1,22 +1,25 @@
-package constdp
-
+package hl
 import (
 	"simplex/geom"
 	"simplex/geom/mbr"
 	"simplex/struct/sset"
+	"simplex/constdp/rng"
+	"simplex/constdp/ln"
+	"simplex/constdp/cmp"
+	"simplex/constdp/seg"
 )
 
 //hull node
 type HullNode struct {
-	Pln    *Polyline
-	Range  *Range
-	PRange *Range
+	Pln    *ln.Polyline
+	Range  *rng.Range
+	PRange *rng.Range
 	Geom   geom.Geometry
 	PtSet  *sset.SSet
 }
 
 //New Hull Node
-func NewHullNode(pln *Polyline, rng, prng *Range) *HullNode {
+func NewHullNode(pln *ln.Polyline, rng, prng *rng.Range) *HullNode {
 	coords := make([]*geom.Point, 0)
 	for _, i := range rng.Stride() {
 		x, y, idx := pln.Coords[i][0], pln.Coords[i][1], float64(i)
@@ -25,7 +28,7 @@ func NewHullNode(pln *Polyline, rng, prng *Range) *HullNode {
 
 	convex_hull := geom.ConvexHull(coords, false)
 
-	ptset := sset.NewSSet(PointIndexCmp)
+	ptset := sset.NewSSet(cmp.PointIndexCmp)
 	for _, pt := range convex_hull {
 		ptset.Add(pt)
 	}
@@ -56,10 +59,10 @@ func (h *HullNode) Coordinates() []*geom.Point {
 }
 
 //as segment
-func (h *HullNode) Segment() *Seg {
+func (h *HullNode) Segment() *seg.Seg {
 	coords := h.Coordinates()
-	i, j := h.Range.i, h.Range.j
-	return NewSeg(coords[i], coords[j], i, j)
+	i, j := h.Range.I(), h.Range.J()
+	return seg.NewSeg(coords[i], coords[j], i, j)
 }
 
 //hull geom

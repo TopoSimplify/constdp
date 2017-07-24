@@ -4,12 +4,13 @@ import (
 	"testing"
 	"simplex/geom"
 	"github.com/franela/goblin"
+	"simplex/constdp/ln"
 )
 
-func polyln(wkt string) *Polyline {
-	ln := geom.NewLineStringFromWKT(wkt)
-	coords := ln.Coordinates()
-	return NewPolyline(coords)
+func polyln(wkt string) *ln.Polyline {
+	return ln.NewPolyline(
+		geom.NewLineStringFromWKT(wkt).Coordinates(),
+	)
 }
 
 func TestQuadRelate(t *testing.T) {

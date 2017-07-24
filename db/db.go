@@ -1,10 +1,10 @@
-package constdp
+package db
 
 import (
 	"simplex/struct/rtree"
 )
 
-func dbKNN(db *rtree.RTree, g rtree.BoxObj, mindist float64) []rtree.BoxObj {
+func KNN(db *rtree.RTree, g rtree.BoxObj, mindist float64) []rtree.BoxObj {
 	return db.KNN(g, -1, score, predicate(mindist))
 }
 
