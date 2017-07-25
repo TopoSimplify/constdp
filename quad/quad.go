@@ -1,4 +1,4 @@
-package constdp
+package quad
 
 import (
 	"strings"
@@ -8,13 +8,14 @@ import (
 	"simplex/struct/rtree"
 	"simplex/constdp/ln"
 	"simplex/constdp/seg"
+	"simplex/constdp/ctx"
 )
 
 func DirectionRelate(pln *ln.Polyline, g geom.Geometry) string {
 	segdb := rtree.NewRTree(8)
 	objs := make([]rtree.BoxObj, 0)
 	for _, s := range pln.Segments() {
-		ctx := NewCtxGeom(s, s.I, s.J).AsSelfSegment()
+		ctx := ctx.NewCtxGeom(s, s.I, s.J).AsSelfSegment()
 		objs = append(objs, ctx)
 	}
 	segdb.Load(objs)
@@ -81,8 +82,8 @@ func asPolygon(box *mbr.MBR) *geom.Polygon {
 func intersects_quad(q geom.Geometry, res []*rtree.Node) bool {
 	bln := false
 	for _, node := range res {
-		ctx := node.GetItem().(*CtxGeom)
-		s := ctx.Geom.(*seg.Seg)
+		c := node.GetItem().(*ctx.CtxGeom)
+		s := c.Geom.(*seg.Seg)
 		if q.Intersects(s.Segment) {
 			bln = true
 			break

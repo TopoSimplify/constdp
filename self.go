@@ -7,6 +7,7 @@ import (
 	"simplex/struct/sset"
 	"simplex/struct/rtree"
 	"simplex/constdp/cmp"
+	"simplex/constdp/ctx"
 )
 
 const (
@@ -38,7 +39,7 @@ func update(dict map[[2]float64]*kvCount, o *geom.Point, index int) {
 	v.count += 1
 }
 
-func LinearSelfIntersection(pln *ln.Polyline) []*CtxGeom {
+func LinearSelfIntersection(pln *ln.Polyline) []*ctx.CtxGeom {
 	var tree = *rtree.NewRTree(8)
 	var dict = make(map[[2]float64]*kvCount)
 
@@ -88,16 +89,16 @@ func LinearSelfIntersection(pln *ln.Polyline) []*CtxGeom {
 		}
 	}
 
-	results := make([]*CtxGeom, 0)
+	results := make([]*ctx.CtxGeom, 0)
 	for _, val := range self_intersects {
-		cg := NewCtxGeom(val.point, 0, -1).AsSelfNonVertex()
+		cg := ctx.NewCtxGeom(val.point, 0, -1).AsSelfNonVertex()
 		cg.Meta.SelfNonVertices = val.keyset
 		results = append(results, cg)
 	}
 
 	for k, v := range dict {
 		if v.count > 2 {
-			cg := NewCtxGeom(geom.NewPoint(k[:]), 0, -1).AsSelfVertex()
+			cg := ctx.NewCtxGeom(geom.NewPoint(k[:]), 0, -1).AsSelfVertex()
 			cg.Meta.SelfVertices = v.indxset
 			results = append(results, cg)
 		}

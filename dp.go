@@ -9,8 +9,8 @@ import (
 	"simplex/constdp/rng"
 	"simplex/constdp/opts"
 	"simplex/constdp/hl"
+	"simplex/constdp/ctx"
 )
-
 
 //Type DP
 type ConstDP struct {
@@ -49,18 +49,15 @@ func (self *ConstDP) Polyline() *ln.Polyline {
 	return self.Pln
 }
 
-
 func (self *ConstDP) MaximumOffset(pln ln.Linear, rg *rng.Range) (int, float64) {
 	return self.MaxOffset(pln, rg)
 }
-
-
 
 //creates constraint db from geometries
 func (self *ConstDP) build_context_db(geoms []geom.Geometry) *ConstDP {
 	lst := make([]rtree.BoxObj, 0)
 	for _, g := range geoms {
-		cg := NewCtxGeom(g, 0, -1).AsContextNeighbour()
+		cg := ctx.NewCtxGeom(g, 0, -1).AsContextNeighbour()
 		lst = append(lst, cg)
 	}
 	self.CtxDB.Clear().Load(lst)
@@ -71,7 +68,7 @@ func (self *ConstDP) build_context_db(geoms []geom.Geometry) *ConstDP {
 func (self *ConstDP) build_segs_db() *ConstDP {
 	lst := make([]rtree.BoxObj, 0)
 	for _, s := range self.Pln.Segments() {
-		lst = append(lst, NewCtxGeom(s, s.I, s.J).AsSelfSegment())
+		lst = append(lst, ctx.NewCtxGeom(s, s.I, s.J).AsSelfSegment())
 	}
 	self.SegsDB.Clear().Load(lst)
 	return self

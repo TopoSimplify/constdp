@@ -43,7 +43,8 @@ func (o *Range) AsArray() [2]int {
 
 //As Slice
 func (o *Range) AsSlice() []int {
-	return []int{o.i, o.j}
+	ar := o.AsArray()
+	return ar[:]
 }
 
 //Size

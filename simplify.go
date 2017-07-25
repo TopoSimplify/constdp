@@ -1,7 +1,6 @@
 package constdp
 
 import (
-	"fmt"
 	"sort"
 	"simplex/geom"
 	"simplex/struct/rtree"
@@ -12,6 +11,8 @@ import (
 	"simplex/constdp/ln"
 	"simplex/constdp/db"
 	"simplex/constdp/opts"
+	"simplex/constdp/ctx"
+	"simplex/constdp/quad"
 )
 
 func (self *ConstDP) split_hulls_at_selfintersects(dphulls *deque.Deque) *deque.Deque {
@@ -78,16 +79,16 @@ func (self *ConstDP) split_hulls_at_selfintersects(dphulls *deque.Deque) *deque.
 //homotopic simplification at a given threshold
 func (self *ConstDP) Simplify(opts *opts.Opts) *ConstDP {
 	self.Simple = make([]*hl.HullNode, 0)
-	self.Hulls = self.dp_decompose(opts.Threshold)
+	self.Hulls = self.decompose(opts.Threshold)
 
 	// split hulls by self intersects
 	if opts.KeepSelfIntersects {
 		self.Hulls = self.split_hulls_at_selfintersects(self.Hulls)
 	}
 
-	for _, h := range *self.Hulls.DataView() {
-		fmt.Println(h)
-	}
+	//for _, h := range *self.Hulls.DataView() {
+	//	fmt.Println(h)
+	//}
 
 	hulldb := rtree.NewRTree(8)
 	for self.Hulls.Len() > 0 {
@@ -117,17 +118,17 @@ func (self *ConstDP) Simplify(opts *opts.Opts) *ConstDP {
 		ctxs := db.KNN(self.CtxDB, hull, self.Opts.MinDist)
 		i := 0
 		for bln && i < len(ctxs) {
-			ctx := ctxs[i].(*CtxGeom)
+			c := ctxs[i].(*ctx.CtxGeom)
 			if bln && self.Opts.GeomRelation {
-				bln = self.is_geom_relate_valid(hull, ctx)
+				bln = self.is_geom_relate_valid(hull, c)
 			}
 
 			if bln && self.Opts.DistRelation {
-				bln = self.is_dist_relate_valid(hull, ctx)
+				bln = self.is_dist_relate_valid(hull, c)
 			}
 
 			if bln && self.Opts.DirRelation {
-				bln = self.is_dir_relate_valid(hull, ctx)
+				bln = self.is_dir_relate_valid(hull, c)
 			}
 
 			i += 1
@@ -155,7 +156,7 @@ func (self *ConstDP) deform_hull(hulldb *rtree.RTree, hull *hl.HullNode) {
 	self.Hulls.AppendLeft(ha)
 }
 
-func (self *ConstDP) is_geom_relate_valid(hull *hl.HullNode, ctx *CtxGeom) bool {
+func (self *ConstDP) is_geom_relate_valid(hull *hl.HullNode, ctx *ctx.CtxGeom) bool {
 	seg := hl.HullSegment(self, hull)
 	subpln := self.Pln.SubPolyline(hull.Range)
 
@@ -177,7 +178,7 @@ func (self *ConstDP) is_geom_relate_valid(hull *hl.HullNode, ctx *CtxGeom) bool 
 }
 
 //is distance relate valid ?
-func (self *ConstDP) is_dist_relate_valid(hull *hl.HullNode, ctx *CtxGeom) bool {
+func (self *ConstDP) is_dist_relate_valid(hull *hl.HullNode, ctx *ctx.CtxGeom) bool {
 	mindist := self.Opts.MinDist
 	seg := hl.HullSegment(self, hull)
 	ln_geom := hull.Pln.Geom
@@ -195,15 +196,15 @@ func (self *ConstDP) is_dist_relate_valid(hull *hl.HullNode, ctx *CtxGeom) bool 
 	return bln
 }
 
-func (self *ConstDP) is_dir_relate_valid(hull *hl.HullNode, ctx *CtxGeom) bool {
+func (self *ConstDP) is_dir_relate_valid(hull *hl.HullNode, ctx *ctx.CtxGeom) bool {
 	subpln := self.Pln.SubPolyline(hull.Range)
 	segment := ln.NewPolyline([]*geom.Point{
 		self.Pln.Coords[hull.Range.I()],
 		self.Pln.Coords[hull.Range.J()],
 	})
 
-	lnr  := DirectionRelate(subpln, ctx.Geom)
-	segr := DirectionRelate(segment, ctx.Geom)
+	lnr := quad.DirectionRelate(subpln, ctx.Geom)
+	segr := quad.DirectionRelate(segment, ctx.Geom)
 
 	return lnr == segr
 }

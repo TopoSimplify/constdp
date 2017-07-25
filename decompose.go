@@ -8,10 +8,11 @@ import (
 )
 
 //Douglas Peucker decomposition at a given threshold
-func (self *ConstDP) dp_decompose(threshold float64) *deque.Deque {
-	pln := self.Pln
-	hque := deque.NewDeque()
+func (self *ConstDP) decompose(threshold float64) *deque.Deque {
+	var pln  = self.Pln
+	var hque = deque.NewDeque()
 	var rg, prg *rng.Range
+
 	rg = rng.NewRange(0, pln.Len()-1)
 	stk := stack.NewStack()
 	stk.Add([2]*rng.Range{rg, prg})
