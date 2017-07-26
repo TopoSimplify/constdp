@@ -5,6 +5,9 @@ import (
 	"simplex/struct/rtree"
 	"simplex/constdp/opts"
 	"simplex/constdp/db"
+	"simplex/geom"
+	"simplex/geom/mbr"
+	"simplex/constdp/box"
 )
 
 //select deform hull
@@ -121,8 +124,16 @@ func select_hulls_to_deform(a, b *HullNode, opts *opts.Opts) []*HullNode {
 
 //find context deformation list
 func FindHullDeformationList(hulldb *rtree.RTree, hull *HullNode, opts *opts.Opts) []*HullNode {
-	ctxs := db.KNN(hulldb, hull, 1.e-5)
 	selections := make(map[[2]int]*HullNode, 0)
+	ctxs := db.KNN(hulldb, hull, 1.e-5,  func(_, item rtree.BoxObj) float64 {
+			var other geom.Geometry
+			if o, ok := item.(*mbr.MBR); ok {
+				other = box.MBRToPolygon(o)
+			} else {
+				other = item.(*HullNode).Geom
+			}
+			return hull.Geom.Distance(other)
+		})
 
 	// for each item in the context list
 	for _, ctx := range ctxs {

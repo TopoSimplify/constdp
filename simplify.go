@@ -3,26 +3,28 @@ package constdp
 import (
 	"sort"
 	"simplex/geom"
-	"simplex/struct/rtree"
-	"simplex/struct/deque"
-	"simplex/struct/sset"
-	"simplex/constdp/cmp"
 	"simplex/constdp/hl"
 	"simplex/constdp/ln"
 	"simplex/constdp/db"
-	"simplex/constdp/opts"
 	"simplex/constdp/ctx"
+	"simplex/constdp/cmp"
+	"simplex/struct/sset"
+	"simplex/struct/deque"
+	"simplex/struct/rtree"
+	"simplex/constdp/opts"
 	"simplex/constdp/quad"
+	"simplex/geom/mbr"
+	"simplex/constdp/box"
 )
 
 func (self *ConstDP) split_hulls_at_selfintersects(dphulls *deque.Deque) *deque.Deque {
-	tree := rtree.NewRTree(8)
+	hulldb := rtree.NewRTree(8)
 	self_inters := LinearSelfIntersection(self.Pln)
 	data := make([]rtree.BoxObj, 0)
 	for _, v := range *dphulls.DataView() {
 		data = append(data, v.(*hl.HullNode))
 	}
-	tree.Load(data)
+	hulldb.Load(data)
 	at_vertex_set := sset.NewSSet(cmp.IntCmp)
 
 	for _, inter := range self_inters {
@@ -36,7 +38,16 @@ func (self *ConstDP) split_hulls_at_selfintersects(dphulls *deque.Deque) *deque.
 			continue
 		}
 
-		hulls := db.KNN(tree, inter, 1.e-5)
+		hulls := db.KNN(hulldb, inter, 1.e-5, func(_, item rtree.BoxObj) float64 {
+			var other geom.Geometry
+			if o, ok := item.(*mbr.MBR); ok {
+				other = box.MBRToPolygon(o)
+			} else {
+				other = item.(*hl.HullNode).Geom
+			}
+			return inter.Geom.Distance(other)
+		})
+
 		for _, h := range hulls {
 			hull := h.(*hl.HullNode)
 			idxs := inter.Meta.SelfVertices.Values()
@@ -47,25 +58,25 @@ func (self *ConstDP) split_hulls_at_selfintersects(dphulls *deque.Deque) *deque.
 			hsubs := hl.SplitHullAtIndex(self, hull, indices)
 
 			if len(hsubs) > 0 {
-				tree.Remove(hull)
+				hulldb.Remove(hull)
 			}
 
 			keep, rm := hl.MergeContigFragments(
-				self, hsubs, tree, at_vertex_set,
+				self, hsubs, hulldb, at_vertex_set,
 			)
 
 			for _, h := range rm {
-				tree.Remove(h)
+				hulldb.Remove(h)
 			}
 
 			for _, h := range keep {
-				tree.Insert(h)
+				hulldb.Insert(h)
 			}
 		}
 	}
 
 	hdata := make([]*hl.HullNode, 0)
-	for _, h := range tree.All() {
+	for _, h := range hulldb.All() {
 		hdata = append(hdata, h.GetItem().(*hl.HullNode))
 	}
 	sort.Sort(hl.HullNodes(hdata))
@@ -115,7 +126,16 @@ func (self *ConstDP) Simplify(opts *opts.Opts) *ConstDP {
 		}
 
 		// find context neighbours - if valid
-		ctxs := db.KNN(self.CtxDB, hull, self.Opts.MinDist)
+		ctxs := db.KNN(self.CtxDB, hull, self.Opts.MinDist, func(_, item rtree.BoxObj) float64 {
+			var other geom.Geometry
+			if o, ok := item.(*mbr.MBR); ok {
+				other = box.MBRToPolygon(o)
+			} else {
+				other = item.(*ctx.CtxGeom).Geom
+			}
+			return hull.Geom.Distance(other)
+		})
+
 		i := 0
 		for bln && i < len(ctxs) {
 			c := ctxs[i].(*ctx.CtxGeom)

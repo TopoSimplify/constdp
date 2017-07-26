@@ -5,12 +5,12 @@ import (
 	"simplex/util/math"
 )
 
-//int cmp
+//integer cmp
 func IntCmp(a, b interface{}) int {
 	return a.(int) - b.(int)
 }
 
-//hullpt compare
+//hull point compare
 func PointIndexCmp(a interface{} , b interface{}) int {
 	self, other := a.(*geom.Point), b.(*geom.Point)
 	d := self[2] - other[2]

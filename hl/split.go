@@ -7,11 +7,14 @@ import (
 	"simplex/struct/rtree"
 	"simplex/constdp/db"
 	"simplex/constdp/ln"
+	"simplex/geom"
+	"simplex/geom/mbr"
+	"simplex/constdp/box"
 )
 
 //split hull at vertex with
 //maximum_offset offset -- k
-func  SplitHull(self ln.Linear, hull *HullNode) (*HullNode, *HullNode) {
+func SplitHull(self ln.Linear, hull *HullNode) (*HullNode, *HullNode) {
 	i, j := hull.Range.I(), hull.Range.J()
 	k, _ := self.MaximumOffset(self, hull.Range)
 	// -------------------------------------------
@@ -23,7 +26,7 @@ func  SplitHull(self ln.Linear, hull *HullNode) (*HullNode, *HullNode) {
 }
 
 //	split hull at indexes (index, index, ...)
-func  SplitHullAtIndex(self ln.Linear, hull *HullNode, idxs []int) []*HullNode {
+func SplitHullAtIndex(self ln.Linear, hull *HullNode, idxs []int) []*HullNode {
 	pln := self.Polyline()
 	i, j := hull.Range.I(), hull.Range.J()
 	subhulls := make([]*HullNode, 0)
@@ -41,10 +44,10 @@ func  SplitHullAtIndex(self ln.Linear, hull *HullNode, idxs []int) []*HullNode {
 }
 
 //merge contig hulls after split - merge line segment fragments
-func  MergeContigFragments(
+func MergeContigFragments(
 	self ln.Linear,
 	hulls []*HullNode,
-	tree *rtree.RTree,
+	hulldb *rtree.RTree,
 	vertex_set *sset.SSet,
 ) ([]*HullNode, []*HullNode) {
 
@@ -52,9 +55,17 @@ func  MergeContigFragments(
 	keep, rm := make([]*HullNode, 0), make([]*HullNode, 0)
 
 	for _, h := range hulls {
-		hs := db.KNN(tree, h.Geom, 1.0e-5)
+		hs := db.KNN(hulldb, h, 1.0e-5, func(_, item rtree.BoxObj) float64 {
+			var other geom.Geometry
+			if o, ok := item.(*mbr.MBR); ok {
+				other = box.MBRToPolygon(o)
+			} else {
+				other = item.(*HullNode).Geom
+			}
+			return h.Geom.Distance(other)
+		})
 		hr := h.Range
-		m := h
+		m  := h
 
 		if hr.Size() == 1 {
 			for _, _s := range hs {
