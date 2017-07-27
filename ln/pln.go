@@ -43,8 +43,8 @@ func (ln *Polyline) Polyline() *Polyline {
 	return ln
 }
 
-//Coordinates at index i
-func (ln *Polyline) Coordinates(i int) []*geom.Point {
+//Coordinates
+func (ln *Polyline) Coordinates() []*geom.Point {
 	return ln.Coords
 }
 

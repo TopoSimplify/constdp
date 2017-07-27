@@ -2,12 +2,12 @@ package hl
 
 import (
 	"sort"
-	"simplex/struct/rtree"
-	"simplex/constdp/opts"
-	"simplex/constdp/db"
 	"simplex/geom"
 	"simplex/geom/mbr"
+	"simplex/constdp/db"
 	"simplex/constdp/box"
+	"simplex/struct/rtree"
+	"simplex/constdp/opts"
 )
 
 //select deform hull
@@ -18,16 +18,16 @@ func sel_deform_hull(a, b *HullNode, opts *opts.Opts) []*HullNode {
 	aln := a.Pln.SubPolyline(a.Range)
 	bln := b.Pln.SubPolyline(b.Range)
 
-    aseg_geom := aseg.Segment
-    bseg_geom := bseg.Segment
+	aseg_geom := aseg.Segment
+	bseg_geom := bseg.Segment
 
-    aln_geom := aln.Geom
-    bln_geom := bln.Geom
+	aln_geom := aln.Geom
+	bln_geom := bln.Geom
 
-    aseg_inters_bseg := aseg_geom.Intersects(bseg_geom)
-    aseg_inters_bln  := aseg_geom.Intersects(bln_geom)
-    bseg_inters_aln  := bseg_geom.Intersects(aln_geom)
-    aln_inters_bln   :=  aln_geom.Intersects(bln_geom)
+	aseg_inters_bseg := aseg_geom.Intersects(bseg_geom)
+	aseg_inters_bln := aseg_geom.Intersects(bln_geom)
+	bseg_inters_aln := bseg_geom.Intersects(aln_geom)
+	aln_inters_bln := aln_geom.Intersects(bln_geom)
 
 	if aseg_inters_bseg && aseg_inters_bln && (!aln_inters_bln) {
 		return []*HullNode{a}
@@ -112,8 +112,7 @@ func select_hulls_to_deform(a, b *HullNode, opts *opts.Opts) []*HullNode {
 		sort.Sort(HullNodes(hulls))
 		//future should not affect the past
 		ha, hb := hulls[0], hulls[1]
-		hs := NewHullCollapseSidedness(hb.PtSet)
-		bln := hs.IsValid(ha.PtSet)
+		bln := IsContigHullCollapsible(hb, ha)
 		if !bln {
 			deformlist = append(deformlist, hb)
 		}
@@ -125,15 +124,15 @@ func select_hulls_to_deform(a, b *HullNode, opts *opts.Opts) []*HullNode {
 //find context deformation list
 func FindHullDeformationList(hulldb *rtree.RTree, hull *HullNode, opts *opts.Opts) []*HullNode {
 	selections := make(map[[2]int]*HullNode, 0)
-	ctxs := db.KNN(hulldb, hull, 1.e-5,  func(_, item rtree.BoxObj) float64 {
-			var other geom.Geometry
-			if o, ok := item.(*mbr.MBR); ok {
-				other = box.MBRToPolygon(o)
-			} else {
-				other = item.(*HullNode).Geom
-			}
-			return hull.Geom.Distance(other)
-		})
+	ctxs := db.KNN(hulldb, hull, 1.e-5, func(_, item rtree.BoxObj) float64 {
+		var other geom.Geometry
+		if o, ok := item.(*mbr.MBR); ok {
+			other = box.MBRToPolygon(o)
+		} else {
+			other = item.(*HullNode).Geom
+		}
+		return hull.Geom.Distance(other)
+	})
 
 	// for each item in the context list
 	for _, ctx := range ctxs {

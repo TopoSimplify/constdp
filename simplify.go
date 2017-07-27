@@ -1,8 +1,10 @@
 package constdp
 
 import (
+	"fmt"
 	"sort"
 	"simplex/geom"
+	"simplex/geom/mbr"
 	"simplex/constdp/hl"
 	"simplex/constdp/ln"
 	"simplex/constdp/db"
@@ -13,7 +15,6 @@ import (
 	"simplex/struct/rtree"
 	"simplex/constdp/opts"
 	"simplex/constdp/quad"
-	"simplex/geom/mbr"
 	"simplex/constdp/box"
 )
 
@@ -92,14 +93,13 @@ func (self *ConstDP) Simplify(opts *opts.Opts) *ConstDP {
 	self.Simple = make([]*hl.HullNode, 0)
 	self.Hulls = self.decompose(opts.Threshold)
 
+	for _, h := range *self.Hulls.DataView() {
+		fmt.Println(h)
+	}
 	// split hulls by self intersects
 	if opts.KeepSelfIntersects {
 		self.Hulls = self.split_hulls_at_selfintersects(self.Hulls)
 	}
-
-	//for _, h := range *self.Hulls.DataView() {
-	//	fmt.Println(h)
-	//}
 
 	hulldb := rtree.NewRTree(8)
 	for self.Hulls.Len() > 0 {
