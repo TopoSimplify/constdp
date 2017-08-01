@@ -1,21 +1,19 @@
-package hl
+package constdp
 
 import (
+	"fmt"
+	"time"
 	"testing"
+	"strings"
 	"simplex/geom"
-	"github.com/franela/goblin"
 	"simplex/constdp/ln"
 	"simplex/constdp/rng"
+	"simplex/constdp/opts"
+	"github.com/franela/goblin"
 )
 
-type testD struct {
-	k   int
-	bln bool
-	wkt string
-}
-
-func TestCollapsible(t *testing.T) {
-	var g = goblin.Goblin(t)
+func TestDeform(t *testing.T) {
+	g := goblin.Goblin(t)
 	var lnwkts = []testD{
 		{21, false,
 		 "LINESTRING ( 810 540, 790 570, 800 580, 820 580, 860 570, 880 600, 870 610, 850 610, 800 610, 810 650, 890 640, 900 640, 920 600, 930 580, 930 540, 920 500, 880 490, 860 520, 810 510, 750 520, 780 460, 730 410, 830 440, 890 410, 940 450, 970 500, 1040 510, 1050 570, 1080 620, 1040 660, 1020 720, 950 720, 840 680, 760 690, 690 720, 710 640, 630 620 )"},
@@ -33,48 +31,36 @@ func TestCollapsible(t *testing.T) {
 		 "LINESTRING ( 208 576, 212 568, 206 572, 208 562, 202 568, 196 564, 200 560, 194 554, 202 556, 214 556, 220 560, 220 568, 226 572, 220 580, 212 584, 210 590, 208 584, 204 588, 202 582, 204 584, 208 580 )"},
 	}
 
-	g.Describe("context neighbours", func() {
-		g.It("should test contiguous hulls", func() {
-			for _, o := range lnwkts {
-				k, bln, wkt := o.k, o.bln, o.wkt
+	g.Describe("hull deformation", func() {
+		options := &opts.Opts{
+			Threshold:              50.0,
+			MinDist:                20.0,
+			RelaxDist:              30.0,
+			KeepSelfIntersects:     true,
+			AvoidNewSelfIntersects: true,
+			GeomRelation:           true,
+			DistRelation:           false,
+			DirRelation:            false,
+		}
+
+		g.It("should test selection of hulls for deformation", func() {
+			g.Timeout(60 * time.Minute)
+
+			for _, o := range lnwkts[:1] {
+				k, _, wkt := o.k, o.bln, o.wkt
 				coords := geom.NewLineStringFromWKT(wkt).Coordinates()
 				pln := ln.NewPolyline(coords)
+
 				n := len(coords) - 1
+				fmt.Println(wkt)
 				ha, hb := NewHullNode(pln, rng.NewRange(0, k), rng.NewRange(0, n)), NewHullNode(pln, rng.NewRange(k, n), rng.NewRange(0, n))
-				g.Assert(IsContigHullCollapsible(hb, ha)).Equal(bln)
+				fmt.Println(hb.Geom.WKT())
+				fmt.Println(ha.Geom.WKT())
+
+				slns := select_hulls_to_deform(ha, hb, options)
+				g.Assert(len(slns)).Equal(1)
+				fmt.Println(strings.Repeat("--", 80))
 			}
-		})
-
-		g.It("should test contiguous and non contiguous", func() {
-			wkt := "LINESTRING ( 467.082432820504 469.7831661127625, 480.006016496363 438.2819309028562, 505.85318384808096 402.74207579424393, 587.433305801941 375.2794604830436, 624.5886088700355 382.54897630071423, 642.3585364243417 412.4347635511382, 643.4709527477502 439.116190719288, 605.3439380779691 452.77166096041014, 574.5798901784301 466.2701717734732, 531.700351199799 481.0913018291391, 523.623111402387 491.59171356577457, 520.3922154834223 515.8234329580102, 521.1999394631636 540.0551523502459, 530.8926272200578 545.7092202084342, 581.1879051657643 561.1022524449884, 599.9685326993344 539.6722729770875, 620.4120431716209 520.2642150257254, 632.0270408479774 503.31259679536714, 643.4709527477502 439.116190719288, 653.6666721407183 466.55227019379777, 656.8975680596831 497.2457814239629, 644.7817083635653 540.862876329987, 593.0873736601293 582.0567992967876, 551.8934506933286 597.4035549118702 )"
-			coords := geom.NewLineStringFromWKT(wkt).Coordinates()
-			k1, k2, k3, k4 := 6, 10, 14, 18
-			n := len(coords) - 1
-			pln := ln.NewPolyline(coords)
-
-			h1 := NewHullNode(pln, rng.NewRange(0, k1), rng.NewRange(0, n))
-			h2 := NewHullNode(pln, rng.NewRange(k1, k2), rng.NewRange(0, n))
-			h3 := NewHullNode(pln, rng.NewRange(k2, k3), rng.NewRange(0, n))
-			h4 := NewHullNode(pln, rng.NewRange(k3, k4), rng.NewRange(0, n))
-			h5 := NewHullNode(pln, rng.NewRange(k4, n), rng.NewRange(0, n))
-
-			hulls := [][2]*HullNode{{h1, h4}, {h1, h2}, {h1, h5}, {h2, h3}, {h2, h4}, {h2, h5}}
-			for _, o := range hulls {
-				ha, hb := o[0], o[1]
-				g.Assert(IsContigHullCollapsible(hb, ha)).IsTrue()
-			}
-
-			ha, hb := h4, h5
-			g.Assert(IsContigHullCollapsible(hb, ha)).IsFalse()
-			//if not contiguous should be eql
-			g.Assert(IsContigHullCollapsible(h5, h3)).IsTrue()
-
 		})
 	})
 }
-
-//
-//    def test_complex_contig_hulls(self):
-
-//suite = unittest.TestLoader().loadTestsFromTestCase(TestHullSidedness)
-//unittest.TextTestRunner(verbosity=4).run(suite)

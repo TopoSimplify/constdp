@@ -1,6 +1,8 @@
-package hl
+package constdp
 
-import "simplex/geom"
+import (
+	"simplex/geom"
+)
 
 //Is hull_a collapsible with respect to hull_b
 //hull_a and hull_b should be contiguous
@@ -28,6 +30,11 @@ func IsContigHullCollapsible(ha, hb *HullNode) bool {
 	if c.Equals2D(t) {
 		t = bi
 	}
-	ply := ha.Geom.(*geom.Polygon)
-	return ! ply.Shell.PointCompletelyInRing(t)
+	ply, ok := ha.Geom.(*geom.Polygon)
+	if !ok {
+		if _, ok = ha.Geom.(*geom.LineString); ok {
+			return ok
+		}
+	}
+	return !ply.Shell.PointCompletelyInRing(t)
 }

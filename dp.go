@@ -8,13 +8,12 @@ import (
 	"simplex/constdp/ln"
 	"simplex/constdp/rng"
 	"simplex/constdp/opts"
-	"simplex/constdp/hl"
 	"simplex/constdp/ctx"
 )
 
 //Type DP
 type ConstDP struct {
-	Simple    []*hl.HullNode
+	Simple    []*HullNode
 	Opts      *opts.Opts
 	Hulls     *deque.Deque
 	Ints      *sset.SSet
@@ -29,7 +28,7 @@ type ConstDP struct {
 func NewConstDP(coordinates []*geom.Point, constraints []geom.Geometry, options *opts.Opts,
 	maximum_offset func(ln.Linear, *rng.Range) (int, float64)) *ConstDP {
 	cdp := &ConstDP{
-		Simple:    []*hl.HullNode{},
+		Simple:    []*HullNode{},
 		Opts:      options,
 		Hulls:     deque.NewDeque(),
 		Ints:      sset.NewSSet(geom.PointCmp),

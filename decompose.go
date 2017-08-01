@@ -4,7 +4,6 @@ import (
 	"simplex/struct/deque"
 	"simplex/struct/stack"
 	"simplex/constdp/rng"
-	"simplex/constdp/hl"
 )
 
 //Douglas Peucker decomposition at a given threshold
@@ -28,7 +27,7 @@ func (self *ConstDP) decompose(threshold float64) *deque.Deque {
 			if prg == nil {
 				prg = rg
 			}
-			node := hl.NewHullNode(pln, rg, prg)
+			node := NewHullNode(pln, rg, prg)
 			hque.Append(node)
 		} else {
 			stk.Add([2]*rng.Range{rng.NewRange(k, rg.J()), rg}) // right

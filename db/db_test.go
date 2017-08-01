@@ -2,11 +2,11 @@ package db
 
 import (
 	"testing"
-	"github.com/franela/goblin"
-	"simplex/struct/rtree"
 	"simplex/geom"
 	"simplex/geom/mbr"
+	"simplex/struct/rtree"
 	"simplex/constdp/box"
+	"github.com/franela/goblin"
 )
 
 func TestDB(t *testing.T) {
