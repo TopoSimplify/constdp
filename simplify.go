@@ -55,13 +55,13 @@ func (self *ConstDP) split_hulls_at_selfintersects(dphulls *deque.Deque) *deque.
 			for _, o := range idxs {
 				indices = append(indices, o.(int))
 			}
-			hsubs := SplitHullAtIndex(self, hull, indices)
+			hsubs := splitHullAtIndex(self, hull, indices)
 
 			if len(hsubs) > 0 {
 				hulldb.Remove(hull)
 			}
 
-			keep, rm := MergeContigFragments(
+			keep, rm := mergeContiguousFragments(
 				self, hsubs, hulldb, at_vertex_set,
 			)
 
@@ -119,7 +119,7 @@ func (self *ConstDP) Simplify(opts *opts.Opts) *ConstDP {
 
 		if bln && self.Opts.AvoidNewSelfIntersects {
 			// find hull neighbours
-			hlist = FindHullDeformationList(hulldb, hull, self.Opts)
+			hlist = findHullDeformationList(hulldb, hull, self.Opts)
 			for _, h := range hlist {
 				bln = !(h == hull)
 				self.deform_hull(hulldb, h)
@@ -174,7 +174,7 @@ func (self *ConstDP) Simplify(opts *opts.Opts) *ConstDP {
 
 func (self *ConstDP) deform_hull(hulldb *rtree.RTree, hull *HullNode) {
 	// split hull at maximum_offset offset
-	ha, hb := SplitHull(self, hull)
+	ha, hb := splitHull(self, hull)
 	hulldb.Remove(hull)
 
 	self.Hulls.AppendLeft(hb)

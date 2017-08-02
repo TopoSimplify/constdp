@@ -6,7 +6,7 @@ import (
 
 //Is hull_a collapsible with respect to hull_b
 //hull_a and hull_b should be contiguous
-func IsContigHullCollapsible(ha, hb *HullNode) bool {
+func isContiguousHullCollapsible(ha, hb *HullNode) bool {
 	pln := ha.Pln.Coordinates()
 	pt := func(i int) *geom.Point {
 		return geom.NewPoint(pln[i][:2])

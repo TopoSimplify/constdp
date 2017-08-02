@@ -1,7 +1,6 @@
 package constdp
 
 import (
-	"fmt"
 	"simplex/geom"
 	"simplex/geom/mbr"
 	"simplex/constdp/db"
@@ -11,7 +10,7 @@ import (
 )
 
 //select deform hull
-func sel_deform_hull(a, b *HullNode, opts *opts.Opts) []*HullNode {
+func select_deform_hull(a, b *HullNode, opts *opts.Opts) []*HullNode {
 	aseg := a.Pln.Segment(a.Range)
 	bseg := b.Pln.Segment(b.Range)
 
@@ -97,33 +96,29 @@ func is_hull_contiguous_at_vertex(a, b *HullNode) (bool, bool, int) {
 	return bln, bln_at_vertex, inter_count
 }
 
-func select_hulls_to_deform(a, b *HullNode, opts *opts.Opts) []*HullNode {
+func selectHullsToDeform(a, b *HullNode, opts *opts.Opts) []*HullNode {
 	deformlist := make([]*HullNode, 0)
 	intersects, at_contig_vertex, n := is_hull_contiguous_at_vertex(a, b)
 
 	if intersects && (!at_contig_vertex) {
-		sels := sel_deform_hull(a, b, opts)
+		sels := select_deform_hull(a, b, opts)
 		for _, s := range sels {
 			deformlist = append(deformlist, s)
 		}
 	} else if intersects && at_contig_vertex && n > 1 {
 		// compute sidedness relation between contiguous hulls to avoid hull flip
-		hulls := sort_hulls([]*HullNode{a, b})
+		hulls := sortHulls([]*HullNode{a, b})
 		//future should not affect the past
 		ha, hb := hulls[0], hulls[1]
 
-		if ha.Range.I() == 15 {
-			fmt.Println(ha)
-		}
-
 		//& the present should not affect the future
-		bln := IsContigHullCollapsible(ha, hb)
+		bln := isContiguousHullCollapsible(ha, hb)
 		if !bln {
 			deformlist = append(deformlist, ha)
 		}
 
 		//future should not affect the present
-		bln = IsContigHullCollapsible(hb, ha)
+		bln = isContiguousHullCollapsible(hb, ha)
 		if !bln {
 			deformlist = append(deformlist, hb)
 		}
@@ -133,7 +128,7 @@ func select_hulls_to_deform(a, b *HullNode, opts *opts.Opts) []*HullNode {
 }
 
 //find context deformation list
-func FindHullDeformationList(hulldb *rtree.RTree, hull *HullNode, opts *opts.Opts) []*HullNode {
+func findHullDeformationList(hulldb *rtree.RTree, hull *HullNode, opts *opts.Opts) []*HullNode {
 	selections := make(map[[2]int]*HullNode, 0)
 	predicate := hull_predicate(hull, 1.e-5)
 	ctxs := db.KNN(hulldb, hull, 1.e-5, func(_, item rtree.BoxObj) float64 {
@@ -150,7 +145,7 @@ func FindHullDeformationList(hulldb *rtree.RTree, hull *HullNode, opts *opts.Opt
 	for _, ctx := range ctxs {
 		h := ctx.(*HullNode)
 		// find which item to deform against current hull
-		selns := select_hulls_to_deform(hull, h, opts)
+		selns := selectHullsToDeform(hull, h, opts)
 		// add candidate deformation hulls to selection list
 		for _, s := range selns {
 			selections[s.Range.AsArray()] = s

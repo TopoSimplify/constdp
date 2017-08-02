@@ -33,19 +33,19 @@ func TestCollapsible(t *testing.T) {
 		 "LINESTRING ( 208 576, 212 568, 206 572, 208 562, 202 568, 196 564, 200 560, 194 554, 202 556, 214 556, 220 560, 220 568, 226 572, 220 580, 212 584, 210 590, 208 584, 204 588, 202 582, 204 584, 208 580 )"},
 	}
 
-	g.Describe("context neighbours", func() {
-		g.It("should test contiguous hulls", func() {
+	g.Describe("hull collapse", func() {
+		g.It("should test hull collapsibility", func() {
 			for _, o := range lnwkts {
 				k, bln, wkt := o.k, o.bln, o.wkt
 				coords := geom.NewLineStringFromWKT(wkt).Coordinates()
 				pln := ln.NewPolyline(coords)
 				n := len(coords) - 1
 				ha, hb := NewHullNode(pln, rng.NewRange(0, k), rng.NewRange(0, n)), NewHullNode(pln, rng.NewRange(k, n), rng.NewRange(0, n))
-				g.Assert(IsContigHullCollapsible(hb, ha)).Equal(bln)
+				g.Assert(isContiguousHullCollapsible(hb, ha)).Equal(bln)
 			}
 		})
 
-		g.It("should test contiguous and non contiguous", func() {
+		g.It("should test collapsible of contiguous and non contiguous", func() {
 			wkt := "LINESTRING ( 467.082432820504 469.7831661127625, 480.006016496363 438.2819309028562, 505.85318384808096 402.74207579424393, 587.433305801941 375.2794604830436, 624.5886088700355 382.54897630071423, 642.3585364243417 412.4347635511382, 643.4709527477502 439.116190719288, 605.3439380779691 452.77166096041014, 574.5798901784301 466.2701717734732, 531.700351199799 481.0913018291391, 523.623111402387 491.59171356577457, 520.3922154834223 515.8234329580102, 521.1999394631636 540.0551523502459, 530.8926272200578 545.7092202084342, 581.1879051657643 561.1022524449884, 599.9685326993344 539.6722729770875, 620.4120431716209 520.2642150257254, 632.0270408479774 503.31259679536714, 643.4709527477502 439.116190719288, 653.6666721407183 466.55227019379777, 656.8975680596831 497.2457814239629, 644.7817083635653 540.862876329987, 593.0873736601293 582.0567992967876, 551.8934506933286 597.4035549118702 )"
 			coords := geom.NewLineStringFromWKT(wkt).Coordinates()
 			k1, k2, k3, k4 := 6, 10, 14, 18
@@ -61,20 +61,15 @@ func TestCollapsible(t *testing.T) {
 			hulls := [][2]*HullNode{{h1, h4}, {h1, h2}, {h1, h5}, {h2, h3}, {h2, h4}, {h2, h5}}
 			for _, o := range hulls {
 				ha, hb := o[0], o[1]
-				g.Assert(IsContigHullCollapsible(hb, ha)).IsTrue()
+				g.Assert(isContiguousHullCollapsible(hb, ha)).IsTrue()
 			}
 
 			ha, hb := h4, h5
-			g.Assert(IsContigHullCollapsible(hb, ha)).IsFalse()
+			g.Assert(isContiguousHullCollapsible(hb, ha)).IsFalse()
 			//if not contiguous should be eql
-			g.Assert(IsContigHullCollapsible(h5, h3)).IsTrue()
+			g.Assert(isContiguousHullCollapsible(h5, h3)).IsTrue()
 
 		})
 	})
 }
 
-//
-//    def test_complex_contig_hulls(self):
-
-//suite = unittest.TestLoader().loadTestsFromTestCase(TestHullSidedness)
-//unittest.TextTestRunner(verbosity=4).run(suite)

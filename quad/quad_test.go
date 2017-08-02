@@ -8,9 +8,7 @@ import (
 )
 
 func polyln(wkt string) *ln.Polyline {
-	return ln.NewPolyline(
-		geom.NewLineStringFromWKT(wkt).Coordinates(),
-	)
+	return ln.NewPolyline(geom.NewLineStringFromWKT(wkt).Coordinates())
 }
 
 func TestQuadRelate(t *testing.T) {

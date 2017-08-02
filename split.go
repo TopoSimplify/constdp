@@ -7,7 +7,7 @@ import (
 
 //split hull at vertex with
 //maximum_offset offset -- k
-func SplitHull(self ln.Linear, hull *HullNode) (*HullNode, *HullNode) {
+func splitHull(self ln.Linear, hull *HullNode) (*HullNode, *HullNode) {
 	i, j := hull.Range.I(), hull.Range.J()
 	k, _ := self.MaximumOffset(self, hull.Range)
 	// -------------------------------------------
@@ -19,7 +19,7 @@ func SplitHull(self ln.Linear, hull *HullNode) (*HullNode, *HullNode) {
 }
 
 //split hull at indexes (index, index, ...)
-func SplitHullAtIndex(self ln.Linear, hull *HullNode, idxs []int) []*HullNode {
+func splitHullAtIndex(self ln.Linear, hull *HullNode, idxs []int) []*HullNode {
 	pr := hull.Range
 	pln := self.Polyline()
 	ranges := pr.Split(idxs)

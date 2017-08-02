@@ -13,7 +13,7 @@ import (
 )
 
 //merge contig hulls after split - merge line segment fragments
-func MergeContigFragments(
+func mergeContiguousFragments(
 	self ln.Linear, hulls []*HullNode, hulldb *rtree.RTree,
 	vertex_set *sset.SSet, ) ([]*HullNode, []*HullNode) {
 	pln := self.Polyline()
@@ -43,7 +43,7 @@ func MergeContigFragments(
 		//if hr.Size() < 4{
 		if hr.Size() == 1 {
 			hs = ExceptHull(hs, h)
-			sort_hulls(hs) // sort hulls for consistency
+			sortHulls(hs) // sort hulls for consistency
 
 			for _, s := range hs {
 				sr := s.Range
