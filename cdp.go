@@ -13,30 +13,34 @@ import (
 
 //Type DP
 type ConstDP struct {
-	Simple    []*HullNode
-	Opts      *opts.Opts
-	Hulls     *deque.Deque
-	Ints      *sset.SSet
-	MaxOffset func(ln.Linear, *rng.Range) (int, float64)
-	Pln       *ln.Polyline
-	CtxDB     *rtree.RTree
-	SegsDB    *rtree.RTree
+	Simple []*HullNode
+	Opts   *opts.Opts
+	Hulls  *deque.Deque
+	Ints   *sset.SSet
+	Score  func(ln.Linear, *rng.Range) (int, float64)
+	Pln    *ln.Polyline
+	CtxDB  *rtree.RTree
+	SegsDB *rtree.RTree
 }
 
 //Creates a new constrained DP Simplification instance
 //	dp decomposition of linear geometries
-func NewConstDP(coordinates []*geom.Point, constraints []geom.Geometry, options *opts.Opts,
-	maximum_offset func(ln.Linear, *rng.Range) (int, float64)) *ConstDP {
+func NewConstDP(coordinates []*geom.Point,
+	constraints []geom.Geometry, options *opts.Opts,
+	maximum_offset func(ln.Linear, *rng.Range) (int, float64),
+) *ConstDP {
+
 	cdp := &ConstDP{
-		Simple:    []*HullNode{},
-		Opts:      options,
-		Hulls:     deque.NewDeque(),
-		Ints:      sset.NewSSet(geom.PointCmp),
-		MaxOffset: maximum_offset,
-		Pln:       ln.NewPolyline(coordinates),
-		CtxDB:     rtree.NewRTree(8),
-		SegsDB:    rtree.NewRTree(8),
+		Simple: []*HullNode{},
+		Opts:   options,
+		Hulls:  deque.NewDeque(),
+		Ints:   sset.NewSSet(geom.PointCmp),
+		Score:  maximum_offset,
+		Pln:    ln.NewPolyline(coordinates),
+		CtxDB:  rtree.NewRTree(8),
+		SegsDB: rtree.NewRTree(8),
 	}
+
 	return cdp.build_segs_db().build_context_db(constraints)
 }
 
@@ -49,7 +53,7 @@ func (self *ConstDP) Polyline() *ln.Polyline {
 }
 
 func (self *ConstDP) MaximumOffset(pln ln.Linear, rg *rng.Range) (int, float64) {
-	return self.MaxOffset(pln, rg)
+	return self.Score(pln, rg)
 }
 
 //creates constraint db from geometries

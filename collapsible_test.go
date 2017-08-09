@@ -41,7 +41,7 @@ func TestCollapsible(t *testing.T) {
 				pln := ln.NewPolyline(coords)
 				n := len(coords) - 1
 				ha, hb := NewHullNode(pln, rng.NewRange(0, k), rng.NewRange(0, n)), NewHullNode(pln, rng.NewRange(k, n), rng.NewRange(0, n))
-				g.Assert(isContiguousHullCollapsible(hb, ha)).Equal(bln)
+				g.Assert(is_contig_hull_collapsible(hb, ha)).Equal(bln)
 			}
 		})
 
@@ -61,13 +61,13 @@ func TestCollapsible(t *testing.T) {
 			hulls := [][2]*HullNode{{h1, h4}, {h1, h2}, {h1, h5}, {h2, h3}, {h2, h4}, {h2, h5}}
 			for _, o := range hulls {
 				ha, hb := o[0], o[1]
-				g.Assert(isContiguousHullCollapsible(hb, ha)).IsTrue()
+				g.Assert(is_contig_hull_collapsible(hb, ha)).IsTrue()
 			}
 
 			ha, hb := h4, h5
-			g.Assert(isContiguousHullCollapsible(hb, ha)).IsFalse()
+			g.Assert(is_contig_hull_collapsible(hb, ha)).IsFalse()
 			//if not contiguous should be eql
-			g.Assert(isContiguousHullCollapsible(h5, h3)).IsTrue()
+			g.Assert(is_contig_hull_collapsible(h5, h3)).IsTrue()
 
 		})
 	})

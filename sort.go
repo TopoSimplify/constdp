@@ -17,7 +17,7 @@ func (s HullNodes) Less(i, j int) bool {
 }
 
 
-func sortHulls(hulls []*HullNode)[]*HullNode{
+func sort_hulls(hulls []*HullNode) []*HullNode{
 	sort.Sort(HullNodes(hulls))
 	return hulls
 }

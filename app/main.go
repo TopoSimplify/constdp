@@ -54,7 +54,7 @@ func main() {
 		constraints = append(constraints, g)
 	}
 
-	wkt := linear_wkt[2]
+	wkt := linear_wkt[1]
 	fmt.Println(wkt)
 
 	coords := geom.NewLineStringFromWKT(wkt).Coordinates()

@@ -12,8 +12,27 @@ import (
 	"simplex/struct/rtree"
 )
 
+func contiguous_fragments_at_threshold(self *ConstDP, ha, hb *HullNode) *HullNode {
+	m := contiguous_fragments(self, ha, hb)
+	_, score := self.Score(self, m.Range)
+	if score <= self.Opts.Threshold {
+		return m
+	}
+	return nil
+}
+
+//merge contiguous hulls
+func contiguous_fragments(self *ConstDP, ha, hb *HullNode) *HullNode {
+	var l = append(ha.Range.AsSlice(), hb.Range.AsSlice()...)
+	sort.Ints(l)
+	// i...[ha]...k...[hb]...j
+	i, j := l[0], l[len(l)-1]
+	rng = rng.NewRange(i, j)
+	return NewHullNode(self.Pln, rng, rng)
+}
+
 //merge contig hulls after split - merge line segment fragments
-func mergeContiguousFragments(
+func find_mergeable_contiguous_fragments(
 	self ln.Linear, hulls []*HullNode, hulldb *rtree.RTree,
 	vertex_set *sset.SSet, ) ([]*HullNode, []*HullNode) {
 	pln := self.Polyline()
@@ -23,35 +42,41 @@ func mergeContiguousFragments(
 	for _, h := range hulls {
 		hdict[h.Range.AsArray()] = h
 
-		hs_knn := db.KNN(hulldb, h, 1.0e-5, func(_, item rtree.BoxObj) float64 {
-			var other geom.Geometry
-			if o, ok := item.(*mbr.MBR); ok {
-				other = box.MBRToPolygon(o)
-			} else {
-				other = item.(*HullNode).Geom
-			}
-			return h.Geom.Distance(other)
-		})
-
-		hs := make([]*HullNode, len(hs_knn))
-		for i, h := range hs_knn {
-			hs[i] = h.(*HullNode)
-		}
-
 		hr := h.Range
-
 		//if hr.Size() < 4{
 		if hr.Size() == 1 {
-			hs = ExceptHull(hs, h)
-			sortHulls(hs) // sort hulls for consistency
+			//@formatter:off
+			predicate   := hull_predicate(h,  1e-5)
+			hs_knn      := db.KNN(hulldb, h, 1e-5,
+				func(_, item rtree.BoxObj) float64 {
+					var other geom.Geometry
+					if o, ok := item.(*mbr.MBR); ok {
+						other = box.MBRToPolygon(o)
+					} else {
+						other = item.(*HullNode).Geom
+					}
+					return h.Geom.Distance(other)
+				}, predicate)
+
+
+			hs := make([]*HullNode, len(hs_knn))
+			for i, h := range hs_knn {
+				hs[i] = h.(*HullNode)
+			}
+			sort_hulls(hs) // sort hulls for consistency
 
 			for _, s := range hs {
 				sr := s.Range
-				bln :=  (hr.J() == sr.I() && vertex_set.Contains(sr.I())) ||
-						(hr.I() == sr.J() && vertex_set.Contains(sr.J()))
+				//test whether sr.i or sr.j is a self inter-vertex -- split point
+				//not sr.i != hr.i or sr.j != hr.j without i/j being a inter-vertex
+				//tests for contiguous and whether contiguous index is part of vertex set
+				//if the location at which they are contiguous is not part of vertex set then
+				//its mergeable
+				mergeable := (hr.J() == sr.I() && !vertex_set.Contains(sr.I())) ||
+							 (hr.I() == sr.J() && !vertex_set.Contains(sr.J()))
 
-				if !bln && (hr.Contains(sr.I()) || hr.Contains(sr.J())) {
-					l := []int{sr.I(), sr.J(), hr.I(), hr.J()}
+				if mergeable {
+					l := append(sr.AsSlice(), hr.AsSlice()...)
 					sort.Ints(l)
 
 					// rm sr + hr
@@ -59,7 +84,7 @@ func mergeContiguousFragments(
 					delete(hdict, hr.AsArray())
 
 					r := rng.NewRange(l[0], l[len(l)-1])
-					m := NewHullNode(pln, r, r)
+					m := NewHullNode(pln, r, r.Clone())
 
 					// add merge
 					hdict[m.Range.AsArray()] = m
@@ -78,4 +103,3 @@ func mergeContiguousFragments(
 	}
 	return keep, rm
 }
-

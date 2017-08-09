@@ -33,6 +33,11 @@ func (o *Range) J() int {
 	return o.j
 }
 
+//clone Range
+func (o *Range) Clone() *Range {
+	return NewRange(o.i, o.j)
+}
+
 //compare equality of two ranges
 func (o *Range) Equals(r *Range) bool {
 	return  (o.i == r.i) && (o.j == r.j)

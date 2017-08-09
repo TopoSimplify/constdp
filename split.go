@@ -7,7 +7,7 @@ import (
 
 //split hull at vertex with
 //maximum_offset offset -- k
-func splitHull(self ln.Linear, hull *HullNode) (*HullNode, *HullNode) {
+func split_at_offset(self ln.Linear, hull *HullNode) (*HullNode, *HullNode) {
 	i, j := hull.Range.I(), hull.Range.J()
 	k, _ := self.MaximumOffset(self, hull.Range)
 	// -------------------------------------------

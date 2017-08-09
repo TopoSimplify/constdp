@@ -15,8 +15,7 @@ func DirectionRelate(pln *ln.Polyline, g geom.Geometry) string {
 	segdb := rtree.NewRTree(8)
 	objs := make([]rtree.BoxObj, 0)
 	for _, s := range pln.Segments() {
-		ctx := ctx.NewCtxGeom(s, s.I, s.J).AsSelfSegment()
-		objs = append(objs, ctx)
+		objs = append(objs, ctx.NewCtxGeom(s, s.I, s.J).AsSelfSegment())
 	}
 	segdb.Load(objs)
 
@@ -27,7 +26,7 @@ func DirectionRelate(pln *ln.Polyline, g geom.Geometry) string {
 	extbox.ExpandIncludeMBR(lnbox)
 
 	delta := math.MaxF64(extbox.Height(), extbox.Width()) / 2.0
-	uppper := [2]float64{
+	uppper := [2]float64 {
 		extbox.MaxX() + delta,
 		extbox.MaxY() + delta,
 	}

@@ -10,14 +10,8 @@ import (
 	"github.com/franela/goblin"
 	"simplex/struct/rtree"
 	"fmt"
+	"simplex/constdp/offset"
 )
-
-//type testDat struct {
-//	ranges  [][]int
-//	q       int
-//	expects []int
-//	wkt     string
-//}
 
 func TestDeform(t *testing.T) {
 	g := goblin.Goblin(t)
@@ -84,6 +78,7 @@ func TestDeform(t *testing.T) {
 			DistRelation:           false,
 			DirRelation:            false,
 		}
+		homo := NewConstDP([]*geom.Point{}, []geom.Geometry{}, options, offset.MaxOffset)
 
 		g.It("should test selection of hulls for deformation", func() {
 			g.Timeout(60 * time.Minute)
@@ -102,7 +97,7 @@ func TestDeform(t *testing.T) {
 				coords := geom.NewLineStringFromWKT(wkt).Coordinates()
 				hulls, hulldb := create_hulls_db_test(ranges, coords)
 				query := hulls[q]
-				slns := findHullDeformationList(hulldb, query, options)
+				slns := homo.select_deformation_candidates(hulldb, query)
 				//slns = select_hulls_to_deform(ha, hb, opts)
 				if len(slns) != len(expects) {
 					fmt.Println(slns)
