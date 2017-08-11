@@ -8,14 +8,14 @@ import (
 //hull_a and hull_b should be contiguous
 func is_contig_hull_collapsible(ha, hb *HullNode) bool {
 	pln := ha.Pln.Coordinates()
-	pt := func(i int) *geom.Point {
+	pt_at := func(i int) *geom.Point {
 		return geom.NewPoint(pln[i][:2])
 	}
 
 	ra := ha.Range
 	rb := hb.Range
-	ai, aj := pt(ra.I()), pt(ra.J())
-	bi, bj := pt(rb.I()), pt(rb.J())
+	ai, aj := pt_at(ra.I()), pt_at(ra.J())
+	bi, bj := pt_at(rb.I()), pt_at(rb.J())
 
 	var c *geom.Point
 	if ai.Equals2D(bi) || aj.Equals2D(bi) {
@@ -30,10 +30,12 @@ func is_contig_hull_collapsible(ha, hb *HullNode) bool {
 	if c.Equals2D(t) {
 		t = bi
 	}
+	//hull geometry can be a polygon or a line (segment)
 	ply, ok := ha.Geom.(*geom.Polygon)
 	if !ok {
 		if _, ok = ha.Geom.(*geom.LineString); ok {
-			return ok
+			//segments are already collapsed
+			return true
 		}
 	}
 	return !ply.Shell.PointCompletelyInRing(t)

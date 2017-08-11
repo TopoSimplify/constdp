@@ -43,7 +43,13 @@ func NewHullNode(pln *ln.Polyline, rng, prng *rng.Range) *HullNode {
 	}
 }
 
-//bbox interface
+
+//implements igeom interface
+func (o *HullNode) Geometry() geom.Geometry{
+	return o.Geom
+}
+
+//implements bbox interface
 func (h *HullNode) BBox() *mbr.MBR {
 	return h.Geom.BBox()
 }

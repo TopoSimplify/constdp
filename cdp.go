@@ -13,35 +13,37 @@ import (
 
 //Type DP
 type ConstDP struct {
-	Simple []*HullNode
-	Opts   *opts.Opts
-	Hulls  *deque.Deque
-	Ints   *sset.SSet
-	Score  func(ln.Linear, *rng.Range) (int, float64)
-	Pln    *ln.Polyline
-	CtxDB  *rtree.RTree
-	SegsDB *rtree.RTree
+	Simple    []*HullNode
+	Opts      *opts.Opts
+	Hulls     *deque.Deque
+	Ints      *sset.SSet
+	Pln       *ln.Polyline
+	ContextDB *rtree.RTree
+	SegmentDB *rtree.RTree
+	score     func(ln.Linear, *rng.Range) (int, float64)
 }
 
 //Creates a new constrained DP Simplification instance
 //	dp decomposition of linear geometries
 func NewConstDP(coordinates []*geom.Point,
 	constraints []geom.Geometry, options *opts.Opts,
-	maximum_offset func(ln.Linear, *rng.Range) (int, float64),
+	offset_score func(ln.Linear, *rng.Range) (int, float64),
 ) *ConstDP {
 
-	cdp := &ConstDP{
+	self := &ConstDP{
 		Simple: []*HullNode{},
 		Opts:   options,
 		Hulls:  deque.NewDeque(),
 		Ints:   sset.NewSSet(geom.PointCmp),
-		Score:  maximum_offset,
 		Pln:    ln.NewPolyline(coordinates),
-		CtxDB:  rtree.NewRTree(8),
-		SegsDB: rtree.NewRTree(8),
-	}
 
-	return cdp.build_segs_db().build_context_db(constraints)
+		ContextDB: rtree.NewRTree(8),
+		SegmentDB: rtree.NewRTree(8),
+
+		score: offset_score,
+	}
+	//prepare databases
+	return self.build_segs_db().build_context_db(constraints)
 }
 
 func (self *ConstDP) Coordinates() []*geom.Point {
@@ -52,18 +54,17 @@ func (self *ConstDP) Polyline() *ln.Polyline {
 	return self.Pln
 }
 
-func (self *ConstDP) MaximumOffset(pln ln.Linear, rg *rng.Range) (int, float64) {
-	return self.Score(pln, rg)
+func (self *ConstDP) Score(pln ln.Linear, rg *rng.Range) (int, float64) {
+	return self.score(pln, rg)
 }
 
 //creates constraint db from geometries
 func (self *ConstDP) build_context_db(geoms []geom.Geometry) *ConstDP {
 	lst := make([]rtree.BoxObj, 0)
 	for _, g := range geoms {
-		cg := ctx.NewCtxGeom(g, 0, -1).AsContextNeighbour()
-		lst = append(lst, cg)
+		lst = append(lst, ctx.NewCtxGeom(g, 0, -1).AsContextNeighbour())
 	}
-	self.CtxDB.Clear().Load(lst)
+	self.ContextDB.Clear().Load(lst)
 	return self
 }
 
@@ -73,6 +74,6 @@ func (self *ConstDP) build_segs_db() *ConstDP {
 	for _, s := range self.Pln.Segments() {
 		lst = append(lst, ctx.NewCtxGeom(s, s.I, s.J).AsSelfSegment())
 	}
-	self.SegsDB.Clear().Load(lst)
+	self.SegmentDB.Clear().Load(lst)
 	return self
 }

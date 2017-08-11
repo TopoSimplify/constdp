@@ -11,7 +11,7 @@ import (
 type Linear interface {
 	Coordinates() []*geom.Point
 	Polyline() *Polyline
-	MaximumOffset(Linear, *rng.Range) (int, float64)
+	Score(Linear, *rng.Range) (int, float64)
 }
 
 //Polyline Type

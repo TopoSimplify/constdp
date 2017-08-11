@@ -1,16 +1,16 @@
 package constdp
 
 import (
+	"fmt"
+	"time"
 	"testing"
+	"strings"
 	"simplex/geom"
-	"simplex/constdp/offset"
-	"github.com/franela/goblin"
-	"simplex/constdp/opts"
 	"simplex/struct/sset"
 	"simplex/constdp/cmp"
-	"fmt"
-	"strings"
-	"time"
+	"simplex/constdp/opts"
+	"simplex/constdp/offset"
+	"github.com/franela/goblin"
 )
 
 type testData struct {

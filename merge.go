@@ -14,7 +14,7 @@ import (
 
 func contiguous_fragments_at_threshold(self *ConstDP, ha, hb *HullNode) *HullNode {
 	m := contiguous_fragments(self, ha, hb)
-	_, score := self.Score(self, m.Range)
+	_, score := self.score(self, m.Range)
 	if score <= self.Opts.Threshold {
 		return m
 	}
@@ -27,8 +27,8 @@ func contiguous_fragments(self *ConstDP, ha, hb *HullNode) *HullNode {
 	sort.Ints(l)
 	// i...[ha]...k...[hb]...j
 	i, j := l[0], l[len(l)-1]
-	rng = rng.NewRange(i, j)
-	return NewHullNode(self.Pln, rng, rng)
+	r := rng.NewRange(i, j)
+	return NewHullNode(self.Pln, r, r.Clone())
 }
 
 //merge contig hulls after split - merge line segment fragments
@@ -46,18 +46,7 @@ func find_mergeable_contiguous_fragments(
 		//if hr.Size() < 4{
 		if hr.Size() == 1 {
 			//@formatter:off
-			predicate   := hull_predicate(h,  1e-5)
-			hs_knn      := db.KNN(hulldb, h, 1e-5,
-				func(_, item rtree.BoxObj) float64 {
-					var other geom.Geometry
-					if o, ok := item.(*mbr.MBR); ok {
-						other = box.MBRToPolygon(o)
-					} else {
-						other = item.(*HullNode).Geom
-					}
-					return h.Geom.Distance(other)
-				}, predicate)
-
+			hs_knn      := find_context_hulls(hulldb, h, EpsilonDist)
 
 			hs := make([]*HullNode, len(hs_knn))
 			for i, h := range hs_knn {

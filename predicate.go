@@ -7,19 +7,20 @@ import (
 
 //hull_predicate within range i and j
 func hull_predicate(queryhull *HullNode, mindist float64) func(*rtree.KObj) (bool, bool) {
+	//@formatter:off
 	return func(candidate *rtree.KObj) (bool, bool) {
-		dist := candidate.Score()
+		dist     := candidate.Score()
 		candhull := candidate.GetItem().(*HullNode)
 
-		qgeom := queryhull.Geom
-		cgeom := candhull.Geom
+		qgeom    := queryhull.Geom
+		cgeom    := candhull.Geom
 
 		// same hull
 		if candhull.Range.Equals(queryhull.Range) {
 			return false, false
 		}
 
-		// if intersects or distance from linegen.geom.context neighbours is almost  offset
+		// if intersects or distance from context neighbours is almost  offset
 		if qgeom.Intersects(cgeom) || math.FloatEqual(dist, mindist) {
 			return true, false
 		}

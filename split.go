@@ -9,7 +9,7 @@ import (
 //maximum_offset offset -- k
 func split_at_offset(self ln.Linear, hull *HullNode) (*HullNode, *HullNode) {
 	i, j := hull.Range.I(), hull.Range.J()
-	k, _ := self.MaximumOffset(self, hull.Range)
+	k, _ := self.Score(self, hull.Range)
 	// -------------------------------------------
 	// i..[ha]..k..[hb]..j
 	ha := NewHullNode(self.Polyline(), rng.NewRange(i, k), rng.NewRange(i, j))
@@ -19,14 +19,14 @@ func split_at_offset(self ln.Linear, hull *HullNode) (*HullNode, *HullNode) {
 }
 
 //split hull at indexes (index, index, ...)
-func splitHullAtIndex(self ln.Linear, hull *HullNode, idxs []int) []*HullNode {
-	pr := hull.Range
-	pln := self.Polyline()
-	ranges := pr.Split(idxs)
-	sub_hulls := make([]*HullNode, 0)
+func split_at_index(self ln.Linear, hull *HullNode, idxs []int) []*HullNode {
+	//formatter:off
+	pr          := hull.Range
+	pln         := self.Polyline()
+	ranges      := pr.Split(idxs)
+	sub_hulls   := make([]*HullNode, 0)
 	for _, r := range ranges {
-		h := NewHullNode(pln, r, pr)
-		sub_hulls = append(sub_hulls, h)
+		sub_hulls = append(sub_hulls, NewHullNode(pln, r, pr))
 	}
 	return sub_hulls
 }

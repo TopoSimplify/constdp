@@ -42,10 +42,17 @@ func NewCtxGeom(g geom.Geometry, i, j int) *CtxGeom {
 	}
 }
 
+//implements stringer interface
 func (o *CtxGeom) String() string {
 	return o.Geom.WKT()
 }
 
+//implements igeom interface
+func (o *CtxGeom) Geometry() geom.Geometry{
+	return o.Geom
+}
+
+//implements bbox interface
 func (o *CtxGeom) BBox() *mbr.MBR {
 	return o.Geom.BBox()
 }

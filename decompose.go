@@ -9,7 +9,7 @@ import (
 //Douglas Peucker decomposition at a given threshold
 func (self *ConstDP) decompose(threshold float64) *deque.Deque {
 	var pln = self.Pln
-	var score = self.Score
+	var score = self.score
 	var hque = deque.NewDeque()
 	var rg, prg *rng.Range
 
