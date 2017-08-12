@@ -73,6 +73,11 @@ func (ln *Polyline) Segments() []*seg.Seg {
 	return lst
 }
 
+//Range of entire polyline
+func (ln *Polyline) Range() *rng.Range {
+	return rng.NewRange(0, ln.Len()-1)
+}
+
 //Segment given range
 func (ln *Polyline) Segment(rng *rng.Range) *seg.Seg {
 	if rng.Size() == 1 {

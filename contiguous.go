@@ -56,5 +56,3 @@ func is_contiguous(a, b *HullNode) (bool, bool, int) {
 
 	return bln, bln_at_vertex, inter_count
 }
-
-

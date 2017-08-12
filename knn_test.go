@@ -1,4 +1,4 @@
-package db
+package constdp
 
 import (
 	"testing"
@@ -41,10 +41,10 @@ func TestDB(t *testing.T) {
 			tree.Load(objs)
 			q := geom.NewGeometry("POLYGON (( 370 300, 370 330, 400 330, 400 300, 370 300 ))")
 
-			results := KNN(tree, q, 15, score_fn)
+			results := find_knn(tree, q, 15, score_fn)
 
 			g.Assert(len(results) == 2)
-			results = KNN(tree, q, 20, score_fn)
+			results = find_knn(tree, q, 20, score_fn)
 			g.Assert(len(results) == 3)
 		})
 	})

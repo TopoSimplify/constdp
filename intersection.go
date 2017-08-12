@@ -10,11 +10,6 @@ import (
 	"simplex/constdp/ctx"
 )
 
-const (
-	x = 0
-	y = 1
-)
-
 type kvCount struct {
 	count   int
 	indxset *sset.SSet
@@ -25,8 +20,8 @@ type selfInter struct {
 	point  *geom.Point
 }
 
-func update(dict map[[2]float64]*kvCount, o *geom.Point, index int) {
-	k := [2]float64{o[x], o[y]}
+func update_kv_count(dict map[[2]float64]*kvCount, o *geom.Point, index int) {
+	k := [2]float64{o[0], o[1]}
 	v, ok := dict[k]
 	if !ok {
 		v = &kvCount{
@@ -39,7 +34,7 @@ func update(dict map[[2]float64]*kvCount, o *geom.Point, index int) {
 	v.count += 1
 }
 
-func LinearSelfIntersection(pln *ln.Polyline) []*ctx.CtxGeom {
+func linear_self_intersection(pln *ln.Polyline) []*ctx.CtxGeom {
 	var tree = *rtree.NewRTree(8)
 	var dict = make(map[[2]float64]*kvCount)
 
@@ -54,8 +49,8 @@ func LinearSelfIntersection(pln *ln.Polyline) []*ctx.CtxGeom {
 	for _, d := range data {
 		s := d.(*seg.Seg)
 		res := tree.Search(s.BBox())
-		update(dict, s.A, s.I)
-		update(dict, s.B, s.J)
+		update_kv_count(dict, s.A, s.I)
+		update_kv_count(dict, s.B, s.J)
 
 		for _, node := range res {
 			other_seg := node.GetItem().(*seg.Seg)

@@ -1,4 +1,4 @@
-package quad
+package constdp
 
 import (
 	"testing"

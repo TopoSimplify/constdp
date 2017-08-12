@@ -7,7 +7,7 @@ import (
 
 //split hull at vertex with
 //maximum_offset offset -- k
-func split_at_offset(self ln.Linear, hull *HullNode) (*HullNode, *HullNode) {
+func split_at_score_selection(self ln.Linear, hull *HullNode) (*HullNode, *HullNode) {
 	i, j := hull.Range.I(), hull.Range.J()
 	k, _ := self.Score(self, hull.Range)
 	// -------------------------------------------

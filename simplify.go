@@ -7,9 +7,9 @@ import (
 
 //homotopic simplification at a given threshold
 func (self *ConstDP) Simplify(opts *opts.Opts) *ConstDP {
-	self.Opts = opts
+	self.Opts   = opts
 	self.Simple = make([]*HullNode, 0)
-	self.Hulls = self.decompose(opts.Threshold)
+	self.Hulls  = self.decompose(opts.Threshold)
 
 	// constrain hulls to self intersects
 	self.Hulls, _ = self.constrain_to_selfintersects(opts)
@@ -109,12 +109,12 @@ func (self *ConstDP) is_merge_simplx_valid(hull *HullNode, hulldb *rtree.RTree) 
 	}
 
 	// self intersection constraint
-	hlist, bln := self.constrain_self_intersection(hull, hulldb, bln)
-	if len(hlist) > 0 || !bln {
+	side_effects, bln := self.constrain_self_intersection(hull, hulldb, bln)
+	if len(side_effects) > 0 || !bln {
 		return false
 	}
 
-	// context_geom geometry constraint
-	hlist, bln = self.constrain_context_relation(hull, bln)
-	return len(hlist) == 0 && bln
+	// context geometry constraint
+	side_effects, bln = self.constrain_context_relation(hull, bln)
+	return len(side_effects) == 0 && bln
 }

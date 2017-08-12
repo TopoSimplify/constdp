@@ -32,7 +32,7 @@ func TestHullSeg(t *testing.T) {
 			hulls := create_hulls(ranges, coords)
 
 			for i, r := range ranges {
-				s := hullSegment(homo, hulls[i])
+				s := hull_segment(homo, hulls[i])
 				a, b := coords[r[0]][:2], coords[r[1]][:2]
 				g.Assert(r).Equal(s.Range().AsSlice())
 				g.Assert(s.A[:2]).Equal(a)

@@ -1,12 +1,18 @@
 package constdp
 
 import (
+	"sort"
 	"simplex/struct/rtree"
 	"simplex/struct/deque"
 )
 
 const Epsilon = 1.0e-8
 const EpsilonDist = 1.0e-5
+
+func sort_ints(iter []int) []int {
+	sort.Ints(iter)
+	return iter
+}
 
 //Convert slice of interface to ints
 func as_ints(iter []interface{}) []int {
@@ -25,6 +31,7 @@ func as_hullnodes(iter []*rtree.Node) []*HullNode {
 	}
 	return nodes
 }
+
 //Rtree nodes boxes as hull nodes
 func as_hullnodes_from_boxes(iter []rtree.BoxObj) []*HullNode {
 	nodes := make([]*HullNode, len(iter))

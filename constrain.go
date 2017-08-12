@@ -17,7 +17,7 @@ func (self *ConstDP) constrain_to_selfintersects(opts *opts.Opts) (*deque.Deque,
 
 	hulldb := rtree.NewRTree(8)
 
-	self_inters := LinearSelfIntersection(self.Pln)
+	self_inters := linear_self_intersection(self.Pln)
 
 	data := make([]rtree.BoxObj, 0)
 	for _, v := range *self.Hulls.DataView() {
@@ -48,8 +48,8 @@ func (self *ConstDP) constrain_to_selfintersects(opts *opts.Opts) (*deque.Deque,
 				hulldb.Remove(hull)
 			}
 
-			keep, rm := find_mergeable_contiguous_fragments(
-				self, hsubs, hulldb, at_vertex_set,
+			keep, rm := self.find_mergeable_contiguous_fragments(
+				hsubs, hulldb, at_vertex_set,
 			)
 
 			for _, h := range rm {

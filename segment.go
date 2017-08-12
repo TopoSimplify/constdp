@@ -6,7 +6,7 @@ import (
 )
 
 //hull segment
-func hullSegment(self ln.Linear, hull *HullNode) *seg.Seg {
+func hull_segment(self ln.Linear, hull *HullNode) *seg.Seg {
 	coords := self.Coordinates()
 	a, b := coords[hull.Range.I()], coords[hull.Range.J()]
 	return seg.NewSeg(a, b, hull.Range.I(), hull.Range.J())

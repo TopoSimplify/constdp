@@ -2,7 +2,6 @@ package constdp
 
 import (
 	"simplex/struct/rtree"
-	"simplex/constdp/opts"
 )
 
 //find context deformation list
@@ -21,9 +20,9 @@ func (self *ConstDP) select_deformation_candidates(hulldb *rtree.RTree, hull *Hu
 		if inters {
 			sels := []*HullNode{}
 			if contig && n > 1 {
-				sels = _contiguous_candidates(hull, h, self.Opts)
+				sels = self._contiguous_candidates(hull, h)
 			} else if !contig {
-				sels = _non_contiguous_candidates(hull, h, self.Opts)
+				sels = self._non_contiguous_candidates(hull, h)
 			}
 			for _, s := range sels {
 				selection = append(selection, s)
@@ -44,7 +43,7 @@ func (self *ConstDP) select_deformation_candidates(hulldb *rtree.RTree, hull *Hu
 }
 
 //select contiguous candidates
-func _contiguous_candidates(a, b *HullNode, opts *opts.Opts) []*HullNode {
+func (self *ConstDP) _contiguous_candidates(a, b *HullNode) []*HullNode {
 	var selection = make([]*HullNode, 0)
 	// compute sidedness relation between contiguous hulls to avoid hull flip
 	hulls := sort_hulls([]*HullNode{a, b})
@@ -66,7 +65,7 @@ func _contiguous_candidates(a, b *HullNode, opts *opts.Opts) []*HullNode {
 }
 
 //select non-contiguous candidates
-func _non_contiguous_candidates(a, b *HullNode, opts *opts.Opts) []*HullNode {
+func (self *ConstDP) _non_contiguous_candidates(a, b *HullNode) []*HullNode {
 	aseg := a.Pln.Segment(a.Range)
 	bseg := b.Pln.Segment(b.Range)
 
@@ -104,7 +103,7 @@ func _non_contiguous_candidates(a, b *HullNode, opts *opts.Opts) []*HullNode {
 		for _, ptln := range pt_lns {
 			for _, ptseg := range at_seg {
 				delta := ptln.Distance(ptseg)
-				if delta > opts.RelaxDist {
+				if delta > self.Opts.RelaxDist {
 					_add_to_selection(&selection, a, b)
 					return selection
 				}

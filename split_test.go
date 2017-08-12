@@ -56,7 +56,7 @@ func TestSplitHull(t *testing.T) {
 			homo := NewConstDP(coords, constraints, options, offset.MaxOffset)
 
 			hull := create_hulls([][]int{{0, n}}, coords)[0]
-			ha, hb := split_at_offset(homo, hull)
+			ha, hb := split_at_score_selection(homo, hull)
 
 			g.Assert(ha.Range.AsSlice()).Equal([]int{0, 8})
 			g.Assert(hb.Range.AsSlice()).Equal([]int{8, len(coords) - 1})
@@ -87,7 +87,7 @@ func TestSplitHull(t *testing.T) {
 			hulldb.Load(boxes)
 
 			vertex_set := sset.NewSSet(cmp.IntCmp)
-			keep, rm := find_mergeable_contiguous_fragments(homo, splits, hulldb, vertex_set)
+			keep, rm := homo.find_mergeable_contiguous_fragments(splits, hulldb, vertex_set)
 			g.Assert(len(keep)).Equal(2)
 			g.Assert(len(rm)).Equal(2)
 

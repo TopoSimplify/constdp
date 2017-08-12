@@ -1,15 +1,13 @@
 package constdp
 
 import (
-	"sort"
-	"simplex/constdp/ln"
 	"simplex/struct/sset"
 	"simplex/constdp/rng"
 	"simplex/struct/rtree"
 )
 
 func contiguous_fragments_at_threshold(self *ConstDP, ha, hb *HullNode) *HullNode {
-	m := contiguous_fragments(self, ha, hb)
+	m := self.contiguous_fragments(ha, hb)
 	_, score := self.score(self, m.Range)
 	if score <= self.Opts.Threshold {
 		return m
@@ -18,19 +16,20 @@ func contiguous_fragments_at_threshold(self *ConstDP, ha, hb *HullNode) *HullNod
 }
 
 //merge contiguous hulls
-func contiguous_fragments(self *ConstDP, ha, hb *HullNode) *HullNode {
-	var l = append(ha.Range.AsSlice(), hb.Range.AsSlice()...)
-	sort.Ints(l)
+func (self *ConstDP) contiguous_fragments(ha, hb *HullNode) *HullNode {
+	var l = sort_ints(append(ha.Range.AsSlice(), hb.Range.AsSlice()...))
 	// i...[ha]...k...[hb]...j
 	i, j := l[0], l[len(l)-1]
-	r := rng.NewRange(i, j)
-	return NewHullNode(self.Pln, r, r.Clone())
+	return NewHullNode(self.Pln, rng.NewRange(i, j), rng.NewRange(i, j))
 }
 
 //merge contig hulls after split - merge line segment fragments
-func find_mergeable_contiguous_fragments(
-	self ln.Linear, hulls []*HullNode, hulldb *rtree.RTree,
-	vertex_set *sset.SSet, ) ([]*HullNode, []*HullNode) {
+func (self *ConstDP) find_mergeable_contiguous_fragments(
+	hulls []*HullNode, hulldb *rtree.RTree,
+	vertex_set *sset.SSet,
+) ([]*HullNode, []*HullNode) {
+	//@formatter:off
+
 	pln := self.Polyline()
 	keep, rm := make([]*HullNode, 0), make([]*HullNode, 0)
 
@@ -41,14 +40,10 @@ func find_mergeable_contiguous_fragments(
 		hr := h.Range
 		//if hr.Size() < 4{
 		if hr.Size() == 1 {
-			//@formatter:off
-			hs_knn      := find_context_hulls(hulldb, h, EpsilonDist)
-
-			hs := make([]*HullNode, len(hs_knn))
-			for i, h := range hs_knn {
-				hs[i] = h.(*HullNode)
-			}
-			sort_hulls(hs) // sort hulls for consistency
+			// sort hulls for consistency
+			hs   := sort_hulls(
+				as_hullnodes_from_boxes(find_context_hulls(hulldb, h, EpsilonDist)),
+			)
 
 			for _, s := range hs {
 				sr := s.Range
@@ -56,19 +51,20 @@ func find_mergeable_contiguous_fragments(
 				//not sr.i != hr.i or sr.j != hr.j without i/j being a inter-vertex
 				//tests for contiguous and whether contiguous index is part of vertex set
 				//if the location at which they are contiguous is not part of vertex set then
-				//its mergeable
-				mergeable := (hr.J() == sr.I() && !vertex_set.Contains(sr.I())) ||
-							 (hr.I() == sr.J() && !vertex_set.Contains(sr.J()))
+				//its mergeable : mergeable score <= threshold
+				bln := (hr.J() == sr.I() && !vertex_set.Contains(sr.I())) ||
+					   (hr.I() == sr.J() && !vertex_set.Contains(sr.J()))
+
+				l := sort_ints(append(sr.AsSlice(), hr.AsSlice()...))
+				r := rng.NewRange(l[0], l[len(l)-1])
+				_, val      := self.score(self, r)
+				mergeable   := bln && (val <= self.Opts.Threshold)
 
 				if mergeable {
-					l := append(sr.AsSlice(), hr.AsSlice()...)
-					sort.Ints(l)
-
 					// rm sr + hr
 					delete(hdict, sr.AsArray())
 					delete(hdict, hr.AsArray())
 
-					r := rng.NewRange(l[0], l[len(l)-1])
 					m := NewHullNode(pln, r, r.Clone())
 
 					// add merge
