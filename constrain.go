@@ -23,7 +23,6 @@ func (self *ConstDP) constrain_to_selfintersects(opts *opts.Opts) (*deque.Deque,
 	for _, v := range *self.Hulls.DataView() {
 		data = append(data, v.(*HullNode))
 	}
-
 	hulldb.Load(data)
 
 	at_vertex_set := sset.NewSSet(cmp.IntCmp)
@@ -82,7 +81,7 @@ func (self *ConstDP) constrain_self_intersection(hull *HullNode, hulldb *rtree.R
 }
 
 //Constrain for context neighbours
-func (self *ConstDP) constrain_context_relation(hull *HullNode, hulldb *rtree.RTree, bln bool) ([]*HullNode, bool) {
+func (self *ConstDP) constrain_context_relation(hull *HullNode, bln bool) ([]*HullNode, bool) {
 	var selections = []*HullNode{hull}
 	if !bln {
 		return selections, bln
@@ -95,17 +94,17 @@ func (self *ConstDP) constrain_context_relation(hull *HullNode, hulldb *rtree.RT
 			break
 		}
 
-		c := contxt.(*ctx.CtxGeom)
+		cg := contxt.(*ctx.CtxGeom)
 		if bln && self.Opts.GeomRelation {
-			bln = self.is_geom_relate_valid(hull, c)
+			bln = self.is_geom_relate_valid(hull, cg)
 		}
 
 		if bln && self.Opts.DistRelation {
-			bln = self.is_dist_relate_valid(hull, c)
+			bln = self.is_dist_relate_valid(hull, cg)
 		}
 
 		if bln && self.Opts.DirRelation {
-			bln = self.is_dir_relate_valid(hull, c)
+			bln = self.is_dir_relate_valid(hull, cg)
 		}
 	}
 

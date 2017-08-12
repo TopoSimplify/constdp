@@ -25,6 +25,14 @@ func as_hullnodes(iter []*rtree.Node) []*HullNode {
 	}
 	return nodes
 }
+//Rtree nodes boxes as hull nodes
+func as_hullnodes_from_boxes(iter []rtree.BoxObj) []*HullNode {
+	nodes := make([]*HullNode, len(iter))
+	for i, h := range iter {
+		nodes[i] = h.(*HullNode)
+	}
+	return nodes
+}
 
 //Hull nodes as deque
 func as_deque(iter []*HullNode) *deque.Deque {

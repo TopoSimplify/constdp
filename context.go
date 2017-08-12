@@ -26,11 +26,11 @@ func scorer(query igeom.IGeom) func(_, item rtree.BoxObj) float64 {
 	}
 }
 
-func find_context_neighbs(database *rtree.RTree, query igeom.IGeom, mindist float64) []rtree.BoxObj {
-	return db.KNN(database, query.Geometry(), mindist, scorer(query))
+func find_context_neighbs(database *rtree.RTree, query igeom.IGeom, dist float64) []rtree.BoxObj {
+	return db.KNN(database, query.Geometry(), dist, scorer(query))
 }
 
-func find_context_hulls(hulldb *rtree.RTree, hull *HullNode, mindist float64) []rtree.BoxObj {
-	predicate   := hull_predicate(hull,  mindist)
-	return db.KNN(hulldb, hull.Geometry(), mindist, scorer(hull), predicate)
+func find_context_hulls(hulldb *rtree.RTree, hull *HullNode, dist float64) []rtree.BoxObj {
+	predicate   := hull_predicate(hull, dist)
+	return db.KNN(hulldb, hull.Geometry(), dist, scorer(hull), predicate)
 }

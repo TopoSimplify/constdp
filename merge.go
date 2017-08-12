@@ -2,12 +2,8 @@ package constdp
 
 import (
 	"sort"
-	"simplex/geom"
-	"simplex/geom/mbr"
 	"simplex/constdp/ln"
 	"simplex/struct/sset"
-	"simplex/constdp/db"
-	"simplex/constdp/box"
 	"simplex/constdp/rng"
 	"simplex/struct/rtree"
 )

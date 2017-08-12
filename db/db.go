@@ -7,8 +7,8 @@ import (
 func KNN(
 	db *rtree.RTree, g rtree.BoxObj, minscore float64,
 	score func(rtree.BoxObj, rtree.BoxObj) float64,
-	predicate ... func(*rtree.KObj) (bool, bool),
-) []rtree.BoxObj {
+	predicate ... func(*rtree.KObj) (bool, bool)) []rtree.BoxObj {
+
 	var pred func(*rtree.KObj) (bool, bool)
 	if len(predicate) > 0 {
 		pred = predicate[0]
@@ -19,10 +19,9 @@ func KNN(
 	return db.KNN(g, -1, score, pred)
 }
 
-func default_predicate(mindist float64) func(*rtree.KObj) (bool, bool) {
+func default_predicate(dist float64) func(*rtree.KObj) (bool, bool) {
 	return func(candidate *rtree.KObj) (bool, bool) {
-		dist := candidate.Score()
-		if dist <= mindist {
+		if candidate.Score() <= dist {
 			return true, false
 		}
 		return false, true
