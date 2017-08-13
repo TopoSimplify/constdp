@@ -6,8 +6,8 @@ import (
 	"simplex/struct/rtree"
 )
 
-func contiguous_fragments_at_threshold(self *ConstDP, ha, hb *HullNode) *HullNode {
-	m := self.contiguous_fragments(ha, hb)
+func merge_contiguous_fragments_at_threshold(self *ConstDP, ha, hb *HullNode) *HullNode {
+	m := self.merge_contiguous_fragments(ha, hb)
 	_, score := self.score(self, m.Range)
 	if score <= self.Opts.Threshold {
 		return m
@@ -16,7 +16,7 @@ func contiguous_fragments_at_threshold(self *ConstDP, ha, hb *HullNode) *HullNod
 }
 
 //merge contiguous hulls
-func (self *ConstDP) contiguous_fragments(ha, hb *HullNode) *HullNode {
+func (self *ConstDP) merge_contiguous_fragments(ha, hb *HullNode) *HullNode {
 	var l = sort_ints(append(ha.Range.AsSlice(), hb.Range.AsSlice()...))
 	// i...[ha]...k...[hb]...j
 	i, j := l[0], l[len(l)-1]
@@ -28,25 +28,35 @@ func (self *ConstDP) find_mergeable_contiguous_fragments(
 	hulls []*HullNode, hulldb *rtree.RTree,
 	vertex_set *sset.SSet,
 ) ([]*HullNode, []*HullNode) {
+
 	//@formatter:off
 
-	pln := self.Polyline()
-	keep, rm := make([]*HullNode, 0), make([]*HullNode, 0)
+	var pln      = self.Polyline()
+	var keep, rm = make([]*HullNode, 0), make([]*HullNode, 0)
 
-	hdict := make(map[[2]int]*HullNode, 0)
+	var hdict    = make(map[[2]int]*HullNode, 0)
+	var mrgdict  = make(map[[2]int]*HullNode, 0)
+
+	var is_merged = func(o *rng.Range) bool {
+		_, ok := mrgdict[o.AsArray()]
+		return ok
+	}
+
 	for _, h := range hulls {
+		hr := h.Range
+		if is_merged(hr){continue}
 		hdict[h.Range.AsArray()] = h
 
-		hr := h.Range
 		//if hr.Size() < 4{
 		if hr.Size() == 1 {
 			// sort hulls for consistency
-			hs   := sort_hulls(
+			hs := sort_hulls(
 				as_hullnodes_from_boxes(find_context_hulls(hulldb, h, EpsilonDist)),
 			)
 
 			for _, s := range hs {
 				sr := s.Range
+				if is_merged(sr){continue}
 				//test whether sr.i or sr.j is a self inter-vertex -- split point
 				//not sr.i != hr.i or sr.j != hr.j without i/j being a inter-vertex
 				//tests for contiguous and whether contiguous index is part of vertex set
@@ -61,6 +71,10 @@ func (self *ConstDP) find_mergeable_contiguous_fragments(
 				mergeable   := bln && (val <= self.Opts.Threshold)
 
 				if mergeable {
+					//keep track of items merged
+					mrgdict[hr.AsArray()] = h
+					mrgdict[sr.AsArray()] = s
+
 					// rm sr + hr
 					delete(hdict, sr.AsArray())
 					delete(hdict, hr.AsArray())

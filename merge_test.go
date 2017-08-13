@@ -4,14 +4,16 @@ import (
 	"time"
 	"testing"
 	"simplex/geom"
+	"simplex/constdp/cmp"
 	"simplex/constdp/opts"
+	"simplex/struct/sset"
+	"simplex/struct/rtree"
 	"simplex/constdp/offset"
 	"github.com/franela/goblin"
-	"fmt"
 )
 
 //@formatter:off
-func TestSplitHull(t *testing.T) {
+func TestMergeHull(t *testing.T) {
 	g := goblin.Goblin(t)
 	g.Describe("test split hull", func() {
 		g.It("should test split", func() {
@@ -36,30 +38,39 @@ func TestSplitHull(t *testing.T) {
 			homo    := NewConstDP(coords, constraints, options, offset.MaxOffset)
 
 			hull    := create_hulls([][]int{{0, n}}, coords)[0]
-			fmt.Println(hull)
-
 			ha, hb  := split_at_score_selection(homo, hull)
-
-			g.Assert(ha.Range.AsSlice()).Equal([]int{0, 8})
-			g.Assert(hb.Range.AsSlice()).Equal([]int{8, len(coords) - 1})
-
-			splits := split_at_index(homo, ha, []int{3, 6})
-			g.Assert(len(splits)).Equal(3)
-			g.Assert(splits[0].Range.AsSlice()).Equal([]int{0, 3})
-			g.Assert(splits[1].Range.AsSlice()).Equal([]int{3, 6})
-			g.Assert(splits[2].Range.AsSlice()).Equal([]int{6, 8})
-
-			splits = split_at_index(homo, hull, []int{
-				ha.Range.I(), ha.Range.J(),
-				hb.Range.I(), hb.Range.J(),
-			})
-
-			g.Assert(len(splits)).Equal(2)
-			splits = split_at_index(homo, hull, []int{
+			splits  := split_at_index(homo, hull, []int{
 				ha.Range.I(), ha.Range.J(), hb.Range.I(),
 				hb.Range.I() - 1, hb.Range.J(),
 			})
 			g.Assert(len(splits)).Equal(3)
+
+			hulldb := rtree.NewRTree(8)
+			boxes := make([]rtree.BoxObj, len(splits))
+			for i, v := range splits {
+				boxes[i] = v
+			}
+			hulldb.Load(boxes)
+
+			vertex_set := sset.NewSSet(cmp.IntCmp)
+			keep, rm := homo.find_mergeable_contiguous_fragments(splits, hulldb, vertex_set)
+			g.Assert(len(keep)).Equal(2)
+			g.Assert(len(rm)).Equal(2)
+
+			splits  = split_at_index(homo, hull, []int{0, 5, 6, 7, 8, 12,})
+			g.Assert(len(splits)).Equal(5)
+
+			hulldb = rtree.NewRTree(8)
+			boxes = make([]rtree.BoxObj, len(splits))
+			for i, v := range splits {
+				boxes[i] = v
+			}
+			hulldb.Load(boxes)
+
+			vertex_set = sset.NewSSet(cmp.IntCmp)
+			keep, rm = homo.find_mergeable_contiguous_fragments(splits, hulldb, vertex_set)
+			g.Assert(len(keep)).Equal(3)
+			g.Assert(len(rm)).Equal(4)
 		})
 	})
 }

@@ -23,7 +23,7 @@ func split_at_index(self ln.Linear, hull *HullNode, idxs []int) []*HullNode {
 	//formatter:off
 	pr          := hull.Range
 	pln         := self.Polyline()
-	ranges      := pr.Split(idxs)
+	ranges      := hull.Range.Split(idxs)
 	sub_hulls   := make([]*HullNode, 0)
 	for _, r := range ranges {
 		sub_hulls = append(sub_hulls, NewHullNode(pln, r, pr))

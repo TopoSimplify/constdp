@@ -71,11 +71,11 @@ func (self *ConstDP) merge_simple_segments(hulldb *rtree.RTree) []*HullNode {
 			// find mergeable neihbs contig
 			var merge_prev, merge_nxt *HullNode
 			if prev != nil  {
-				merge_prev = contiguous_fragments_at_threshold(self, prev, hull)
+				merge_prev = merge_contiguous_fragments_at_threshold(self, prev, hull)
 			}
 
 			if nxt != nil {
-				merge_nxt = contiguous_fragments_at_threshold(self, hull, nxt)
+				merge_nxt = merge_contiguous_fragments_at_threshold(self, hull, nxt)
 			}
 
 			// nxt, prev
