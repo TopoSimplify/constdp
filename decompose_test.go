@@ -30,9 +30,14 @@ func TestDecompose(t *testing.T) {
 			constraints := make([]geom.Geometry, 0)
 			cdp := NewConstDP(coords, constraints, options, offset.MaxOffset)
 
-			hulls := cdp.decompose(120)
+			cdp.Opts.Threshold = 120
+			hulls := cdp.decompose()
+
 			g.Assert(hulls.Len()).Equal(4)
-			hulls = cdp.decompose(150)
+
+			cdp.Opts.Threshold = 150
+			hulls = cdp.decompose()
+
 			g.Assert(hulls.Len()).Equal(1)
 			h := hulls.Get(0).(*HullNode)
 			g.Assert(h.Range.AsSlice()).Equal([]int{0, len(coords) - 1})

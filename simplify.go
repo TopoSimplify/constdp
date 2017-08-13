@@ -9,7 +9,7 @@ import (
 func (self *ConstDP) Simplify(opts *opts.Opts) *ConstDP {
 	self.Opts   = opts
 	self.Simple = make([]*HullNode, 0)
-	self.Hulls  = self.decompose(opts.Threshold)
+	self.Hulls  = self.decompose()
 
 	// constrain hulls to self intersects
 	self.Hulls, _ = self.constrain_to_selfintersects(opts)

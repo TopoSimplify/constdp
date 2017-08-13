@@ -15,8 +15,8 @@ import (
 //@formatter:off
 func TestMergeHull(t *testing.T) {
 	g := goblin.Goblin(t)
-	g.Describe("test split hull", func() {
-		g.It("should test split", func() {
+	g.Describe("test merge hull", func() {
+		g.It("should test merge", func() {
 
 			g.Timeout(1 * time.Hour)
 			options := &opts.Opts{
@@ -60,11 +60,9 @@ func TestMergeHull(t *testing.T) {
 			splits  = split_at_index(homo, hull, []int{0, 5, 6, 7, 8, 12,})
 			g.Assert(len(splits)).Equal(5)
 
-			hulldb = rtree.NewRTree(8)
-			boxes = make([]rtree.BoxObj, len(splits))
-			for i, v := range splits {
-				boxes[i] = v
-			}
+			hulldb  = rtree.NewRTree(8)
+			boxes   = make([]rtree.BoxObj, len(splits))
+			for i, v := range splits {boxes[i] = v}
 			hulldb.Load(boxes)
 
 			vertex_set = sset.NewSSet(cmp.IntCmp)

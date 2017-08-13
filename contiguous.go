@@ -15,7 +15,6 @@ func extract_neighbours(hull *HullNode, neighbs []*HullNode) (*HullNode, *HullNo
 	return prev, nxt
 }
 
-
 //returns bool (intersects), bool(is contig at vertex)
 func is_contiguous(a, b *HullNode) (bool, bool, int) {
 	//@formatter:off

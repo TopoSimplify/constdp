@@ -9,9 +9,8 @@ import (
 const size = 2
 
 //Douglas Peucker decomposition at a given threshold
-func (self *ConstDP) decompose(threshold float64) *deque.Deque {
+func (self *ConstDP) decompose() *deque.Deque {
 	var pln   = self.Pln
-	var score = self.score
 	var hque  = deque.NewDeque()
 	var rg, prg *rng.Range
 
@@ -21,10 +20,10 @@ func (self *ConstDP) decompose(threshold float64) *deque.Deque {
 	for !s.IsEmpty() {
 		ranges  := s.Pop().([size]*rng.Range)
 		rg, prg := ranges[0], ranges[1]
-		k, val  := score(self, rg)
+		k, val  := self.Score(self, rg)
 		//dtn[rg] = (k, val)
 
-		if val <= threshold {
+		if self.is_score_relate_valid(val) {
 			if prg == nil {
 				prg = rg.Clone()
 			}

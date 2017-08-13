@@ -12,8 +12,6 @@ func (self *ConstDP) select_deformation_candidates(hulldb *rtree.RTree, hull *Hu
 	// for each item in the context list
 	for _, h := range ctxs {
 		// find which item to deform against current hull
-		selection := make([]*HullNode, 0)
-
 		h := h.(*HullNode)
 		inters, contig, n := is_contiguous(hull, h)
 
@@ -25,13 +23,9 @@ func (self *ConstDP) select_deformation_candidates(hulldb *rtree.RTree, hull *Hu
 				sels = self._non_contiguous_candidates(hull, h)
 			}
 			for _, s := range sels {
-				selection = append(selection, s)
+				// add candidate deformation hulls to selection list
+				seldict[s.Range.AsArray()] = s
 			}
-		}
-
-		// add candidate deformation hulls to selection list
-		for _, s := range selection {
-			seldict[s.Range.AsArray()] = s
 		}
 	}
 

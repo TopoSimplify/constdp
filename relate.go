@@ -6,6 +6,12 @@ import (
 	"simplex/constdp/ctx"
 )
 
+//checks if score is valid at threshold of constrained dp
+func (self *ConstDP) is_score_relate_valid(val float64) bool {
+	return val <= self.Opts.Threshold
+}
+
+//geometry relate
 func (self *ConstDP) is_geom_relate_valid(hull *HullNode, ctx *ctx.CtxGeom) bool {
 	seg    := hull_segment(self, hull)
 	subpln := self.Pln.SubPolyline(hull.Range)
@@ -18,16 +24,14 @@ func (self *ConstDP) is_geom_relate_valid(hull *HullNode, ctx *ctx.CtxGeom) bool
 	seg_g_inter := seg_geom.Intersects(ctx_geom)
 
 	bln := true
-	if seg_g_inter && (!ln_g_inter) {
-		bln = false
-	} else if (!seg_g_inter) && ln_g_inter {
+	if (seg_g_inter && !ln_g_inter)  || (!seg_g_inter && ln_g_inter){
 		bln = false
 	}
 	// both intersects & disjoint
 	return bln
 }
 
-//is distance relate valid ?
+//distance relate
 func (self *ConstDP) is_dist_relate_valid(hull *HullNode, ctx *ctx.CtxGeom) bool {
 	mindist := self.Opts.MinDist
 	seg     := hull_segment(self, hull)
@@ -50,6 +54,7 @@ func (self *ConstDP) is_dist_relate_valid(hull *HullNode, ctx *ctx.CtxGeom) bool
 	return bln
 }
 
+//direction relate
 func (self *ConstDP) is_dir_relate_valid(hull *HullNode, ctx *ctx.CtxGeom) bool {
 	subpln  := self.Pln.SubPolyline(hull.Range)
 	segment := ln.NewPolyline([]*geom.Point{

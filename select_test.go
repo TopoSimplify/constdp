@@ -78,7 +78,7 @@ func TestDeform(t *testing.T) {
 			DistRelation:           false,
 			DirRelation:            false,
 		}
-		homo := NewConstDP([]*geom.Point{}, []geom.Geometry{}, options, offset.MaxOffset)
+		cdp := &ConstDP{Opts:options, score:offset.MaxOffset}
 
 		g.It("should test selection of hulls for deformation", func() {
 			g.Timeout(60 * time.Minute)
@@ -96,14 +96,16 @@ func TestDeform(t *testing.T) {
 				ranges, q, expects, wkt := o.ranges, o.q, o.expects, o.wkt
 				coords := geom.NewLineStringFromWKT(wkt).Coordinates()
 				hulls, hulldb := create_hulls_db_test(ranges, coords)
+
 				query := hulls[q]
-				slns := homo.select_deformation_candidates(hulldb, query)
+
+				slns := cdp.select_deformation_candidates(hulldb, query)
 				//slns = select_hulls_to_deform(ha, hb, opts)
 				if len(slns) != len(expects) {
 					fmt.Println(slns)
 				}
 				g.Assert(len(slns)).Equal(len(expects))
-				for i := range expects {
+				for _, i := range expects {
 					g.Assert(contains(hulls[i], slns))
 				}
 			}
