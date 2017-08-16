@@ -108,7 +108,7 @@ func (self *ConstDP) constrain_context_relation(hull *HullNode, bln bool) ([]*Hu
 		}
 	}
 
-	if !bln {
+	if bln {
 		selections[len(selections)-1] = nil
 		selections = selections[:len(selections)-1]
 	}

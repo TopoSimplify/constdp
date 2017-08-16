@@ -7,21 +7,22 @@ import (
 //find context deformation list
 func (self *ConstDP) select_deformation_candidates(hulldb *rtree.RTree, hull *HullNode) []*HullNode {
 	seldict := make(map[[2]int]*HullNode, 0)
-	ctxs := find_context_hulls(hulldb, hull, EpsilonDist)
+	ctxs    := find_context_hulls(hulldb, hull, EpsilonDist)
 
 	// for each item in the context list
-	for _, h := range ctxs {
+	for _, cn := range ctxs {
 		// find which item to deform against current hull
-		h := h.(*HullNode)
+		h := cn.(*HullNode)
 		inters, contig, n := is_contiguous(hull, h)
 
 		if inters {
-			sels := []*HullNode{}
+			sels := make([]*HullNode, 0)
 			if contig && n > 1 {
 				sels = self._contiguous_candidates(hull, h)
 			} else if !contig {
 				sels = self._non_contiguous_candidates(hull, h)
 			}
+
 			for _, s := range sels {
 				// add candidate deformation hulls to selection list
 				seldict[s.Range.AsArray()] = s
@@ -43,6 +44,10 @@ func (self *ConstDP) _contiguous_candidates(a, b *HullNode) []*HullNode {
 	hulls := sort_hulls([]*HullNode{a, b})
 	//future should not affect the past
 	ha, hb := hulls[0], hulls[1]
+
+	//all hulls that are simple should be collapsible
+	// if not collapsible -- add to selection for deformation
+	// to reach collapsibility
 
 	//& the present should not affect the future
 	bln := is_contig_hull_collapsible(ha, hb)
@@ -111,6 +116,7 @@ func (self *ConstDP) _non_contiguous_candidates(a, b *HullNode) []*HullNode {
 // add if range size is greater than 1 : not a segment
 func _add_to_selection(selection *[]*HullNode, hulls ...*HullNode) {
 	for _, h := range hulls {
+		//add to selection for deformation - if polygon
 		if h.Range.Size() > 1 {
 			*selection = append(*selection, h)
 		}

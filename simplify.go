@@ -3,20 +3,23 @@ package constdp
 import (
 	"simplex/struct/rtree"
 	"simplex/constdp/opts"
+	"strings"
+	"fmt"
 )
 
 //homotopic simplification at a given threshold
 func (self *ConstDP) Simplify(opts *opts.Opts) *ConstDP {
-	self.Opts   = opts
+	self.Opts = opts
 	self.Simple = make([]*HullNode, 0)
-	self.Hulls  = self.decompose()
+	self.Hulls = self.decompose()
 
 	// constrain hulls to self intersects
 	self.Hulls, _ = self.constrain_to_selfintersects(opts)
 
-	// for _, h := range *self.Hulls.DataView() {
-	// 	fmt.Println(h)
-	// }
+	//for _, h := range *self.Hulls.DataView() {
+	//	fmt.Println(h)
+	//}
+	//fmt.Println(strings.Repeat("-", 80))
 
 	var bln bool
 	var hull *HullNode
@@ -35,7 +38,9 @@ func (self *ConstDP) Simplify(opts *opts.Opts) *ConstDP {
 
 		// self intersection constraint
 		hlist, bln = self.constrain_self_intersection(hull, hulldb, bln)
-		self.deform_hull(hulldb, hlist)
+		if len(hlist) > 0 {
+			self.deform_hull(hulldb, hlist)
+		}
 
 		if !bln {
 			continue
@@ -43,7 +48,9 @@ func (self *ConstDP) Simplify(opts *opts.Opts) *ConstDP {
 
 		// context_geom geometry constraint
 		hlist, bln = self.constrain_context_relation(hull, bln)
-		self.deform_hull(hulldb, hlist)
+		if len(hlist) > 0 {
+			self.deform_hull(hulldb, hlist)
+		}
 
 	}
 
@@ -53,12 +60,19 @@ func (self *ConstDP) Simplify(opts *opts.Opts) *ConstDP {
 
 func (self *ConstDP) merge_simple_segments(hulldb *rtree.RTree) []*HullNode {
 	hulls := as_deque(sort_hulls(as_hullnodes(hulldb.All())))
+	cache := make(map[[4]int]bool)
+
+	for _, h := range *hulls.DataView() {
+		fmt.Println(h)
+	}
+	fmt.Println(strings.Repeat("-", 80))
 
 	for !hulls.IsEmpty() {
 		// from left
 		hull := hulls.PopLeft().(*HullNode)
 
 		if hull.Range.Size() == 1 {
+
 			hulldb.Remove(hull)
 			// find context neighbours
 			neighbs := as_hullnodes_from_boxes(
@@ -70,36 +84,59 @@ func (self *ConstDP) merge_simple_segments(hulldb *rtree.RTree) []*HullNode {
 
 			// find mergeable neihbs contig
 			var merge_prev, merge_nxt *HullNode
-			if prev != nil  {
-				merge_prev = merge_contiguous_fragments_at_threshold(self, prev, hull)
+			if prev != nil {
+				key := cache_key(prev, hull)
+				if !cache[key] {
+					add_to_merge_cache(cache, &key)
+					merge_prev = merge_contiguous_fragments_at_threshold(self, prev, hull)
+				}
 			}
 
 			if nxt != nil {
-				merge_nxt = merge_contiguous_fragments_at_threshold(self, hull, nxt)
+				key := cache_key(hull, nxt)
+				if !cache[key] {
+					add_to_merge_cache(cache, &key)
+					merge_nxt = merge_contiguous_fragments_at_threshold(self, hull, nxt)
+				}
 			}
 
+			merged := false
 			// nxt, prev
-			if (merge_nxt != nil) && self.is_merge_simplx_valid(merge_nxt, hulldb) {
-				h := hulls.Get(0).(*HullNode)
-				if h == nxt {
-					hulls.PopLeft()
-				}
+			if merge_nxt != nil {
 				hulldb.Remove(nxt)
-				hulldb.Insert(merge_nxt)
-			} else if (merge_prev != nil) && self.is_merge_simplx_valid(merge_prev, hulldb) {
-				// prev cannot exist since moving from left --- right
-				// if hulls[-1] is prev:
-				//     hulls.popleft()
+				if self.is_merge_simplx_valid(merge_nxt, hulldb) {
+					h := hulls.First().(*HullNode)
+					if h == nxt {
+						hulls.PopLeft()
+					}
+					hulldb.Insert(merge_nxt)
+					merged = true
+				} else {
+					merged = false
+					hulldb.Insert(nxt)
+				}
+			} else if merge_prev != nil {
 				hulldb.Remove(prev)
-				hulldb.Insert(merge_prev)
-			} else {
+				if self.is_merge_simplx_valid(merge_prev, hulldb) {
+					// prev cannot exist since moving from left --- right
+					// if hulls[-1] is prev:
+					//     hulls.popleft()
+					hulldb.Insert(merge_prev)
+					merged = true
+				} else {
+					merged = false
+					hulldb.Insert(prev)
+				}
+			}
+
+			if !merged {
 				hulldb.Insert(hull)
 			}
 		}
 	}
+
 	return sort_hulls(as_hullnodes(hulldb.All()))
 }
-
 
 func (self *ConstDP) is_merge_simplx_valid(hull *HullNode, hulldb *rtree.RTree) bool {
 	bln := hull != nil
@@ -117,4 +154,14 @@ func (self *ConstDP) is_merge_simplx_valid(hull *HullNode, hulldb *rtree.RTree) 
 	// context geometry constraint
 	side_effects, bln = self.constrain_context_relation(hull, bln)
 	return len(side_effects) == 0 && bln
+}
+
+func cache_key(a, b *HullNode) [4]int {
+	ij := [4]int{a.Range.I(), a.Range.J(), b.Range.I(), b.Range.J()}
+	sort_ints(ij[:])
+	return ij
+}
+
+func add_to_merge_cache(cache map[[4]int]bool, key *[4]int) {
+	cache[*key] = true
 }

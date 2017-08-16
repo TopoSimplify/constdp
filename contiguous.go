@@ -21,7 +21,7 @@ func is_contiguous(a, b *HullNode) (bool, bool, int) {
 	pln           := a.Pln
 	ga            := a.Geom
 	gb            := b.Geom
-	bln_at_vertex := false
+	contig        := false
 	inter_count   := 0
 
 	bln := ga.Intersects(gb)
@@ -41,17 +41,17 @@ func is_contiguous(a, b *HullNode) (bool, bool, int) {
 			bln_bseg := pt.Equals2D(bi_pt) || pt.Equals2D(bj_pt)
 
 			if bln_aseg || bln_bseg {
-				bln_at_vertex = aj_pt.Equals2D(bi_pt) ||
-								aj_pt.Equals2D(bj_pt) ||
-								ai_pt.Equals2D(bj_pt) ||
-								ai_pt.Equals2D(bi_pt)
+				contig = aj_pt.Equals2D(bi_pt) ||
+					     aj_pt.Equals2D(bj_pt) ||
+					     ai_pt.Equals2D(bj_pt) ||
+					     ai_pt.Equals2D(bi_pt)
 			}
 
-			if bln_at_vertex {
+			if contig {
 				break
 			}
 		}
 	}
 
-	return bln, bln_at_vertex, inter_count
+	return bln, contig, inter_count
 }
