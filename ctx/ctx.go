@@ -16,6 +16,22 @@ const (
 	ContextNeighbour = "context_neighbour"
 )
 
+
+type ContextGeoms []*CtxGeom
+
+func (s ContextGeoms) Len() int {
+	return len(s)
+}
+
+func (s ContextGeoms) Swap(i, j int) {
+	s[i], s[j] = s[j], s[i]
+}
+
+func (s ContextGeoms) Less(i, j int) bool {
+	return s[i].I < s[j].I
+}
+
+
 type ctxMeta struct {
 	SelfVertices    *sset.SSet
 	SelfNonVertices *sset.SSet
@@ -121,3 +137,4 @@ func (o *CtxGeom) IsContextNeighbour() bool {
 func (o *CtxGeom) Intersection(other geom.Geometry) []*geom.Point {
 	return o.Geom.Intersection(other)
 }
+

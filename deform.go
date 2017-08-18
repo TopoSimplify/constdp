@@ -4,6 +4,7 @@ import "simplex/struct/rtree"
 
 //split hull based on score selected vertex
 func (self *ConstDP) deform_hull(hulldb *rtree.RTree, hulls []*HullNode) {
+	hulls = sort_reverse(hulls)
 	for _, hull := range hulls {
 		ha, hb := split_at_score_selection(self, hull)
 		hulldb.Remove(hull)

@@ -9,47 +9,39 @@ import (
 	"simplex/struct/deque"
 )
 
-//Constrain for planar self-intersection
-func (self *ConstDP) constrain_to_selfintersects(opts *opts.Opts) (*deque.Deque, bool) {
-	if !opts.KeepSelfIntersects {
-		return self.Hulls, true
-	}
-
-	hulldb := rtree.NewRTree(8)
-
-	self_inters := linear_self_intersection(self.Pln)
-
-	data := make([]rtree.BoxObj, 0)
-	for _, v := range *self.Hulls.DataView() {
-		data = append(data, v.(*HullNode))
-	}
-	hulldb.Load(data)
-
-	at_vertex_set := sset.NewSSet(cmp.IntCmp)
-	for _, inter := range self_inters {
-		if inter.IsSelfVertex() {
-			at_vertex_set.Union(inter.Meta.SelfVertices)
-		}
-	}
+//constrain hulls at self intersection fragments - planar self-intersection
+func (self *ConstDP) _const_at_self_intersect_fragments(hulldb *rtree.RTree,
+	self_inters []*ctx.CtxGeom, at_vertex_set *sset.SSet) []*HullNode {
+	//@formatter:off
+	var hsubs     []*HullNode
+	var hulls     []*HullNode
+	var fragments []*HullNode
+	var idxs      []int
+	var unmerged = make(map[[2]int]*HullNode, 0)
 
 	for _, inter := range self_inters {
 		if !inter.IsSelfVertex() {
 			continue
 		}
 
-		hulls := find_context_neighbs(hulldb, inter, EpsilonDist)
+		hulls =  sort_hulls(
+			as_hullnodes_from_boxes(find_context_neighbs(hulldb, inter, EpsilonDist)),
+		)
 
-		for _, h := range hulls {
-			hull := h.(*HullNode)
-			idxs := as_ints(inter.Meta.SelfVertices.Values())
-			hsubs := split_at_index(self, hull, idxs)
+		for _, hull := range hulls {
+			idxs  = as_ints(inter.Meta.SelfVertices.Values())
+			hsubs = split_at_index(self, hull, idxs)
+
+			if len(hsubs) == 0 && hull.Range.Size() == 1 {
+				hsubs = append(hsubs, hull)
+			}
 
 			if len(hsubs) > 0 {
 				hulldb.Remove(hull)
 			}
 
-			keep, rm := self.find_mergeable_contiguous_fragments(
-				hsubs, hulldb, at_vertex_set,
+			keep, rm  := self.find_mergeable_contiguous_fragments(
+				hsubs, hulldb, at_vertex_set, unmerged,
 			)
 
 			for _, h := range rm {
@@ -61,9 +53,43 @@ func (self *ConstDP) constrain_to_selfintersects(opts *opts.Opts) (*deque.Deque,
 			}
 		}
 	}
+	return  sort_hulls(map_to_slice(unmerged, fragments))
+}
 
-	hulls := as_deque(sort_hulls(as_hullnodes(hulldb.All())))
-	return hulls, true
+//Constrain for planar self-intersection
+func (self *ConstDP) constrain_to_selfintersects(opts *opts.Opts) (*deque.Deque, bool) {
+	if !opts.KeepSelfIntersects {
+		return self.Hulls, true
+	}
+	var at_vertex_set *sset.SSet
+	var fragments     []*HullNode
+	var hulldb      = rtree.NewRTree(8)
+	var self_inters = linear_self_intersection(self.Pln)
+
+	var data = make([]rtree.BoxObj, 0)
+	for _, v := range *self.Hulls.DataView() {
+		data = append(data, v.(*HullNode))
+	}
+	hulldb.Load(data)
+
+	at_vertex_set = sset.NewSSet(cmp.IntCmp)
+	for _, inter := range self_inters {
+		if inter.IsSelfVertex() {
+			at_vertex_set = at_vertex_set.Union(inter.Meta.SelfVertices)
+		}
+	}
+
+	//constrain fragments aroud self intersects
+	//try to merge fragments from first attempt
+	var mcount = 2
+	for mcount > 0  {
+		fragments = self._const_at_self_intersect_fragments(hulldb, self_inters, at_vertex_set)
+		if len(fragments) == 0 {
+			break
+		}
+		mcount += -1
+	}
+	return as_deque(sort_hulls(as_hullnodes(hulldb.All()))), true
 }
 
 //Constrain for self-intersection as a result of simplification
@@ -73,7 +99,10 @@ func (self *ConstDP) constrain_self_intersection(hull *HullNode, hulldb *rtree.R
 		// find hull neighbours
 		hulls := self.select_deformation_candidates(hulldb, hull)
 		for _, h := range hulls {
-			bln = !(h == hull) //cmp &
+			//if bln & selection contains current hull : bln : false
+			if bln && (h == hull) {
+				bln = false //cmp &
+			}
 			selections = append(selections, h)
 		}
 	}

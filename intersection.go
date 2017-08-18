@@ -93,11 +93,12 @@ func linear_self_intersection(pln *ln.Polyline) []*ctx.CtxGeom {
 
 	for k, v := range dict {
 		if v.count > 2 {
-			cg := ctx.NewCtxGeom(geom.NewPoint(k[:]), 0, -1).AsSelfVertex()
+			i := v.indxset.First().(int)
+			cg := ctx.NewCtxGeom(geom.NewPoint(k[:]), i, i).AsSelfVertex()
 			cg.Meta.SelfVertices = v.indxset
 			results = append(results, cg)
 		}
 	}
 
-	return results
+	return sort_context_geoms(results)
 }

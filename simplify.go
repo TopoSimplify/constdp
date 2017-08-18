@@ -3,27 +3,26 @@ package constdp
 import (
 	"simplex/struct/rtree"
 	"simplex/constdp/opts"
-	"strings"
+	"simplex/struct/sset"
 	"fmt"
+	"strings"
 )
 
 //homotopic simplification at a given threshold
-func (self *ConstDP) Simplify(opts *opts.Opts) *ConstDP {
-	self.Opts = opts
+func (self *ConstDP) Simplify(opts *opts.Opts) *sset.SSet {
+	self.Opts   = opts
 	self.Simple = make([]*HullNode, 0)
-	self.Hulls = self.decompose()
+
+	self.Hulls  = self.decompose()
+	//debug_print_ptset(self.Hulls)
 
 	// constrain hulls to self intersects
 	self.Hulls, _ = self.constrain_to_selfintersects(opts)
+	//debug_print_ptset(self.Hulls)
 
-	//for _, h := range *self.Hulls.DataView() {
-	//	fmt.Println(h)
-	//}
-	//fmt.Println(strings.Repeat("-", 80))
-
-	var bln bool
-	var hull *HullNode
-	var hlist []*HullNode
+	var bln     bool
+	var hull    *HullNode
+	var hlist   []*HullNode
 
 	var hulldb = rtree.NewRTree(8)
 	for !self.Hulls.IsEmpty() {
@@ -31,7 +30,7 @@ func (self *ConstDP) Simplify(opts *opts.Opts) *ConstDP {
 		bln = true
 
 		// pop hull in queue
-		hull = self.Hulls.PopLeft().(*HullNode)
+		hull = pop_hull(self.Hulls)
 
 		// insert hull into hull db
 		hulldb.Insert(hull)
@@ -51,21 +50,27 @@ func (self *ConstDP) Simplify(opts *opts.Opts) *ConstDP {
 		if len(hlist) > 0 {
 			self.deform_hull(hulldb, hlist)
 		}
-
 	}
 
-	self.Simple = self.merge_simple_segments(hulldb)
-	return self
+	return simple_hulls_as_ptset(
+		self.merge_simple_segments(hulldb),
+	)
 }
 
 func (self *ConstDP) merge_simple_segments(hulldb *rtree.RTree) []*HullNode {
 	hulls := as_deque(sort_hulls(as_hullnodes(hulldb.All())))
-	cache := make(map[[4]int]bool)
 
-	for _, h := range *hulls.DataView() {
-		fmt.Println(h)
+	//fmt.Println("After constraints:")
+	//DebugPrintPtSet(hulls)
+
+	if Debug {
+		for _, o := range *hulls.DataView() {
+			fmt.Println(o.(*HullNode).Geom.WKT())
+		}
+		fmt.Println(strings.Repeat("--", 80))
 	}
-	fmt.Println(strings.Repeat("-", 80))
+
+	cache := make(map[[4]int]bool)
 
 	for !hulls.IsEmpty() {
 		// from left
@@ -100,14 +105,15 @@ func (self *ConstDP) merge_simple_segments(hulldb *rtree.RTree) []*HullNode {
 				}
 			}
 
-			merged := false
-			// nxt, prev
+			var merged = false
+
+			//nxt, prev
 			if merge_nxt != nil {
 				hulldb.Remove(nxt)
 				if self.is_merge_simplx_valid(merge_nxt, hulldb) {
 					h := hulls.First().(*HullNode)
 					if h == nxt {
-						hulls.PopLeft()
+						pop_hull(hulls)
 					}
 					hulldb.Insert(merge_nxt)
 					merged = true
@@ -118,8 +124,8 @@ func (self *ConstDP) merge_simple_segments(hulldb *rtree.RTree) []*HullNode {
 			} else if merge_prev != nil {
 				hulldb.Remove(prev)
 				if self.is_merge_simplx_valid(merge_prev, hulldb) {
-					// prev cannot exist since moving from left --- right
-					// if hulls[-1] is prev:
+					//prev cannot exist since moving from left --- right
+					//if hulls[-1] is prev:
 					//     hulls.popleft()
 					hulldb.Insert(merge_prev)
 					merged = true

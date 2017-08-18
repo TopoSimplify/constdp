@@ -26,13 +26,13 @@ func (self *ConstDP) merge_contiguous_fragments(ha, hb *HullNode) *HullNode {
 //merge contig hulls after split - merge line segment fragments
 func (self *ConstDP) find_mergeable_contiguous_fragments(
 	hulls []*HullNode, hulldb *rtree.RTree,
-	vertex_set *sset.SSet,
+	vertex_set *sset.SSet, unmerged map[[2]int]*HullNode,
 ) ([]*HullNode, []*HullNode) {
 
 	//@formatter:off
-
-	var pln      = self.Polyline()
-	var keep, rm = make([]*HullNode, 0), make([]*HullNode, 0)
+	var pln       = self.Polyline()
+	var keep      = make([]*HullNode, 0)
+	var rm        = make([]*HullNode, 0)
 
 	var hdict    = make(map[[2]int]*HullNode, 0)
 	var mrgdict  = make(map[[2]int]*HullNode, 0)
@@ -44,7 +44,9 @@ func (self *ConstDP) find_mergeable_contiguous_fragments(
 
 	for _, h := range hulls {
 		hr := h.Range
-		if is_merged(hr){continue}
+		if is_merged(hr){
+			continue
+		}
 		hdict[h.Range.AsArray()] = h
 
 		//if hr.Size() < 4{
@@ -56,7 +58,9 @@ func (self *ConstDP) find_mergeable_contiguous_fragments(
 
 			for _, s := range hs {
 				sr := s.Range
-				if is_merged(sr){continue}
+				if is_merged(sr){
+					continue
+				}
 				//test whether sr.i or sr.j is a self inter-vertex -- split point
 				//not sr.i != hr.i or sr.j != hr.j without i/j being a inter-vertex
 				//tests for contiguous and whether contiguous index is part of vertex set
@@ -87,14 +91,20 @@ func (self *ConstDP) find_mergeable_contiguous_fragments(
 					// add to remove list to remove , after merge
 					rm = append(rm, s)
 					rm = append(rm, h)
+
+					//if present in umerged as fragment remove
+					delete(unmerged, hr.AsArray())
+
 					break
+				} else {
+					unmerged[hr.AsArray()] = h
 				}
 			}
 		}
 	}
 
-	for _, v := range hdict {
-		keep = append(keep, v)
-	}
+	keep  = map_to_slice(hdict, keep)
+
 	return keep, rm
 }
+

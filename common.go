@@ -4,7 +4,11 @@ import (
 	"sort"
 	"simplex/struct/rtree"
 	"simplex/struct/deque"
+	"simplex/struct/sset"
+	"simplex/constdp/cmp"
 )
+
+var Debug = false
 
 const Epsilon = 1.0e-8
 const EpsilonDist = 1.0e-5
@@ -48,4 +52,24 @@ func as_deque(iter []*HullNode) *deque.Deque {
 		queue.Append(h)
 	}
 	return queue
+}
+
+//map[range]*hullnode to slice of hullnode
+func map_to_slice(dict map[[2]int]*HullNode, s []*HullNode) []*HullNode {
+	for _, o := range dict {
+		s = append(s, o)
+	}
+	return s
+}
+
+func simple_hulls_as_ptset(hulls []*HullNode) *sset.SSet {
+	var ptset = sset.NewSSet(cmp.IntCmp)
+	for _, o := range hulls {
+		ptset.Extend(o.Range.I(), o.Range.J())
+	}
+	return ptset
+}
+
+func pop_hull(que *deque.Deque) *HullNode {
+	return que.PopLeft().(*HullNode)
 }
