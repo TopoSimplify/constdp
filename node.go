@@ -86,6 +86,11 @@ func (h *HullNode) Segment() *seg.Seg {
 	return seg.NewSeg(coords[i], coords[j], i, j)
 }
 
+//as segment
+func (h *HullNode) SubPolyline() *ln.Polyline {
+	return h.Pln.SubPolyline(h.Range)
+}
+
 //hull geom
 func hull_geom(coords []*geom.Point) geom.Geometry {
 	var g geom.Geometry

@@ -18,21 +18,22 @@ func extract_neighbours(hull *HullNode, neighbs []*HullNode) (*HullNode, *HullNo
 //returns bool (intersects), bool(is contig at vertex)
 func is_contiguous(a, b *HullNode) (bool, bool, int) {
 	//@formatter:off
-	pln           := a.Pln
-	ga            := a.Geom
-	gb            := b.Geom
-	contig        := false
-	inter_count   := 0
+	pln         := a.Pln
+	coords      := pln.Coordinates()
+	ga          := a.Geom
+	gb          := b.Geom
+	contig      := false
+	inter_count := 0
 
 	bln := ga.Intersects(gb)
 	if bln {
 		interpts := ga.Intersection(gb)
 
-		ai_pt := pln.Coords[a.Range.I()]
-		aj_pt := pln.Coords[a.Range.J()]
+		ai_pt := coords[a.Range.I()]
+		aj_pt := coords[a.Range.J()]
 
-		bi_pt := pln.Coords[b.Range.I()]
-		bj_pt := pln.Coords[b.Range.J()]
+		bi_pt := coords[b.Range.I()]
+		bj_pt := coords[b.Range.J()]
 
 		inter_count = len(interpts)
 

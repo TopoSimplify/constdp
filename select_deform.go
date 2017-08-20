@@ -67,11 +67,11 @@ func (self *ConstDP) _contiguous_candidates(a, b *HullNode) []*HullNode {
 
 //select non-contiguous candidates
 func (self *ConstDP) _non_contiguous_candidates(a, b *HullNode) []*HullNode {
-	aseg := a.Pln.Segment(a.Range)
-	bseg := b.Pln.Segment(b.Range)
+	aseg := a.Segment()
+	bseg := b.Segment()
 
-	aln := a.Pln.SubPolyline(a.Range)
-	bln := b.Pln.SubPolyline(b.Range)
+	aln := a.SubPolyline()
+	bln := b.SubPolyline()
 
 	aseg_geom := aseg.Segment
 	bseg_geom := bseg.Segment

@@ -5,7 +5,6 @@ import (
 	"simplex/geom"
 	"simplex/constdp/ln"
 	"github.com/franela/goblin"
-	"fmt"
 	"simplex/constdp/opts"
 	"time"
 	"simplex/constdp/ctx"
@@ -36,7 +35,6 @@ func TestRelate(t *testing.T) {
 			neib := geom.NewPolygonFromWKT("POLYGON ((674.7409300316725 422.8229196659948, 674.7409300316725 446.72732507918226, 691.3886409444281 446.72732507918226, 691.3886409444281 422.8229196659948, 674.7409300316725 422.8229196659948))")
 			const_geom := ctx.NewCtxGeom(neib, 0, -1).AsContextNeighbour()
 			for _, h := range hulls {
-				fmt.Println(h.Geom.WKT())
 				g.Assert(cdp.is_geom_relate_valid(h, const_geom)).IsTrue()
 				g.Assert(cdp.is_dir_relate_valid(h, const_geom)).IsTrue()
 				g.Assert(cdp.is_dist_relate_valid(h, const_geom)).IsTrue()

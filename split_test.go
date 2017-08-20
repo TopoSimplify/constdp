@@ -7,7 +7,6 @@ import (
 	"simplex/constdp/opts"
 	"simplex/constdp/offset"
 	"github.com/franela/goblin"
-	"fmt"
 )
 
 //@formatter:off
@@ -36,7 +35,6 @@ func TestSplitHull(t *testing.T) {
 			homo    := NewConstDP(coords, constraints, options, offset.MaxOffset)
 
 			hull    := create_hulls([][]int{{0, n}}, coords)[0]
-			fmt.Println(hull)
 
 			ha, hb  := split_at_score_selection(homo, hull)
 
