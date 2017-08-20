@@ -11,11 +11,12 @@ import (
 
 //constrain hulls at self intersection fragments - planar self-intersection
 func (self *ConstDP) _const_at_self_intersect_fragments(hulldb *rtree.RTree,
-	self_inters []*ctx.CtxGeom, at_vertex_set *sset.SSet) []*HullNode {
+	self_inters []*ctx.CtxGeom, at_vertex_set *sset.SSet) map[[2]int]*HullNode {
 	//@formatter:off
+	var fragment_size = 1
+
 	var hsubs     []*HullNode
 	var hulls     []*HullNode
-	var fragments []*HullNode
 	var idxs      []int
 	var unmerged = make(map[[2]int]*HullNode, 0)
 
@@ -24,24 +25,23 @@ func (self *ConstDP) _const_at_self_intersect_fragments(hulldb *rtree.RTree,
 			continue
 		}
 
-		hulls =  sort_hulls(
-			as_hullnodes_from_boxes(find_context_neighbs(hulldb, inter, EpsilonDist)),
-		)
+		hulls =  sort_hulls(as_hullnodes_from_boxes(find_context_neighbs(hulldb, inter, EpsilonDist)))
 
+		idxs  = as_ints(inter.Meta.SelfVertices.Values())
 		for _, hull := range hulls {
-			idxs  = as_ints(inter.Meta.SelfVertices.Values())
 			hsubs = split_at_index(self, hull, idxs)
 
-			if len(hsubs) == 0 && hull.Range.Size() == 1 {
+			if len(hsubs) == 0 && (hull.Range.Size() == fragment_size) {
 				hsubs = append(hsubs, hull)
 			}
 
-			if len(hsubs) > 0 {
-				hulldb.Remove(hull)
+			if len(hsubs) == 0 {
+				continue
 			}
 
-			keep, rm  := self.find_mergeable_contiguous_fragments(
-				hsubs, hulldb, at_vertex_set, unmerged,
+			hulldb.Remove(hull)
+			keep, rm  := self.merge_contiguous_fragments_by_size(
+				hsubs, hulldb, at_vertex_set, unmerged, fragment_size,
 			)
 
 			for _, h := range rm {
@@ -53,7 +53,8 @@ func (self *ConstDP) _const_at_self_intersect_fragments(hulldb *rtree.RTree,
 			}
 		}
 	}
-	return  sort_hulls(map_to_slice(unmerged, fragments))
+
+	return  unmerged
 }
 
 //Constrain for planar self-intersection
@@ -62,7 +63,6 @@ func (self *ConstDP) constrain_to_selfintersects(opts *opts.Opts) (*deque.Deque,
 		return self.Hulls, true
 	}
 	var at_vertex_set *sset.SSet
-	var fragments     []*HullNode
 	var hulldb      = rtree.NewRTree(8)
 	var self_inters = linear_self_intersection(self.Pln)
 
@@ -83,7 +83,7 @@ func (self *ConstDP) constrain_to_selfintersects(opts *opts.Opts) (*deque.Deque,
 	//try to merge fragments from first attempt
 	var mcount = 2
 	for mcount > 0  {
-		fragments = self._const_at_self_intersect_fragments(hulldb, self_inters, at_vertex_set)
+		fragments := self._const_at_self_intersect_fragments(hulldb, self_inters, at_vertex_set)
 		if len(fragments) == 0 {
 			break
 		}
@@ -93,28 +93,28 @@ func (self *ConstDP) constrain_to_selfintersects(opts *opts.Opts) (*deque.Deque,
 }
 
 //Constrain for self-intersection as a result of simplification
-func (self *ConstDP) constrain_self_intersection(hull *HullNode, hulldb *rtree.RTree, bln bool) ([]*HullNode, bool) {
-	var selections = make([]*HullNode, 0)
-	if bln && self.Opts.AvoidNewSelfIntersects {
-		// find hull neighbours
-		hulls := self.select_deformation_candidates(hulldb, hull)
-		for _, h := range hulls {
-			//if bln & selection contains current hull : bln : false
-			if bln && (h == hull) {
-				bln = false //cmp &
-			}
-			selections = append(selections, h)
+//returns boolean : is hull collapsible
+func (self *ConstDP) constrain_self_intersection(hull *HullNode, hulldb *rtree.RTree,  selections *[]*HullNode)  bool {
+	//assume hull is valid and proof otherwise
+	var bln = true
+	// find hull neighbours
+	hulls := self.select_deformation_candidates(hulldb, hull)
+	for _, h := range hulls {
+		//if bln & selection contains current hull : bln : false
+		if bln && (h == hull) {
+			bln = false //cmp &
 		}
+		*selections = append(*selections, h)
 	}
-	return selections, bln
+
+	return  bln
 }
 
 //Constrain for context neighbours
-func (self *ConstDP) constrain_context_relation(hull *HullNode, bln bool) ([]*HullNode, bool) {
-	var selections = []*HullNode{hull}
-	if !bln {
-		return selections, bln
-	}
+// finds the collapsibility of hull with respect to context hull neighbours
+// if hull is deformable, its added to selections
+func (self *ConstDP) constrain_context_relation(hull *HullNode,  selections *[]*HullNode)  bool {
+	var bln = true
 
 	// find context neighbours - if valid
 	ctxs := find_context_neighbs(self.ContextDB, hull, self.Opts.MinDist)
@@ -123,7 +123,7 @@ func (self *ConstDP) constrain_context_relation(hull *HullNode, bln bool) ([]*Hu
 			break
 		}
 
-		cg := contxt.(*ctx.CtxGeom)
+		cg := cast_as_context_geom(contxt)
 		if bln && self.Opts.GeomRelation {
 			bln = self.is_geom_relate_valid(hull, cg)
 		}
@@ -137,10 +137,9 @@ func (self *ConstDP) constrain_context_relation(hull *HullNode, bln bool) ([]*Hu
 		}
 	}
 
-	if bln {
-		selections[len(selections)-1] = nil
-		selections = selections[:len(selections)-1]
+	if !bln {
+		*selections = append(*selections, hull)
 	}
 
-	return selections, bln
+	return  bln
 }

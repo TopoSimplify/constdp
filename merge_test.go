@@ -54,7 +54,7 @@ func TestMergeHull(t *testing.T) {
 
 			vertex_set := sset.NewSSet(cmp.IntCmp)
 			var unmerged = make(map[[2]int]*HullNode,0)
-			keep, rm := homo.find_mergeable_contiguous_fragments(splits, hulldb, vertex_set, unmerged)
+			keep, rm := homo.merge_contiguous_fragments_by_size(splits, hulldb, vertex_set, unmerged, 1)
 			g.Assert(len(keep)).Equal(2)
 			g.Assert(len(rm)).Equal(2)
 
@@ -68,7 +68,7 @@ func TestMergeHull(t *testing.T) {
 
 			vertex_set = sset.NewSSet(cmp.IntCmp)
 			unmerged = make(map[[2]int]*HullNode,0)
-			keep, rm = homo.find_mergeable_contiguous_fragments(splits, hulldb, vertex_set, unmerged)
+			keep, rm = homo.merge_contiguous_fragments_by_size(splits, hulldb, vertex_set, unmerged, 1)
 			g.Assert(len(keep)).Equal(3)
 			g.Assert(len(rm)).Equal(4)
 		})

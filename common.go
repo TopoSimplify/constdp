@@ -6,6 +6,7 @@ import (
 	"simplex/struct/deque"
 	"simplex/struct/sset"
 	"simplex/constdp/cmp"
+	"simplex/constdp/ctx"
 )
 
 var Debug = false
@@ -70,6 +71,30 @@ func simple_hulls_as_ptset(hulls []*HullNode) *sset.SSet {
 	return ptset
 }
 
-func pop_hull(que *deque.Deque) *HullNode {
+func pop_left_hull(que *deque.Deque) *HullNode {
 	return que.PopLeft().(*HullNode)
 }
+
+func pop_hull_from_slice(ptr *[]*HullNode) {
+	slice := *ptr
+	n := len(slice) - 1
+	slice[n] = nil
+	*ptr = slice[:n]
+}
+
+func empty_hull_slice(ptr *[]*HullNode) {
+	slice := *ptr
+	for i := range slice{
+		slice[i] = nil
+	}
+	*ptr = slice[:0]
+}
+
+func cast_as_context_geom(o interface{}) *ctx.CtxGeom {
+	return o.(*ctx.CtxGeom)
+}
+
+func cast_as_hullnode(o interface{}) *HullNode{
+	return o.(*HullNode)
+}
+

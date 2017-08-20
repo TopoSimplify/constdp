@@ -7,26 +7,28 @@ import (
 //find context deformation list
 func (self *ConstDP) select_deformation_candidates(hulldb *rtree.RTree, hull *HullNode) []*HullNode {
 	seldict := make(map[[2]int]*HullNode, 0)
-	ctxs    := find_context_hulls(hulldb, hull, EpsilonDist)
+	ctx_hulls := find_context_hulls(hulldb, hull, EpsilonDist)
 
 	// for each item in the context list
-	for _, cn := range ctxs {
+	for _, cn := range ctx_hulls {
 		// find which item to deform against current hull
-		h := cn.(*HullNode)
+		h := cast_as_hullnode(cn)
 		inters, contig, n := is_contiguous(hull, h)
 
-		if inters {
-			sels := make([]*HullNode, 0)
-			if contig && n > 1 {
-				sels = self._contiguous_candidates(hull, h)
-			} else if !contig {
-				sels = self._non_contiguous_candidates(hull, h)
-			}
+		if !inters {
+			continue
+		}
 
-			for _, s := range sels {
-				// add candidate deformation hulls to selection list
-				seldict[s.Range.AsArray()] = s
-			}
+		sels := make([]*HullNode, 0)
+		if contig && n > 1 {//contiguity with overlap greater than a vertex
+			sels = self._contiguous_candidates(hull, h)
+		} else if !contig {
+			sels = self._non_contiguous_candidates(hull, h)
+		}
+
+		// add candidate deformation hulls to selection list
+		for _, s := range sels {
+			seldict[s.Range.AsArray()] = s
 		}
 	}
 
