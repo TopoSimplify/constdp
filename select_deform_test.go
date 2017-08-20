@@ -2,6 +2,7 @@ package constdp
 
 import (
 	"time"
+	"fmt"
 	"testing"
 	"simplex/geom"
 	"simplex/constdp/ln"
@@ -9,7 +10,6 @@ import (
 	"simplex/constdp/opts"
 	"github.com/franela/goblin"
 	"simplex/struct/rtree"
-	"fmt"
 	"simplex/constdp/offset"
 )
 

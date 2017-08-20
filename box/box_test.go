@@ -3,8 +3,8 @@ package box
 import (
 	"testing"
 	"simplex/geom"
-	"github.com/franela/goblin"
 	"simplex/geom/mbr"
+	"github.com/franela/goblin"
 )
 
 func TestMBRToPolygon(t *testing.T) {

@@ -9,7 +9,7 @@ import (
 	"simplex/constdp/offset"
 	"github.com/franela/goblin"
 )
-
+//@formatter:off
 
 func cmp_slices(a, b []interface{}) bool {
 	bln := len(a) == len(b)
@@ -38,12 +38,6 @@ func TestConstDP(t *testing.T) {
 			}
 
 			for i, td := range test_data {
-				if i == 10 {
-					Debug = false
-				}else {
-					Debug = false
-				}
-
 				var constraints = make([]geom.Geometry, 0)
 
 				for _, wkt := range dat_constraints {

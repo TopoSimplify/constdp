@@ -1,9 +1,9 @@
 package rng
 
 import (
-	"github.com/franela/goblin"
-	"testing"
 	"time"
+	"testing"
+	"github.com/franela/goblin"
 )
 
 func TestRange(t *testing.T) {

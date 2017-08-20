@@ -1,4 +1,5 @@
 package opts
+
 //Opts
 type Opts struct {
 	Threshold              float64
