@@ -41,7 +41,6 @@ func TestDecompose(t *testing.T) {
 			g.Assert(hulls.Len()).Equal(1)
 			h := hulls.Get(0).(*HullNode)
 			g.Assert(h.Range.AsSlice()).Equal([]int{0, len(coords) - 1})
-			g.Assert(h.Range.AsSlice()).Equal(h.PRange.AsSlice())
 		})
 	})
 }

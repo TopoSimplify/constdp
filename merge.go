@@ -26,7 +26,7 @@ func merge_contiguous_fragments_at_threshold(self *ConstDP, ha, hb *HullNode) *H
 func (self *ConstDP) merge_contiguous_fragments(ha, hb *HullNode) *HullNode {
 	var r = merge_range(ha.Range, hb.Range)
 	// i...[ha]...k...[hb]...j
-	return NewHullNode(self.Pln, r, r)
+	return NewHullNode(self.Pln, r)
 }
 
 //Merge contiguous hulls by fragment size
@@ -100,7 +100,7 @@ func (self *ConstDP) merge_contiguous_fragments_by_size(
 			delete(hdict, hr.AsArray())
 
 			// add merge
-			hdict[r.AsArray()] = NewHullNode(pln, r, r)
+			hdict[r.AsArray()] = NewHullNode(pln, r)
 
 			// add to remove list to remove , after merge
 			rm = append(rm, s)

@@ -54,7 +54,7 @@ func TestDeform(t *testing.T) {
 			if j == -1 {
 				j = n - 1
 			}
-			h := NewHullNode(pln, rng.NewRange(i, j), rng.NewRange(0, n))
+			h := NewHullNode(pln, rng.NewRange(i, j))
 			hulls = append(hulls, h)
 		}
 

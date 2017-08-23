@@ -12,8 +12,8 @@ func split_at_score_selection(self ln.Linear, hull *HullNode) (*HullNode, *HullN
 	k, _ := self.Score(self, hull.Range)
 	// -------------------------------------------
 	// i..[ha]..k..[hb]..j
-	ha := NewHullNode(self.Polyline(), rng.NewRange(i, k), rng.NewRange(i, j))
-	hb := NewHullNode(self.Polyline(), rng.NewRange(k, j), rng.NewRange(i, j))
+	ha := NewHullNode(self.Polyline(), rng.NewRange(i, k))
+	hb := NewHullNode(self.Polyline(), rng.NewRange(k, j))
 	// -------------------------------------------
 	return ha, hb
 }
@@ -21,12 +21,11 @@ func split_at_score_selection(self ln.Linear, hull *HullNode) (*HullNode, *HullN
 //split hull at indexes (index, index, ...)
 func split_at_index(self ln.Linear, hull *HullNode, idxs []int) []*HullNode {
 	//formatter:off
-	pr          := hull.Range
 	pln         := self.Polyline()
 	ranges      := hull.Range.Split(idxs)
 	sub_hulls   := make([]*HullNode, 0)
 	for _, r := range ranges {
-		sub_hulls = append(sub_hulls, NewHullNode(pln, r, pr))
+		sub_hulls = append(sub_hulls, NewHullNode(pln, r))
 	}
 	return sub_hulls
 }

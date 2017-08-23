@@ -40,7 +40,7 @@ func TestCollapsible(t *testing.T) {
 				coords := geom.NewLineStringFromWKT(wkt).Coordinates()
 				pln := ln.NewPolyline(coords)
 				n := len(coords) - 1
-				ha, hb := NewHullNode(pln, rng.NewRange(0, k), rng.NewRange(0, n)), NewHullNode(pln, rng.NewRange(k, n), rng.NewRange(0, n))
+				ha, hb := NewHullNode(pln, rng.NewRange(0, k)), NewHullNode(pln, rng.NewRange(k, n))
 				g.Assert(is_contig_hull_collapsible(hb, ha)).Equal(bln)
 			}
 		})
@@ -52,11 +52,11 @@ func TestCollapsible(t *testing.T) {
 			n := len(coords) - 1
 			pln := ln.NewPolyline(coords)
 
-			h1 := NewHullNode(pln, rng.NewRange(0, k1), rng.NewRange(0, n))
-			h2 := NewHullNode(pln, rng.NewRange(k1, k2), rng.NewRange(0, n))
-			h3 := NewHullNode(pln, rng.NewRange(k2, k3), rng.NewRange(0, n))
-			h4 := NewHullNode(pln, rng.NewRange(k3, k4), rng.NewRange(0, n))
-			h5 := NewHullNode(pln, rng.NewRange(k4, n), rng.NewRange(0, n))
+			h1 := NewHullNode(pln, rng.NewRange(0, k1))
+			h2 := NewHullNode(pln, rng.NewRange(k1, k2))
+			h3 := NewHullNode(pln, rng.NewRange(k2, k3))
+			h4 := NewHullNode(pln, rng.NewRange(k3, k4))
+			h5 := NewHullNode(pln, rng.NewRange(k4, n))
 
 			hulls := [][2]*HullNode{{h1, h4}, {h1, h2}, {h1, h5}, {h2, h3}, {h2, h4}, {h2, h5}}
 			for _, o := range hulls {

@@ -12,12 +12,11 @@ func TestHullSeg(t *testing.T) {
 	var g = goblin.Goblin(t)
 
 	create_hulls := func(ranges [][]int, coords []*geom.Point) []*HullNode {
-		n := len(coords)
 		pln := ln.NewPolyline(coords)
 		hulls := make([]*HullNode, 0)
 		for _, r := range ranges {
 			i, j := r[0], r[len(r)-1]
-			h := NewHullNode(pln, rng.NewRange(i, j), rng.NewRange(0, n))
+			h := NewHullNode(pln, rng.NewRange(i, j))
 			hulls = append(hulls, h)
 		}
 		return hulls

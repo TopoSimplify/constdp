@@ -28,13 +28,12 @@ func (s HullNodes) Less(i, j int) bool {
 type HullNode struct {
 	Pln    *ln.Polyline
 	Range  *rng.Range
-	PRange *rng.Range
 	Geom   geom.Geometry
 	PtSet  *sset.SSet
 }
 
 //New Hull Node
-func NewHullNode(pln *ln.Polyline, rng, prng *rng.Range) *HullNode {
+func NewHullNode(pln *ln.Polyline, rng *rng.Range) *HullNode {
 	coords := make([]*geom.Point, 0)
 	for _, i := range rng.Stride() {
 		x, y, idx := pln.Coords[i][0], pln.Coords[i][1], float64(i)
@@ -52,7 +51,6 @@ func NewHullNode(pln *ln.Polyline, rng, prng *rng.Range) *HullNode {
 	return &HullNode{
 		Pln:    pln,
 		Range:  rng,
-		PRange: prng,
 		Geom:   g,
 		PtSet:  ptset,
 	}

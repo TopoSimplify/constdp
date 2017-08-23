@@ -27,7 +27,7 @@ func (self *ConstDP) decompose() *deque.Deque {
 			if prg == nil {
 				prg = rg.Clone()
 			}
-			hque.Append(NewHullNode(pln, rg, prg))
+			hque.Append(NewHullNode(pln, rg))
 		} else {
 			s.Push(
 				[size]*rng.Range{rng.NewRange(k, rg.J()), rg}, // right
