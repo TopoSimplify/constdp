@@ -35,7 +35,7 @@ func (self *ConstDP) is_geom_relate_valid(hull *HullNode, ctx *ctx.CtxGeom) bool
 func (self *ConstDP) is_dist_relate_valid(hull *HullNode, ctx *ctx.CtxGeom) bool {
 	mindist := self.Opts.MinDist
 	seg     := hull_segment(self, hull)
-	ln_geom := hull.Pln.Geom
+	ln_geom := hull.SubPolyline().Geom
 
 	seg_geom := seg
 	ctx_geom := ctx.Geom
