@@ -30,6 +30,7 @@ type HullNode struct {
 	Range  *rng.Range
 	Geom   geom.Geometry
 	PtSet  *sset.SSet
+	DP     *ConstDP
 }
 
 //New Hull Node

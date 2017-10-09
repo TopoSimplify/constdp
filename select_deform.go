@@ -4,6 +4,59 @@ import (
 	"simplex/struct/rtree"
 )
 
+//find context_geom deformable hulls
+func (self *ConstDP) select_ftclass_deformation_candidates(hulldb *rtree.RTree, hull *HullNode) []*HullNode {
+	var n int
+	var inters, contig bool
+
+	seldict := make(map[[2]int]*HullNode, 0)
+	ctx_hulls := find_context_hulls(hulldb, hull, EpsilonDist)
+	// for each item in the context_geom list
+	for _, cn := range ctx_hulls {
+		n = 0
+		h := cast_as_hullnode(cn)
+
+		same_feature := hull.DP == h.DP
+		// find which item to deform against current hull
+		if same_feature { // check for contiguity
+			inters, contig, n = is_contiguous(hull, h)
+		} else {
+			// contiguity is by default false for different features
+			contig = false
+			ga, gb := hull.Geom, h.Geom
+
+			inters = ga.Intersects(gb)
+			if inters {
+				interpts := ga.Intersection(gb)
+				inters = len(interpts) > 0
+				n = len(interpts)
+			}
+		}
+
+		if !inters { // disjoint : nothing to do, continue
+			continue
+		}
+
+		var sels = make([]*HullNode, 0)
+		if contig && n > 1 { // contiguity with overlap greater than a vertex
+			sels = self._contiguous_candidates(hull, h)
+		} else if !contig {
+			sels = self._non_contiguous_candidates(hull, h)
+		}
+
+		// add candidate deformation hulls to selection list
+		for _, s := range sels {
+			seldict[s.Range.AsArray()] = s
+		}
+	}
+
+	items := make([]*HullNode, 0)
+	for _, v := range seldict {
+		items = append(items, v)
+	}
+	return items
+}
+
 //find context deformation list
 func (self *ConstDP) select_deformation_candidates(hulldb *rtree.RTree, hull *HullNode) []*HullNode {
 	seldict := make(map[[2]int]*HullNode, 0)
@@ -20,7 +73,7 @@ func (self *ConstDP) select_deformation_candidates(hulldb *rtree.RTree, hull *Hu
 		}
 
 		sels := make([]*HullNode, 0)
-		if contig && n > 1 {//contiguity with overlap greater than a vertex
+		if contig && n > 1 { //contiguity with overlap greater than a vertex
 			sels = self._contiguous_candidates(hull, h)
 		} else if !contig {
 			sels = self._non_contiguous_candidates(hull, h)
