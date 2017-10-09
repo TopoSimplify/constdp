@@ -6,8 +6,9 @@ import (
 	"simplex/struct/sset"
 )
 
-//homotopic simplification at a given threshold
+//Homotopic simplification at a given threshold
 func (self *ConstDP) Simplify(opts *opts.Opts) *sset.SSet {
+	var const_vertex_set *sset.SSet
 	self.Opts = opts
 	self.Simple = make([]*HullNode, 0)
 
@@ -16,7 +17,7 @@ func (self *ConstDP) Simplify(opts *opts.Opts) *sset.SSet {
 
 	//debug_print_hulls(self.Hulls)
 	// constrain hulls to self intersects
-	self.Hulls, _ = self.constrain_to_selfintersects(opts)
+	self.Hulls, _, const_vertex_set = self.constrain_to_selfintersects(opts)
 	//debug_print_ptset(self.Hulls)
 
 	var bln bool
@@ -25,7 +26,7 @@ func (self *ConstDP) Simplify(opts *opts.Opts) *sset.SSet {
 
 	var hulldb = rtree.NewRTree(8)
 	for !self.Hulls.IsEmpty() {
-		// assume poped hull to be valid
+		// assume popped hull to be valid
 		bln = true
 
 		// pop hull in queue
@@ -53,10 +54,10 @@ func (self *ConstDP) Simplify(opts *opts.Opts) *sset.SSet {
 		}
 	}
 
-	return simple_hulls_as_ptset(self.merge_simple_segments(hulldb), )
+	return simple_hulls_as_ptset(self.merge_simple_segments(hulldb, const_vertex_set), )
 }
 
-func (self *ConstDP) merge_simple_segments(hulldb *rtree.RTree) []*HullNode {
+func (self *ConstDP) merge_simple_segments(hulldb *rtree.RTree, const_vertex_set *sset.SSet) []*HullNode {
 	var hull *HullNode
 	var hulls = as_deque(sort_hulls(as_hullnodes(hulldb.All())))
 	var cache = make(map[[4]int]bool)
@@ -70,6 +71,10 @@ func (self *ConstDP) merge_simple_segments(hulldb *rtree.RTree) []*HullNode {
 		hull = pop_left_hull(hulls)
 
 		if hull.Range.Size() != fragment_size {
+			continue
+		}
+		//make sure hull index is not part of vertex with degree > 2
+		if const_vertex_set.Contains(hull.Range.I()) || const_vertex_set.Contains(hull.Range.J()) {
 			continue
 		}
 

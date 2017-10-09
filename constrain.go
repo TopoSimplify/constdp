@@ -58,11 +58,12 @@ func (self *ConstDP) _const_at_self_intersect_fragments(hulldb *rtree.RTree,
 }
 
 //Constrain for planar self-intersection
-func (self *ConstDP) constrain_to_selfintersects(opts *opts.Opts) (*deque.Deque, bool) {
-	if !opts.KeepSelfIntersects {
-		return self.Hulls, true
-	}
+func (self *ConstDP) constrain_to_selfintersects(opts *opts.Opts) (*deque.Deque, bool, *sset.SSet) {
 	var at_vertex_set *sset.SSet
+	if !opts.KeepSelfIntersects {
+		return self.Hulls, true, at_vertex_set
+	}
+
 	var hulldb      = rtree.NewRTree(8)
 	var self_inters = linear_self_intersection(self.Pln)
 
@@ -89,7 +90,7 @@ func (self *ConstDP) constrain_to_selfintersects(opts *opts.Opts) (*deque.Deque,
 		}
 		mcount += -1
 	}
-	return as_deque(sort_hulls(as_hullnodes(hulldb.All()))), true
+	return as_deque(sort_hulls(as_hullnodes(hulldb.All()))), true, at_vertex_set
 }
 
 //Constrain for self-intersection as a result of simplification
