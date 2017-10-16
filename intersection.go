@@ -26,12 +26,52 @@ func update_kv_count(dict map[[2]float64]*kvCount, o *geom.Point, index int) {
 	if !ok {
 		v = &kvCount{
 			count:   0,
-			indxset: sset.NewSSet(cmp.IntCmp,8),
+			indxset: sset.NewSSet(cmp.IntCmp, 8),
 		}
 		dict[k] = v
 	}
 	v.indxset.Add(index)
 	v.count += 1
+}
+
+func linear_ftclass_self_intersection(ftcls []*ConstDP) map[string]*sset.SSet {
+	var coord_dict = make(map[[2]float64]map[string]int, 0)
+	for _, self := range ftcls {
+		pln := self.Pln
+		n := self.Pln.Len()
+		for i := 0; i < n; i++ {
+			var dat map[string]int
+			var ok bool
+			var pt = pln.Coords[i]
+			var key = [2]float64{pt.X(), pt.Y()}
+
+			if dat, ok = coord_dict[key]; !ok {
+				dat = make(map[string]int, 0)
+			}
+
+			if _, ok = dat[self.Id]; !ok {
+				dat[self.Id] = i
+			}
+			coord_dict[key] = dat
+		}
+	}
+
+	var fc_junctions = make(map[string]*sset.SSet, 0)
+	for _, o := range coord_dict {
+		if len(o) > 1 {
+			for sid, idx := range o {
+				var ok bool
+				var s *sset.SSet
+
+				if s, ok = fc_junctions [sid]; !ok {
+					s = sset.NewSSet(cmp.IntCmp)
+				}
+				s.Add(idx)
+				fc_junctions[sid] = s
+			}
+		}
+	}
+	return fc_junctions
 }
 
 func linear_self_intersection(pln *ln.Polyline) []*ctx.CtxGeom {
@@ -69,7 +109,7 @@ func linear_self_intersection(pln *ln.Polyline) []*ctx.CtxGeom {
 				if s.A.Equals2D(pt) || s.B.Equals2D(pt) {
 					continue
 				}
-				skey := sset.NewSSet(cmp.IntCmp,8).Extend(s.I, s.J, other_seg.I, other_seg.J)
+				skey := sset.NewSSet(cmp.IntCmp, 8).Extend(s.I, s.J, other_seg.I, other_seg.J)
 
 				k := skey.String()
 				v, ok := self_intersects[k]

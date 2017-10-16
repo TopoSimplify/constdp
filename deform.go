@@ -5,9 +5,9 @@ import (
 )
 
 //split hull based on score selected vertex
-func (self *ConstDP) deform_hull(hulldb *rtree.RTree, selections *[]*HullNode) {
-	sort_reverse(*selections)
-	for _, hull := range *selections {
+func (self *ConstDP) deform_hulls(hulldb *rtree.RTree, selections *HullNodes) {
+	selections.Reverse()
+	for _, hull := range selections.list {
 		ha, hb := split_at_score_selection(self, hull)
 		hulldb.Remove(hull)
 
@@ -15,5 +15,5 @@ func (self *ConstDP) deform_hull(hulldb *rtree.RTree, selections *[]*HullNode) {
 		self.Hulls.AppendLeft(ha)
 	}
 	//empty selections
-	empty_hull_slice(selections)
+	selections.Empty()
 }

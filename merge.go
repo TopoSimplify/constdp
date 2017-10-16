@@ -62,9 +62,9 @@ func (self *ConstDP) merge_contiguous_fragments_by_size(
 		}
 
 		// sort hulls for consistency
-		hs := sort_hulls(as_hullnodes_from_boxes(find_context_hulls(hulldb, h, EpsilonDist)))
+		var hs = NewHullNodesFromBoxes(find_context_hulls(hulldb, h, EpsilonDist)).Sort()
 
-		for _, s := range hs {
+		for _, s := range hs.list {
 			sr := s.Range
 			if is_merged(sr){
 				continue
@@ -112,7 +112,9 @@ func (self *ConstDP) merge_contiguous_fragments_by_size(
 		}
 	}
 
-	keep  = map_to_slice(hdict, keep)
+	for _, o := range hdict {
+		keep = append(keep, o)
+	}
 	return keep, rm
 }
 

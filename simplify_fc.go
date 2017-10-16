@@ -1,107 +1,136 @@
-import constrain
-from sort import sort_hulls
-from collections import deque
-from deform import deform_hulls
-from pylib.structs.sset import SSet
-from pylib.structs.rtree import RTree
-from constdp.intersection import linear_ftclass_self_intersection
+package constdp
+
+import (
+	"simplex/struct/sset"
+	"simplex/constdp/opts"
+	"simplex/struct/deque"
+	"simplex/struct/rtree"
+)
 
 //Update hull nodes with dp instance
-func self_update(self){
-    for hull := range self.hulls{
-        hull.dp = self
-    }
+func (self *ConstDP) self_update() {
+	var hull *HullNode
+	for _, h := range *self.Hulls.DataView() {
+		hull = cast_as_hullnode(h)
+		hull.DP = self
+	}
 }
 
-
-
-func deform_ftclass_selections(queue, hulldb, selections){
-    for s in selections{
-        self = s.DP
-        deform_hulls(self, hulldb, [s])
-        self_update(self=self)
-        for  len(self.hulls){
-            queue.appendleft(self.hulls.pop())
-        }
-    }
-    del selections[:] //empty selections
+func deform_class_selections(queue *deque.Deque, hulldb *rtree.RTree, selections *HullNodes) {
+	for _, s := range selections.list {
+		self := s.DP
+		sels := NewHullNodes().Push(s)
+		self.deform_hulls(hulldb, sels)
+		self.self_update()
+		for self.Hulls.Len() > 0 {
+			queue.AppendLeft(self.Hulls.Pop())
+		}
+	}
+	selections.Empty() //empty selections
 }
 
 // Group hulls in hulldb by instance of ConstDP
-func group_hulls_by_self(hulldb){
-    smap = make(map[string][]*HullNode)
-    for h in hulldb.all() {
-        self = h.dp
-        lst = smap.get(self.id, [])
-        lst.append(h)
-        smap[self.id] = lst
-    }
+func group_hulls_by_self(hulldb *rtree.RTree) {
+	var ok bool
+	var self *ConstDP
+	var hull *HullNode
+	var selfs = make([]*ConstDP, 0)
+	var smap = make(map[string]*HullNodes)
 
-    selfs = []
-    for key, lst in smap.items(){
-        self = lst[0].dp
-        self.hulls.clear()
-        self.hulls.extend(sort_hulls(lst))
-        selfs.append(self)
-    }
+	for _, h := range NewHullNodesFromNodes(hulldb.All()).list {
+		var lst *HullNodes
+		self = h.DP
+		if lst, ok = smap[self.Id]; !ok {
+			lst = NewHullNodes()
+		}
+		lst.Push(h)
+		smap[self.Id] = lst
+	}
 
-    for self in selfs{
-        self.simple.empty() //update new simple
-        for h in self.hulls{
-            self.simple.add(*h.range)
-        }
-    }
+	for _, lst := range smap {
+		self = lst.Get(0).DP
+		self.Hulls.Clear()
+		for _, h := range lst.Sort().list {
+			self.Hulls.Append(h)
+		}
+		selfs = append(selfs, self)
+	}
+
+	for _, self := range selfs {
+		self.Simple.Empty() //update new simple
+		for _, h := range *self.Hulls.DataView() {
+			hull = cast_as_hullnode(h)
+			self.Simple.Extend(hull.Range.I(), hull.Range.J())
+		}
+	}
 }
 
 //Simplify a feature class of linear geometries
-func simplify_featureclass(selfs, opts){
-    junctions = make(map[]SSet,0)
-    if opts.keep_selfintersects{
-        junctions = linear_ftclass_self_intersection(selfs)
-    }
-    // return common.simple_hulls_as_ptset
-    for self := range selfs{
-        const_verts = junctions.get(self.id, SSet())
-        self.simplify(opts=opts, const_verts=const_verts.values())
-    }
+func SimplifyFeatureClass(selfs []*ConstDP, opts *opts.Opts) {
+	var junctions = make(map[string]*sset.SSet, 0)
+	if opts.KeepSelfIntersects {
+		junctions = linear_ftclass_self_intersection(selfs)
+	}
 
-    queue = []
-    hulldb = RTree(8, attribute=('minx', 'miny', 'maxx', 'maxy'))
-    for self in selfs{
-        self_update(self)
-        queue.extend([h for h in self.hulls])
-        self.hulls.clear()  // empty deque, this is for future splits
-    }
+	// return common.simple_hulls_as_ptset
+	for _, self := range selfs {
+		var const_verts []int
+		if v, ok := junctions[self.Id]; ok {
+			const_verts = as_ints(v.Values())
+		} else {
+			const_verts = make([]int, 0)
+		}
+		self.Simplify(opts, const_verts)
+	}
 
-    selections = []
-    queue = deque(queue)
-    while len(queue)>0:
-        // assume poped hull to be valid
-        hull = queue.popleft()
-        self = hull.dp
-        // insert hull into hull db
-        hulldb.insert(hull)
-        // find hull neighbours
-        // self intersection constraint
-        // can self intersect with itself but not with other lines
-        bln = constrain.self_ftclass_intersection(self=self, hull=hull, hulldb=hulldb, selections=selections)
+	var hlist = make([]*HullNode, 0)
+	var hulldb = rtree.NewRTree(8)
+	for _, self := range selfs {
+		self.self_update()
+		for _, h := range *self.Hulls.DataView() {
+			hlist = append(hlist, cast_as_hullnode(h))
+		}
+		self.Hulls.Clear() // empty deque, this is for future splits
+	}
 
-        if len(selections) > 0{
-            deform_ftclass_selections(queue=queue, hulldb=hulldb, selections=selections)
-        }
+	var bln bool
+	var self *ConstDP
+	var hull *HullNode
+	var selections = NewHullNodes()
+	var dque = deque.NewDeque(len(hlist))
 
-        if ! bln{
-            continue
-        }
+	for _, h := range hlist {
+		dque.Append(h)
+	}
 
-        // context_geom geometry constraint
-        constrain.context_relation(self=self, hull=hull, selections=selections)
+	for !dque.IsEmpty() {
+		//fmt.Println("queue size :", dque.Len())
+		// assume poped hull to be valid
+		hull = cast_as_hullnode(dque.PopLeft())
+		self = hull.DP
 
-        if len(selections) > 0{
-            deform_ftclass_selections(queue=queue, hulldb=hulldb, selections=selections)
-        }
+		// insert hull into hull db
+		hulldb.Insert(hull)
 
-    group_hulls_by_self(hulldb=hulldb)
+		// find hull neighbours
+		// self intersection constraint
+		// can self intersect with itself but not with other lines
+		bln = self.constrain_ftclass_intersection(hull, hulldb, selections)
+
+		if !selections.IsEmpty() {
+			deform_class_selections(dque, hulldb, selections)
+		}
+
+		if !bln {
+			continue
+		}
+
+		// context_geom geometry constraint
+		self.constrain_context_relation(hull, selections)
+
+		if !selections.IsEmpty() {
+			deform_class_selections(dque, hulldb, selections)
+		}
+	}
+	group_hulls_by_self(hulldb)
 }
-
-

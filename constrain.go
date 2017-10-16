@@ -16,7 +16,7 @@ func (self *ConstDP) _const_at_self_intersect_fragments(hulldb *rtree.RTree,
 	var fragment_size = 1
 
 	var hsubs []*HullNode
-	var hulls []*HullNode
+	var hulls *HullNodes
 	var idxs []int
 	var unmerged = make(map[[2]int]*HullNode, 0)
 
@@ -25,10 +25,10 @@ func (self *ConstDP) _const_at_self_intersect_fragments(hulldb *rtree.RTree,
 			continue
 		}
 
-		hulls = sort_hulls(as_hullnodes_from_boxes(find_context_neighbs(hulldb, inter, EpsilonDist)))
+		hulls = NewHullNodesFromBoxes(find_context_neighbs(hulldb, inter, EpsilonDist)).Sort()
 
 		idxs = as_ints(inter.Meta.SelfVertices.Values())
-		for _, hull := range hulls {
+		for _, hull := range hulls.list {
 			hsubs = split_at_index(self, hull, idxs)
 
 			if len(hsubs) == 0 && (hull.Range.Size() == fragment_size) {
@@ -58,7 +58,7 @@ func (self *ConstDP) _const_at_self_intersect_fragments(hulldb *rtree.RTree,
 }
 
 //Constrain for planar self-intersection
-func (self *ConstDP) constrain_to_selfintersects(opts *opts.Opts) (*deque.Deque, bool, *sset.SSet) {
+func (self *ConstDP) constrain_to_selfintersects(opts *opts.Opts, const_verts []int) (*deque.Deque, bool, *sset.SSet) {
 	var at_vertex_set *sset.SSet
 	if !opts.KeepSelfIntersects {
 		return self.Hulls, true, at_vertex_set
@@ -80,6 +80,20 @@ func (self *ConstDP) constrain_to_selfintersects(opts *opts.Opts) (*deque.Deque,
 		}
 	}
 
+	//update  const vertices if any
+	//add const vertices as self inters
+	for _, i := range const_verts {
+		if at_vertex_set.Contains(i) { //exclude already self intersects
+			continue
+		}
+		at_vertex_set.Add(i)
+		pt := self.Pln.Coordinate(i)
+		cg := ctx.NewCtxGeom(pt.Clone(), i, i).AsSelfVertex()
+		cg.Meta.SelfVertices = sset.NewSSet(cmp.IntCmp, 4).Add(i)
+		cg.Meta.SelfNonVertices = sset.NewSSet(cmp.IntCmp, 4)
+		self_inters = append(self_inters, cg)
+	}
+
 	//constrain fragments aroud self intersects
 	//try to merge fragments from first attempt
 	var mcount = 2
@@ -90,14 +104,13 @@ func (self *ConstDP) constrain_to_selfintersects(opts *opts.Opts) (*deque.Deque,
 		}
 		mcount += -1
 	}
-	return as_deque(sort_hulls(as_hullnodes(hulldb.All()))), true, at_vertex_set
+	return NewHullNodesFromNodes(hulldb.All()).Sort().AsDeque(), true, at_vertex_set
 }
 
 //Constrain for self-intersection as a result of simplification
 //returns boolean : is hull collapsible
-func (self *ConstDP) constrain_ftclass_intersection(hull *HullNode, hulldb *rtree.RTree, selections *[]*HullNode) bool {
+func (self *ConstDP) constrain_ftclass_intersection(hull *HullNode, hulldb *rtree.RTree, selections *HullNodes) bool {
 	var bln = true
-	var sels = *selections
 	//find hull neighbours
 	var hulls = self.select_ftclass_deformation_candidates(hulldb, hull)
 	for _, h := range hulls {
@@ -105,15 +118,14 @@ func (self *ConstDP) constrain_ftclass_intersection(hull *HullNode, hulldb *rtre
 		if bln && (h == hull) {
 			bln = false // cmp ref
 		}
-		sels = append(sels, h)
+		selections.Push(h)
 	}
-	*selections = sels
 	return bln
 }
 
 //Constrain for self-intersection as a result of simplification
 //returns boolean : is hull collapsible
-func (self *ConstDP) constrain_self_intersection(hull *HullNode, hulldb *rtree.RTree, selections *[]*HullNode) bool {
+func (self *ConstDP) constrain_self_intersection(hull *HullNode, hulldb *rtree.RTree, selections *HullNodes) bool {
 	//assume hull is valid and proof otherwise
 	var bln = true
 	// find hull neighbours
@@ -123,7 +135,7 @@ func (self *ConstDP) constrain_self_intersection(hull *HullNode, hulldb *rtree.R
 		if bln && (h == hull) {
 			bln = false //cmp &
 		}
-		*selections = append(*selections, h)
+		selections.Push(h)
 	}
 
 	return bln
@@ -132,7 +144,7 @@ func (self *ConstDP) constrain_self_intersection(hull *HullNode, hulldb *rtree.R
 //Constrain for context neighbours
 // finds the collapsibility of hull with respect to context hull neighbours
 // if hull is deformable, its added to selections
-func (self *ConstDP) constrain_context_relation(hull *HullNode, selections *[]*HullNode) bool {
+func (self *ConstDP) constrain_context_relation(hull *HullNode, selections *HullNodes) bool {
 	var bln = true
 
 	// find context neighbours - if valid
@@ -157,7 +169,7 @@ func (self *ConstDP) constrain_context_relation(hull *HullNode, selections *[]*H
 	}
 
 	if !bln {
-		*selections = append(*selections, hull)
+		selections.Push(hull)
 	}
 
 	return bln

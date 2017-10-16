@@ -9,21 +9,6 @@ import (
 	"simplex/constdp/seg"
 )
 
-type HullNodes []*HullNode
-
-func (s HullNodes) Len() int {
-	return len(s)
-}
-
-func (s HullNodes) Swap(i, j int) {
-	s[i], s[j] = s[j], s[i]
-}
-
-func (s HullNodes) Less(i, j int) bool {
-	return s[i].Range.I() < s[j].Range.I()
-}
-
-
 //hull node
 type HullNode struct {
 	Pln    *ln.Polyline
@@ -56,7 +41,6 @@ func NewHullNode(pln *ln.Polyline, rng *rng.Range) *HullNode {
 		PtSet:  ptset,
 	}
 }
-
 
 //implements igeom interface
 func (o *HullNode) Geometry() geom.Geometry{

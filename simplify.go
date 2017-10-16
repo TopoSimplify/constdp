@@ -7,22 +7,27 @@ import (
 )
 
 //Homotopic simplification at a given threshold
-func (self *ConstDP) Simplify(opts *opts.Opts) *sset.SSet {
+func (self *ConstDP) Simplify(opts *opts.Opts, const_vertices ...[]int) *ConstDP {
 	var const_vertex_set *sset.SSet
-	self.Opts = opts
-	self.Simple = make([]*HullNode, 0)
+	var const_verts = make([]int, 0)
+	if len(const_vertices) > 0 {
+		const_verts = const_vertices[0]
+	}
 
+	self.Simple.Empty()
+	self.Opts = opts
 	self.Hulls = self.decompose()
+
 	//debug_print_ptset(self.Hulls)
 
 	//debug_print_hulls(self.Hulls)
 	// constrain hulls to self intersects
-	self.Hulls, _, const_vertex_set = self.constrain_to_selfintersects(opts)
+	self.Hulls, _, const_vertex_set = self.constrain_to_selfintersects(opts, const_verts)
 	//debug_print_ptset(self.Hulls)
 
 	var bln bool
 	var hull *HullNode
-	var selections =  make([]*HullNode, 0)
+	var selections  = NewHullNodes()
 
 	var hulldb = rtree.NewRTree(8)
 	for !self.Hulls.IsEmpty() {
@@ -37,10 +42,11 @@ func (self *ConstDP) Simplify(opts *opts.Opts) *sset.SSet {
 
 		// self intersection constraint
 		if bln && self.Opts.AvoidNewSelfIntersects {
-			bln = self.constrain_self_intersection(hull, hulldb, &selections)
+			bln = self.constrain_self_intersection(hull, hulldb, selections)
 		}
-		if len(selections) > 0 {
-			self.deform_hull(hulldb, &selections)
+
+		if !selections.IsEmpty() {
+			self.deform_hulls(hulldb, selections)
 		}
 
 		if !bln {
@@ -48,20 +54,30 @@ func (self *ConstDP) Simplify(opts *opts.Opts) *sset.SSet {
 		}
 
 		// context_geom geometry constraint
-		bln = self.constrain_context_relation(hull,  &selections)
-		if len(selections) > 0 {
-			self.deform_hull(hulldb, &selections)
+		bln = self.constrain_context_relation(hull, selections)
+		if !selections.IsEmpty() {
+			self.deform_hulls(hulldb, selections)
 		}
 	}
 
-	return simple_hulls_as_ptset(self.merge_simple_segments(hulldb, const_vertex_set), )
+	self.merge_simple_segments(hulldb, const_vertex_set)
+
+	self.Hulls.Clear()
+	self.Simple.Empty()
+	for _, h := range NewHullNodesFromNodes(hulldb.All()).Sort().list {
+		self.Hulls.Append(h)
+		self.Simple.Extend(h.Range.I(), h.Range.J())
+	}
+	return self
 }
 
-func (self *ConstDP) merge_simple_segments(hulldb *rtree.RTree, const_vertex_set *sset.SSet) []*HullNode {
-	var hull *HullNode
-	var hulls = as_deque(sort_hulls(as_hullnodes(hulldb.All())))
-	var cache = make(map[[4]int]bool)
+//Merge segment fragments where possible
+func (self *ConstDP) merge_simple_segments(hulldb *rtree.RTree, const_vertex_set *sset.SSet) {
 	var fragment_size = 1
+	var hull *HullNode
+	var neighbs *HullNodes
+	var cache = make(map[[4]int]bool)
+	var hulls = NewHullNodesFromNodes(hulldb.All()).Sort().AsDeque()
 
 	//fmt.Println("After constraints:")
 	//DebugPrintPtSet(hulls)
@@ -73,6 +89,7 @@ func (self *ConstDP) merge_simple_segments(hulldb *rtree.RTree, const_vertex_set
 		if hull.Range.Size() != fragment_size {
 			continue
 		}
+
 		//make sure hull index is not part of vertex with degree > 2
 		if const_vertex_set.Contains(hull.Range.I()) || const_vertex_set.Contains(hull.Range.J()) {
 			continue
@@ -81,15 +98,17 @@ func (self *ConstDP) merge_simple_segments(hulldb *rtree.RTree, const_vertex_set
 		hulldb.Remove(hull)
 
 		// find context neighbours
-		neighbs := as_hullnodes_from_boxes(find_context_hulls(hulldb, hull, EpsilonDist))
+		neighbs = NewHullNodesFromBoxes(find_context_hulls(hulldb, hull, EpsilonDist))
 
 		// find context neighbours
 		prev, nxt := extract_neighbours(hull, neighbs)
 
 		// find mergeable neihbs contig
+		var key [4]int
 		var merge_prev, merge_nxt *HullNode
+
 		if prev != nil {
-			key := cache_key(prev, hull)
+			key = cache_key(prev, hull)
 			if !cache[key] {
 				add_to_merge_cache(cache, &key)
 				merge_prev = merge_contiguous_fragments_at_threshold(self, prev, hull)
@@ -97,20 +116,19 @@ func (self *ConstDP) merge_simple_segments(hulldb *rtree.RTree, const_vertex_set
 		}
 
 		if nxt != nil {
-			key := cache_key(hull, nxt)
+			key = cache_key(hull, nxt)
 			if !cache[key] {
 				add_to_merge_cache(cache, &key)
 				merge_nxt = merge_contiguous_fragments_at_threshold(self, hull, nxt)
 			}
 		}
 
-		var merged = false
-
+		var merged bool
 		//nxt, prev
 		if !merged && merge_nxt != nil {
 			hulldb.Remove(nxt)
 			if self.is_merge_simplx_valid(merge_nxt, hulldb) {
-				h := cast_as_hullnode(hulls.First())
+				var h = cast_as_hullnode(hulls.First())
 				if h == nxt {
 					hulls.PopLeft()
 				}
@@ -124,8 +142,8 @@ func (self *ConstDP) merge_simple_segments(hulldb *rtree.RTree, const_vertex_set
 
 		if !merged && merge_prev != nil {
 			hulldb.Remove(prev)
+			//prev cannot exist since moving from left --- right
 			if self.is_merge_simplx_valid(merge_prev, hulldb) {
-				//prev cannot exist since moving from left --- right
 				hulldb.Insert(merge_prev)
 				merged = true
 			} else {
@@ -137,28 +155,25 @@ func (self *ConstDP) merge_simple_segments(hulldb *rtree.RTree, const_vertex_set
 		if !merged {
 			hulldb.Insert(hull)
 		}
-
 	}
-
-	return sort_hulls(as_hullnodes(hulldb.All()))
 }
 
 func (self *ConstDP) is_merge_simplx_valid(hull *HullNode, hulldb *rtree.RTree) bool {
-	var bln  = true
-	var side_effects = make([]*HullNode, 0)
+	var bln = true
+	var side_effects = NewHullNodes()
 
 	if bln && self.Opts.AvoidNewSelfIntersects {
 		// self intersection constraint
-		bln = self.constrain_self_intersection(hull, hulldb,  &side_effects)
+		bln = self.constrain_self_intersection(hull, hulldb, side_effects)
 	}
 
-	if len(side_effects) > 0 || !bln {
+	if !side_effects.IsEmpty() || !bln {
 		return false
 	}
 
 	// context geometry constraint
-	bln = self.constrain_context_relation(hull,  &side_effects)
-	return len(side_effects) == 0 && bln
+	bln = self.constrain_context_relation(hull, side_effects)
+	return side_effects.IsEmpty() && bln
 }
 
 func cache_key(a, b *HullNode) [4]int {

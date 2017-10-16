@@ -96,9 +96,9 @@ func (self *ConstDP) select_deformation_candidates(hulldb *rtree.RTree, hull *Hu
 func (self *ConstDP) _contiguous_candidates(a, b *HullNode) []*HullNode {
 	var selection = make([]*HullNode, 0)
 	// compute sidedness relation between contiguous hulls to avoid hull flip
-	hulls := sort_hulls([]*HullNode{a, b})
+	hulls := NewHullNodes().Extend(a, b).Sort()
 	//future should not affect the past
-	ha, hb := hulls[0], hulls[1]
+	ha, hb := hulls.list[0], hulls.list[1]
 
 	//all hulls that are simple should be collapsible
 	// if not collapsible -- add to selection for deformation

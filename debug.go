@@ -6,19 +6,19 @@ import (
 )
 
 func debug_print_ptset(hulls *deque.Deque) {
-	fmt.Println(simple_hulls_as_ptset(debug_dque(hulls)))
+	fmt.Println(debug_dque(hulls).AsPointSet())
 }
 
 func debug_print_hulls(dq *deque.Deque) {
-	for _, h := range debug_dque(dq) {
+	for _, h := range debug_dque(dq).list {
 		fmt.Println(h.Geom.WKT())
 	}
 }
 
-func debug_dque(dq *deque.Deque) []*HullNode {
-	hulls := make([]*HullNode, 0)
+func debug_dque(dq *deque.Deque) *HullNodes {
+	hulls := NewHullNodes()
 	for _, o := range *dq.DataView() {
-		hulls = append(hulls, o.(*HullNode))
+		hulls.Push(o.(*HullNode))
 	}
 	return hulls
 }

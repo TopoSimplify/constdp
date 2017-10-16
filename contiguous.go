@@ -1,9 +1,9 @@
 package constdp
 
-func extract_neighbours(hull *HullNode, neighbs []*HullNode) (*HullNode, *HullNode) {
+func extract_neighbours(hull *HullNode, neighbs *HullNodes) (*HullNode, *HullNode) {
 	var prev, nxt *HullNode
 	var i, j = hull.Range.I(), hull.Range.J()
-	for _, h := range neighbs {
+	for _, h := range neighbs.list {
 		if h != hull {
 			if i == h.Range.J() {
 				prev = h
