@@ -10,7 +10,9 @@ import (
 )
 
 const (
-	z = 2
+	x = iota
+	y
+	z
 )
 
 //hull node
@@ -24,25 +26,28 @@ type HullNode struct {
 
 //New Hull Node
 func NewHullNode(polyline *pln.Polyline, rng *rng.Range) *HullNode {
-	var coords = make([]*geom.Point, 0)
-	for i := range rng.Stride() {
-		pt := polyline.Coordinates[i].Clone()
+	var ptset *sset.SSet
+	var pt *geom.Point
+	var chull []*geom.Point
+	var coords = make([]*geom.Point, 0, rng.Size()+1)
+
+	for _, i := range rng.Stride() {
+		pt = polyline.Coordinates[i].Clone()
 		pt[z] = float64(i)
 		coords = append(coords, pt)
 	}
 
-	convex_hull := geom.ConvexHull(coords, false)
+	chull = geom.ConvexHull(coords, false)
 
-	ptset := sset.NewSSet(PointIndexCmp)
-	for _, pt := range convex_hull {
+	ptset = sset.NewSSet(PointIndexCmp)
+	for _, pt = range chull {
 		ptset.Add(pt)
 	}
 
-	g := hull_geom(convex_hull)
 	return &HullNode{
 		Pln:   polyline,
 		Range: rng,
-		Geom:  g,
+		Geom:  hull_geom(chull),
 		PtSet: ptset,
 	}
 }
