@@ -3,8 +3,8 @@ package constdp
 import (
 	"time"
 	"testing"
-	"simplex/constdp/opts"
-	"simplex/constdp/offset"
+	"simplex/opts"
+	"simplex/offset"
 	"github.com/intdxdt/geom"
 	"github.com/franela/goblin"
 )
@@ -26,7 +26,7 @@ func TestConstDP_FC(t *testing.T) {
 		for _, tree := range forest {
 			var coords = make([]*geom.Point, 0)
 			for _, i := range tree.Simple.Values() {
-				coords = append(coords, tree.Pln.Coords[i.(int)])
+				coords = append(coords, tree.Pln.Coordinates[i.(int)])
 			}
 			simple_lns = append(simple_lns, geom.NewLineString(coords))
 		}

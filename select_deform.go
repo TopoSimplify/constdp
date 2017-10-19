@@ -129,8 +129,8 @@ func (self *ConstDP) _non_contiguous_candidates(a, b *HullNode) []*HullNode {
 	aseg_geom := aseg.Segment
 	bseg_geom := bseg.Segment
 
-	aln_geom := aln.Geom
-	bln_geom := bln.Geom
+	aln_geom := aln.Geometry
+	bln_geom := bln.Geometry
 
 	aseg_inters_bseg := aseg_geom.Intersects(bseg_geom)
 	aseg_inters_bln := aseg_geom.Intersects(bln_geom)

@@ -12,7 +12,7 @@ func is_contig_hull_collapsible(ha, hb *HullNode) bool {
 		return true
 	}
 
-	pln := ha.Pln.Coordinates()
+	pln := ha.Pln.Coordinates
 	pt_at := func(i int) *geom.Point {
 		return geom.NewPoint(pln[i][:2])
 	}

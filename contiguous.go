@@ -19,7 +19,7 @@ func extract_neighbours(hull *HullNode, neighbs *HullNodes) (*HullNode, *HullNod
 func is_contiguous(a, b *HullNode) (bool, bool, int) {
 	//@formatter:off
 	pln         := a.Pln
-	coords      := pln.Coordinates()
+	coords      := pln.Coordinates
 	ga          := a.Geom
 	gb          := b.Geom
 	contig      := false

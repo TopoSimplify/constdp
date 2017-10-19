@@ -6,32 +6,32 @@ import (
 	"github.com/intdxdt/mbr"
 	"github.com/intdxdt/math"
 	"github.com/intdxdt/rtree"
-	"simplex/constdp/ln"
-	"simplex/constdp/seg"
-	"simplex/constdp/ctx"
-	"simplex/constdp/box"
+	"simplex/pln"
+	"simplex/seg"
+	"simplex/ctx"
+	"simplex/box"
 )
 
 //Direction Relate
-func DirectionRelate(pln *ln.Polyline, g geom.Geometry) string {
-	segdb := rtree.NewRTree(8)
-	objs := make([]rtree.BoxObj, 0)
-	for _, s := range pln.Segments() {
+func DirectionRelate(polyline *pln.Polyline, g geom.Geometry) string {
+	var segdb = rtree.NewRTree(8)
+	var objs = make([]rtree.BoxObj, 0)
+	for _, s := range polyline.Segments() {
 		objs = append(objs, ctx.NewCtxGeom(s, s.I, s.J).AsSelfSegment())
 	}
 	segdb.Load(objs)
 
-	lnbox   := pln.BBox()
-	gbox    := g.BBox()
-	extbox  := gbox.Clone()
+	var lnbox   = polyline.BBox()
+	var gbox    = g.BBox()
+	var extbox  = gbox.Clone()
 	extbox.ExpandIncludeMBR(lnbox)
 
-	delta  := math.MaxF64(extbox.Height(), extbox.Width()) / 2.0
-	uppper := [2]float64 {
+	var delta  = math.MaxF64(extbox.Height(), extbox.Width()) / 2.0
+	var uppper = [2]float64 {
 		extbox.MaxX() + delta,
 		extbox.MaxY() + delta,
 	}
-	lower := [2]float64 {
+	var lower = [2]float64 {
 		extbox.MinX() - delta,
 		extbox.MinY() - delta,
 	}

@@ -2,7 +2,7 @@ package constdp
 
 import (
 	"sort"
-	"simplex/constdp/cmp"
+	"github.com/intdxdt/cmp"
 	"github.com/intdxdt/rtree"
 	"github.com/intdxdt/deque"
 	"github.com/intdxdt/sset"
@@ -89,7 +89,7 @@ func (self *HullNodes) AsDeque() *deque.Deque {
 }
 
 func (self *HullNodes) AsPointSet() *sset.SSet {
-	var set = sset.NewSSet(cmp.IntCmp)
+	var set = sset.NewSSet(cmp.Int)
 	for _, o := range self.list {
 		set.Extend(o.Range.I(), o.Range.J())
 	}

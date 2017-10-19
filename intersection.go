@@ -1,13 +1,13 @@
 package constdp
 
 import (
+	"simplex/pln"
+	"simplex/seg"
+	"github.com/intdxdt/cmp"
+	"simplex/ctx"
 	"github.com/intdxdt/geom"
-	"simplex/constdp/ln"
-	"simplex/constdp/seg"
 	"github.com/intdxdt/sset"
 	"github.com/intdxdt/rtree"
-	"simplex/constdp/cmp"
-	"simplex/constdp/ctx"
 )
 
 type kvCount struct {
@@ -26,7 +26,7 @@ func update_kv_count(dict map[[2]float64]*kvCount, o *geom.Point, index int) {
 	if !ok {
 		v = &kvCount{
 			count:   0,
-			indxset: sset.NewSSet(cmp.IntCmp, 8),
+			indxset: sset.NewSSet(cmp.Int, 8),
 		}
 		dict[k] = v
 	}
@@ -37,12 +37,12 @@ func update_kv_count(dict map[[2]float64]*kvCount, o *geom.Point, index int) {
 func linear_ftclass_self_intersection(ftcls []*ConstDP) map[string]*sset.SSet {
 	var coord_dict = make(map[[2]float64]map[string]int, 0)
 	for _, self := range ftcls {
-		pln := self.Pln
+		polyline := self.Pln
 		n := self.Pln.Len()
 		for i := 0; i < n; i++ {
 			var dat map[string]int
 			var ok bool
-			var pt = pln.Coords[i]
+			var pt = polyline.Coordinates[i]
 			var key = [2]float64{pt.X(), pt.Y()}
 
 			if dat, ok = coord_dict[key]; !ok {
@@ -64,7 +64,7 @@ func linear_ftclass_self_intersection(ftcls []*ConstDP) map[string]*sset.SSet {
 				var s *sset.SSet
 
 				if s, ok = fc_junctions [sid]; !ok {
-					s = sset.NewSSet(cmp.IntCmp)
+					s = sset.NewSSet(cmp.Int)
 				}
 				s.Add(idx)
 				fc_junctions[sid] = s
@@ -74,12 +74,12 @@ func linear_ftclass_self_intersection(ftcls []*ConstDP) map[string]*sset.SSet {
 	return fc_junctions
 }
 
-func linear_self_intersection(pln *ln.Polyline) []*ctx.CtxGeom {
+func linear_self_intersection(polyline *pln.Polyline) []*ctx.CtxGeom {
 	var tree = *rtree.NewRTree(8)
 	var dict = make(map[[2]float64]*kvCount)
 
 	var data = make([]rtree.BoxObj, 0)
-	for _, s := range pln.Segments() {
+	for _, s := range polyline.Segments() {
 		data = append(data, s)
 	}
 	tree.Load(data)
@@ -109,7 +109,9 @@ func linear_self_intersection(pln *ln.Polyline) []*ctx.CtxGeom {
 				if s.A.Equals2D(pt) || s.B.Equals2D(pt) {
 					continue
 				}
-				skey := sset.NewSSet(cmp.IntCmp, 8).Extend(s.I, s.J, other_seg.I, other_seg.J)
+				skey := sset.NewSSet(cmp.Int, 8).Extend(
+					s.I, s.J, other_seg.I, other_seg.J,
+				)
 
 				k := skey.String()
 				v, ok := self_intersects[k]

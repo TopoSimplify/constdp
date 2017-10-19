@@ -4,11 +4,11 @@ import (
 	"time"
 	"testing"
 	"github.com/intdxdt/geom"
-	"simplex/constdp/cmp"
-	"simplex/constdp/opts"
+	"github.com/intdxdt/cmp"
+	"simplex/opts"
 	"github.com/intdxdt/sset"
 	"github.com/intdxdt/rtree"
-	"simplex/constdp/offset"
+	"simplex/offset"
 	"github.com/franela/goblin"
 )
 
@@ -52,7 +52,7 @@ func TestMergeHull(t *testing.T) {
 			}
 			hulldb.Load(boxes)
 
-			vertex_set := sset.NewSSet(cmp.IntCmp)
+			vertex_set := sset.NewSSet(cmp.Int)
 			var unmerged = make(map[[2]int]*HullNode,0)
 			keep, rm := homo.merge_contiguous_fragments_by_size(splits, hulldb, vertex_set, unmerged, 1)
 			g.Assert(len(keep)).Equal(2)
@@ -66,7 +66,7 @@ func TestMergeHull(t *testing.T) {
 			for i, v := range splits {boxes[i] = v}
 			hulldb.Load(boxes)
 
-			vertex_set = sset.NewSSet(cmp.IntCmp)
+			vertex_set = sset.NewSSet(cmp.Int)
 			unmerged = make(map[[2]int]*HullNode,0)
 			keep, rm = homo.merge_contiguous_fragments_by_size(splits, hulldb, vertex_set, unmerged, 1)
 			g.Assert(len(keep)).Equal(3)

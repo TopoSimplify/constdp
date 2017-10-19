@@ -2,10 +2,10 @@ package constdp
 
 import (
 	"github.com/intdxdt/sset"
-	"simplex/constdp/ctx"
-	"simplex/constdp/cmp"
+	"simplex/ctx"
+	"github.com/intdxdt/cmp"
 	"github.com/intdxdt/rtree"
-	"simplex/constdp/opts"
+	"simplex/opts"
 	"github.com/intdxdt/deque"
 )
 
@@ -73,7 +73,7 @@ func (self *ConstDP) constrain_to_selfintersects(opts *opts.Opts, const_verts []
 	}
 	hulldb.Load(data)
 
-	at_vertex_set = sset.NewSSet(cmp.IntCmp)
+	at_vertex_set = sset.NewSSet(cmp.Int)
 	for _, inter := range self_inters {
 		if inter.IsSelfVertex() {
 			at_vertex_set = at_vertex_set.Union(inter.Meta.SelfVertices)
@@ -89,8 +89,8 @@ func (self *ConstDP) constrain_to_selfintersects(opts *opts.Opts, const_verts []
 		at_vertex_set.Add(i)
 		pt := self.Pln.Coordinate(i)
 		cg := ctx.NewCtxGeom(pt.Clone(), i, i).AsSelfVertex()
-		cg.Meta.SelfVertices = sset.NewSSet(cmp.IntCmp, 4).Add(i)
-		cg.Meta.SelfNonVertices = sset.NewSSet(cmp.IntCmp, 4)
+		cg.Meta.SelfVertices = sset.NewSSet(cmp.Int, 4).Add(i)
+		cg.Meta.SelfNonVertices = sset.NewSSet(cmp.Int, 4)
 		self_inters = append(self_inters, cg)
 	}
 

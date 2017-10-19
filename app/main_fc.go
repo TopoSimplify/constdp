@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"github.com/intdxdt/geom"
 	"simplex/constdp"
-	"simplex/constdp/opts"
-	"simplex/constdp/offset"
+	"simplex/opts"
+	"simplex/offset"
 )
 
 var constraints_wkt []string

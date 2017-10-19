@@ -5,7 +5,7 @@ import (
 	"github.com/intdxdt/geom"
 	"github.com/intdxdt/mbr"
 	"github.com/intdxdt/rtree"
-	"simplex/constdp/box"
+	"simplex/box"
 	"github.com/franela/goblin"
 )
 

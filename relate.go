@@ -2,8 +2,8 @@ package constdp
 
 import (
 	"github.com/intdxdt/geom"
-	"simplex/constdp/ln"
-	"simplex/constdp/ctx"
+	"simplex/pln"
+	"simplex/ctx"
 )
 
 //checks if score is valid at threshold of constrained dp
@@ -13,17 +13,17 @@ func (self *ConstDP) is_score_relate_valid(val float64) bool {
 
 //geometry relate
 func (self *ConstDP) is_geom_relate_valid(hull *HullNode, ctx *ctx.CtxGeom) bool {
-	seg    := hull_segment(self, hull)
-	subpln := self.Pln.SubPolyline(hull.Range)
+	var seg    = hull_segment(self, hull)
+	var subpln = self.Pln.SubPolyline(hull.Range)
 
-	ln_geom  := subpln.Geom
-	seg_geom := seg
-	ctx_geom := ctx.Geom
+	var ln_geom  = subpln.Geometry
+	var seg_geom = seg
+	var ctx_geom = ctx.Geom
 
-	ln_g_inter  := ln_geom.Intersects(ctx_geom)
-	seg_g_inter := seg_geom.Intersects(ctx_geom)
+	var ln_g_inter  = ln_geom.Intersects(ctx_geom)
+	var seg_g_inter = seg_geom.Intersects(ctx_geom)
 
-	bln := true
+	var bln = true
 	if (seg_g_inter && !ln_g_inter)  || (!seg_g_inter && ln_g_inter){
 		bln = false
 	}
@@ -33,15 +33,15 @@ func (self *ConstDP) is_geom_relate_valid(hull *HullNode, ctx *ctx.CtxGeom) bool
 
 //distance relate
 func (self *ConstDP) is_dist_relate_valid(hull *HullNode, ctx *ctx.CtxGeom) bool {
-	mindist := self.Opts.MinDist
-	seg     := hull_segment(self, hull)
-	ln_geom := hull.SubPolyline().Geom
+	var mindist = self.Opts.MinDist
+	var seg     = hull_segment(self, hull)
+	var ln_geom = hull.SubPolyline().Geometry
 
-	seg_geom := seg
-	ctx_geom := ctx.Geom
+	var seg_geom = seg
+	var ctx_geom = ctx.Geom
 
-	_or := ln_geom.Distance(ctx_geom) // original relate
-	dr  := seg_geom.Distance(ctx_geom) // new relate
+	var _or = ln_geom.Distance(ctx_geom) // original relate
+	var dr  = seg_geom.Distance(ctx_geom) // new relate
 
 	bln := dr >= mindist
 	if (!bln) && _or < mindist {//if not bln and _or <= mindist:
@@ -57,9 +57,9 @@ func (self *ConstDP) is_dist_relate_valid(hull *HullNode, ctx *ctx.CtxGeom) bool
 //direction relate
 func (self *ConstDP) is_dir_relate_valid(hull *HullNode, ctx *ctx.CtxGeom) bool {
 	subpln  := self.Pln.SubPolyline(hull.Range)
-	segment := ln.NewPolyline([]*geom.Point{
-		self.Pln.Coords[hull.Range.I()],
-		self.Pln.Coords[hull.Range.J()],
+	segment := pln.New([]*geom.Point{
+		self.Pln.Coordinates[hull.Range.I()],
+		self.Pln.Coordinates[hull.Range.J()],
 	})
 
 	lnr  := DirectionRelate(subpln,  ctx.Geom)

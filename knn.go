@@ -2,10 +2,10 @@ package constdp
 
 import (
 	"github.com/intdxdt/rtree"
-	"simplex/constdp/igeom"
+	"simplex/igeom"
 	"github.com/intdxdt/mbr"
-	"simplex/constdp/ctx"
-	"simplex/constdp/box"
+	"simplex/ctx"
+	"simplex/box"
 )
 
 //find knn

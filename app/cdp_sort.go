@@ -1,13 +1,13 @@
 package main
 
 import (
-	"github.com/intdxdt/geom"
-	"simplex/constdp/ln"
-	"simplex/constdp/rng"
-	"github.com/intdxdt/sset"
 	"sort"
 	"fmt"
 	"strings"
+	"simplex/pln"
+	"simplex/rng"
+	"github.com/intdxdt/geom"
+	"github.com/intdxdt/sset"
 )
 
 type HullNodes []*HullNode
@@ -26,7 +26,7 @@ func (s HullNodes) Less(i, j int) bool {
 
 //hull node
 type HullNode struct {
-	Pln    *ln.Polyline
+	Pln    *pln.Polyline
 	Range  *rng.Range
 	PRange *rng.Range
 	Geom   geom.Geometry

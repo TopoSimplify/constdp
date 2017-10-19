@@ -2,7 +2,7 @@ package constdp
 
 import (
 	"github.com/intdxdt/rtree"
-	"simplex/constdp/igeom"
+	"simplex/igeom"
 )
 
 //find context neighbours
@@ -12,8 +12,7 @@ func find_context_neighbs(database *rtree.RTree, query igeom.IGeom, dist float64
 
 //find context hulls
 func find_context_hulls(hulldb *rtree.RTree, hull *HullNode, dist float64) []rtree.BoxObj {
-	predicate := hull_predicate(hull, dist)
-	return find_knn(hulldb, hull.Geometry(), dist, score_fn(hull), predicate)
+	return find_knn(hulldb, hull.Geometry(), dist, score_fn(hull), hull_predicate(hull, dist))
 }
 
 //hull predicate within index range i, j.

@@ -3,7 +3,7 @@ package constdp
 import (
 	"sort"
 	"github.com/intdxdt/deque"
-	"simplex/constdp/ctx"
+	"simplex/ctx"
 )
 
 var Debug = false
@@ -72,7 +72,7 @@ func pop_left_hull(que *deque.Deque) *HullNode {
 //}
 
 //func simple_hulls_as_ptset(hulls []*HullNode) *sset.SSet {
-//	var ptset = sset.NewSSet(cmp.IntCmp)
+//	var ptset = sset.NewSSet(cmp.Int)
 //	for _, o := range hulls {
 //		ptset.Extend(o.Range.I(), o.Range.J())
 //	}

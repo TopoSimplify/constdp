@@ -3,7 +3,7 @@ package constdp
 import (
 	"github.com/intdxdt/deque"
 	"github.com/intdxdt/stack"
-	"simplex/constdp/rng"
+	"simplex/rng"
 )
 
 

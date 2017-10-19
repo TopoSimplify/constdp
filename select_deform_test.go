@@ -5,12 +5,12 @@ import (
 	"fmt"
 	"testing"
 	"github.com/intdxdt/geom"
-	"simplex/constdp/ln"
-	"simplex/constdp/rng"
-	"simplex/constdp/opts"
+	"simplex/pln"
+	"simplex/rng"
+	"simplex/opts"
 	"github.com/franela/goblin"
 	"github.com/intdxdt/rtree"
-	"simplex/constdp/offset"
+	"simplex/offset"
 )
 
 func TestDeform(t *testing.T) {
@@ -47,14 +47,14 @@ func TestDeform(t *testing.T) {
 
 	create_hulls_db_test := func(ranges [][]int, coords []*geom.Point) ([]*HullNode, *rtree.RTree) {
 		n := len(coords)
-		pln := ln.NewPolyline(coords)
+		polyline := pln.New(coords)
 		hulls := []*HullNode{}
 		for _, r := range ranges {
 			i, j := r[0], r[len(r)-1]
 			if j == -1 {
 				j = n - 1
 			}
-			h := NewHullNode(pln, rng.NewRange(i, j))
+			h := NewHullNode(polyline, rng.NewRange(i, j))
 			hulls = append(hulls, h)
 		}
 

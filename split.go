@@ -1,13 +1,13 @@
 package constdp
 
 import (
-	"simplex/constdp/rng"
-	"simplex/constdp/ln"
+	"simplex/rng"
+	"simplex/lnr"
 )
 
 //split hull at vertex with
 //maximum_offset offset -- k
-func split_at_score_selection(self ln.Linear, hull *HullNode) (*HullNode, *HullNode) {
+func split_at_score_selection(self lnr.Linear, hull *HullNode) (*HullNode, *HullNode) {
 	i, j := hull.Range.I(), hull.Range.J()
 	k, _ := self.Score(self, hull.Range)
 	// -------------------------------------------
@@ -19,7 +19,7 @@ func split_at_score_selection(self ln.Linear, hull *HullNode) (*HullNode, *HullN
 }
 
 //split hull at indexes (index, index, ...)
-func split_at_index(self ln.Linear, hull *HullNode, idxs []int) []*HullNode {
+func split_at_index(self lnr.Linear, hull *HullNode, idxs []int) []*HullNode {
 	//formatter:off
 	pln         := self.Polyline()
 	ranges      := hull.Range.Split(idxs)

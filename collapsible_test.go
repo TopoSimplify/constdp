@@ -2,9 +2,9 @@ package constdp
 
 import (
 	"testing"
+	"simplex/pln"
+	"simplex/rng"
 	"github.com/intdxdt/geom"
-	"simplex/constdp/ln"
-	"simplex/constdp/rng"
 	"github.com/franela/goblin"
 )
 
@@ -38,9 +38,9 @@ func TestCollapsible(t *testing.T) {
 			for _, o := range lnwkts {
 				k, bln, wkt := o.k, o.bln, o.wkt
 				coords := geom.NewLineStringFromWKT(wkt).Coordinates()
-				pln := ln.NewPolyline(coords)
+				poly := pln.New(coords)
 				n := len(coords) - 1
-				ha, hb := NewHullNode(pln, rng.NewRange(0, k)), NewHullNode(pln, rng.NewRange(k, n))
+				ha, hb := NewHullNode(poly, rng.NewRange(0, k)), NewHullNode(poly, rng.NewRange(k, n))
 				g.Assert(is_contig_hull_collapsible(hb, ha)).Equal(bln)
 			}
 		})
@@ -50,13 +50,13 @@ func TestCollapsible(t *testing.T) {
 			coords := geom.NewLineStringFromWKT(wkt).Coordinates()
 			k1, k2, k3, k4 := 6, 10, 14, 18
 			n := len(coords) - 1
-			pln := ln.NewPolyline(coords)
+			polyline := pln.New(coords)
 
-			h1 := NewHullNode(pln, rng.NewRange(0, k1))
-			h2 := NewHullNode(pln, rng.NewRange(k1, k2))
-			h3 := NewHullNode(pln, rng.NewRange(k2, k3))
-			h4 := NewHullNode(pln, rng.NewRange(k3, k4))
-			h5 := NewHullNode(pln, rng.NewRange(k4, n))
+			h1 := NewHullNode(polyline, rng.NewRange(0, k1))
+			h2 := NewHullNode(polyline, rng.NewRange(k1, k2))
+			h3 := NewHullNode(polyline, rng.NewRange(k2, k3))
+			h4 := NewHullNode(polyline, rng.NewRange(k3, k4))
+			h5 := NewHullNode(polyline, rng.NewRange(k4, n))
 
 			hulls := [][2]*HullNode{{h1, h4}, {h1, h2}, {h1, h5}, {h2, h3}, {h2, h4}, {h2, h5}}
 			for _, o := range hulls {

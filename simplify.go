@@ -2,7 +2,7 @@ package constdp
 
 import (
 	"github.com/intdxdt/rtree"
-	"simplex/constdp/opts"
+	"simplex/opts"
 	"github.com/intdxdt/sset"
 )
 

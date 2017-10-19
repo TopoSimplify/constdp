@@ -4,8 +4,8 @@ import (
 	"testing"
 	"github.com/intdxdt/geom"
 	"github.com/franela/goblin"
-	"simplex/constdp/opts"
-	"simplex/constdp/offset"
+	"simplex/opts"
+	"simplex/offset"
 )
 
 func TestDecompose(t *testing.T) {

@@ -5,8 +5,8 @@ import (
 	"time"
 	"testing"
 	"github.com/intdxdt/geom"
-	"simplex/constdp/opts"
-	"simplex/constdp/offset"
+	"simplex/opts"
+	"simplex/offset"
 	"github.com/franela/goblin"
 )
 //@formatter:off
