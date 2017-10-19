@@ -1,8 +1,8 @@
 package cmp
 
 import (
-	"simplex/geom"
-	"simplex/util/math"
+	"github.com/intdxdt/geom"
+	"github.com/intdxdt/math"
 )
 
 //integer cmp

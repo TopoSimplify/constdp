@@ -2,8 +2,8 @@ package box
 
 import (
 	"testing"
-	"simplex/geom"
-	"simplex/geom/mbr"
+	"github.com/intdxdt/mbr"
+	"github.com/intdxdt/geom"
 	"github.com/franela/goblin"
 )
 

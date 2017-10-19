@@ -1,18 +1,20 @@
 package offset
 
 import (
-	"simplex/geom"
 	"simplex/constdp/ln"
 	"simplex/constdp/rng"
-	"simplex/vect"
+	"github.com/intdxdt/geom"
+	"github.com/intdxdt/vect"
 )
+
+//@formatter:off
 
 //euclidean offset distance from dp - archor line [i, j] to maximum
 //vertex at i < k <= j - not maximum offset is may not  be perpendicular
 func MaxOffset(lnr ln.Linear, rng *rng.Range) (int, float64) {
-	pln := lnr.Coordinates()
-	seg := geom.NewSegment(pln[rng.I()], pln[rng.J()])
-	index, offset := rng.J(), 0.0
+	var pln           = lnr.Coordinates()
+	var seg           = geom.NewSegment(pln[rng.I()], pln[rng.J()])
+	var index, offset = rng.J(), 0.0
 
 	if rng.Size() > 1 {
 		for _, k := range rng.ExclusiveStride(1) {
@@ -28,11 +30,11 @@ func MaxOffset(lnr ln.Linear, rng *rng.Range) (int, float64) {
 
 //computes Synchronized Euclidean Distance
 func MaxSEDOffset(lnr ln.Linear, rng *rng.Range) (int, float64) {
-	t               := 2
-	pln             := lnr.Coordinates()
-	index, offset   := rng.J(), 0.0
-	a, b            := pln[rng.I()], pln[rng.J()]
-	segvect         := vect.NewVect(&vect.Options{
+	var t               = 2
+	var pln             = lnr.Coordinates()
+	var index, offset   = rng.J(), 0.0
+	var a, b            = pln[rng.I()], pln[rng.J()]
+	var segvect         = vect.NewVect(&vect.Options{
 		A: a, B: b, At: &a[t], Bt: &b[t],
 	})
 

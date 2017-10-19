@@ -4,12 +4,12 @@ import (
 	"time"
 	"fmt"
 	"testing"
-	"simplex/geom"
+	"github.com/intdxdt/geom"
 	"simplex/constdp/ln"
 	"simplex/constdp/rng"
 	"simplex/constdp/opts"
 	"github.com/franela/goblin"
-	"simplex/struct/rtree"
+	"github.com/intdxdt/rtree"
 	"simplex/constdp/offset"
 )
 

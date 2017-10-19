@@ -2,9 +2,9 @@ package rng
 
 import (
 	"fmt"
-	"simplex/util/iter"
-	"simplex/struct/sset"
-	"simplex/constdp/cmp"
+	"github.com/intdxdt/cmp"
+	"github.com/intdxdt/iter"
+	"github.com/intdxdt/sset"
 )
 
 //Range
@@ -66,7 +66,7 @@ func (o *Range) Size() int {
 
 //Stride
 func (o *Range) Stride(step ...int) []int {
-	s := 1
+	var s = 1
 	if len(step) > 0 {
 		s = step[0]
 	}
@@ -84,7 +84,7 @@ func (o *Range) ExclusiveStride(step ...int) []int {
 
 //Split Range at indices
 func (o *Range) Split(idxs []int) []*Range {
-	idxset := sset.NewSSet(cmp.IntCmp)
+	var idxset = sset.NewSSet(cmp.Int)
 	for _, v := range idxs {
 		idxset.Add(v)
 	}

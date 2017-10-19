@@ -1,16 +1,16 @@
 package constdp
 
 import (
-	"simplex/geom"
-	"simplex/struct/sset"
-	"simplex/struct/rtree"
-	"simplex/struct/deque"
 	"simplex/constdp/ln"
 	"simplex/constdp/rng"
 	"simplex/constdp/opts"
 	"simplex/constdp/ctx"
-	"random"
 	"simplex/constdp/cmp"
+	"github.com/intdxdt/geom"
+	"github.com/intdxdt/sset"
+	"github.com/intdxdt/rtree"
+	"github.com/intdxdt/deque"
+	"github.com/intdxdt/random"
 )
 
 //Type DP

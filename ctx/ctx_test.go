@@ -2,7 +2,7 @@ package ctx
 
 import (
 	"testing"
-	"simplex/geom"
+	"github.com/intdxdt/geom"
 	"github.com/franela/goblin"
 )
 

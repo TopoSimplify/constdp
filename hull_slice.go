@@ -2,10 +2,10 @@ package constdp
 
 import (
 	"sort"
-	"simplex/struct/rtree"
-	"simplex/struct/deque"
-	"simplex/struct/sset"
 	"simplex/constdp/cmp"
+	"github.com/intdxdt/rtree"
+	"github.com/intdxdt/deque"
+	"github.com/intdxdt/sset"
 )
 
 type nodes []*HullNode

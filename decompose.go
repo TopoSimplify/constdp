@@ -1,12 +1,11 @@
 package constdp
 
 import (
-	"simplex/struct/deque"
-	"simplex/struct/stack"
+	"github.com/intdxdt/deque"
+	"github.com/intdxdt/stack"
 	"simplex/constdp/rng"
 )
 
-const size = 2
 
 //Douglas Peucker decomposition at a given threshold
 func (self *ConstDP) decompose() *deque.Deque {

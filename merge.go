@@ -1,9 +1,9 @@
 package constdp
 
 import (
-	"simplex/struct/sset"
+	"github.com/intdxdt/sset"
 	"simplex/constdp/rng"
-	"simplex/struct/rtree"
+	"github.com/intdxdt/rtree"
 )
 
 //Merge two ranges

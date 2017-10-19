@@ -1,7 +1,7 @@
 package constdp
 
 import (
-	"simplex/struct/rtree"
+	"github.com/intdxdt/rtree"
 )
 
 //split hull based on score selected vertex

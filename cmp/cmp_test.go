@@ -2,8 +2,8 @@ package cmp
 
 import (
 	"testing"
+	"github.com/intdxdt/geom"
 	"github.com/franela/goblin"
-	"simplex/geom"
 )
 
 func TestCmp(t *testing.T) {

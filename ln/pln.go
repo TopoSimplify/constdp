@@ -1,8 +1,8 @@
 package ln
 
 import (
-	"simplex/geom"
-	"simplex/geom/mbr"
+	"github.com/intdxdt/geom"
+	"github.com/intdxdt/mbr"
 	"simplex/constdp/seg"
 	"simplex/constdp/rng"
 )
@@ -18,19 +18,15 @@ type Linear interface {
 type Polyline struct {
 	Coords []*geom.Point
 	Geom   *geom.LineString
-	Segs   map[[2]int]*seg.Seg
 }
 
 //construct new polyline
 func NewPolyline(coords []*geom.Point) *Polyline {
-	coords = geom.CloneCoordinates(coords)
-	pln := &Polyline{
-		Coords: coords,
-		Geom:   geom.NewLineString(coords, false),
-		Segs:   make(map[[2]int]*seg.Seg, 0),
+	var n = len(coords)
+	return &Polyline{
+		Coords: coords[:n:n],
+		Geom:   geom.NewLineString(coords),
 	}
-	pln.buildSegments()
-	return pln
 }
 
 //Bounding box of polyline
@@ -53,22 +49,13 @@ func (ln *Polyline) Coordinate(i int) *geom.Point {
 	return ln.Coords[i]
 }
 
-//build polyline segments
-func (ln *Polyline) buildSegments() {
-	for i := 0; i < ln.Len()-1; i++ {
-		j := i + 1
-		ln.Segs[[2]int{i, j}] = seg.NewSeg(
-			ln.Coords[i], ln.Coords[j], i, j,
-		)
-	}
-}
-
 //Polyline segments
 func (ln *Polyline) Segments() []*seg.Seg {
-	lst := make([]*seg.Seg, 0)
-	for i := 0; i < ln.Len()-1; i++ {
-		j := i + 1
-		lst = append(lst, ln.Segs[[2]int{i, j}])
+	var i, j int
+	var lst = make([]*seg.Seg, 0)
+	for i = 0; i < ln.Len()-1; i++ {
+		j = i + 1
+		lst = append(lst, seg.NewSeg(ln.Coords[i], ln.Coords[j], i, j))
 	}
 	return lst
 }
@@ -80,23 +67,13 @@ func (ln *Polyline) Range() *rng.Range {
 
 //Segment given range
 func (ln *Polyline) Segment(rng *rng.Range) *seg.Seg {
-	if rng.Size() == 1 {
-		return ln.Segs[[2]int{rng.I(), rng.J()}]
-	}
-	return seg.NewSeg(
-		ln.Coords[rng.I()],
-		ln.Coords[rng.J()],
-		rng.I(), rng.J(),
-	)
+	var i, j = rng.I(), rng.J()
+	return seg.NewSeg(ln.Coords[i], ln.Coords[j], i, j)
 }
 
 //generates sub polyline from generator indices
 func (self *Polyline) SubPolyline(rng *rng.Range) *Polyline {
-	var poly = make([]*geom.Point, 0)
-	for _, i := range rng.Stride() {
-		poly = append(poly, self.Coords[i])
-	}
-	return NewPolyline(poly)
+	return NewPolyline(self.Coords[rng.I():rng.J()+1])
 }
 
 //Length of coordinates in polyline

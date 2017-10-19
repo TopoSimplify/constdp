@@ -1,9 +1,9 @@
 package constdp
 
 import (
-	"simplex/struct/rtree"
+	"github.com/intdxdt/rtree"
 	"simplex/constdp/igeom"
-	"simplex/geom/mbr"
+	"github.com/intdxdt/mbr"
 	"simplex/constdp/ctx"
 	"simplex/constdp/box"
 )

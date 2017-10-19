@@ -1,12 +1,12 @@
 package constdp
 
 import (
-	"simplex/struct/sset"
+	"github.com/intdxdt/sset"
 	"simplex/constdp/ctx"
 	"simplex/constdp/cmp"
-	"simplex/struct/rtree"
+	"github.com/intdxdt/rtree"
 	"simplex/constdp/opts"
-	"simplex/struct/deque"
+	"github.com/intdxdt/deque"
 )
 
 //constrain hulls at self intersection fragments - planar self-intersection

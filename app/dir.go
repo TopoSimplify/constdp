@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	"simplex/constdp"
-	"simplex/geom"
+	"github.com/intdxdt/geom"
 )
 
 func mainx() {

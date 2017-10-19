@@ -1,12 +1,12 @@
 package constdp
 
 import (
-	"testing"
-	"simplex/geom"
-	"simplex/constdp/opts"
-	"github.com/franela/goblin"
-	"simplex/constdp/offset"
 	"time"
+	"testing"
+	"simplex/constdp/opts"
+	"simplex/constdp/offset"
+	"github.com/intdxdt/geom"
+	"github.com/franela/goblin"
 )
 
 func TestConstDP_FC(t *testing.T) {

@@ -2,7 +2,7 @@ package constdp
 
 import (
 	"sort"
-	"simplex/struct/deque"
+	"github.com/intdxdt/deque"
 	"simplex/constdp/ctx"
 )
 

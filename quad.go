@@ -2,10 +2,10 @@ package constdp
 
 import (
 	"strings"
-	"simplex/geom"
-	"simplex/geom/mbr"
-	"simplex/util/math"
-	"simplex/struct/rtree"
+	"github.com/intdxdt/geom"
+	"github.com/intdxdt/mbr"
+	"github.com/intdxdt/math"
+	"github.com/intdxdt/rtree"
 	"simplex/constdp/ln"
 	"simplex/constdp/seg"
 	"simplex/constdp/ctx"

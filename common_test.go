@@ -1,7 +1,7 @@
 package constdp
 
 import (
-	"simplex/geom"
+	"github.com/intdxdt/geom"
 	"simplex/constdp/ln"
 	"simplex/constdp/rng"
 )

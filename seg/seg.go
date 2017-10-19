@@ -1,8 +1,8 @@
 package seg
 
 import (
-	"simplex/geom"
 	"simplex/constdp/rng"
+	"github.com/intdxdt/geom"
 )
 
 type Seg struct {

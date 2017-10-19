@@ -1,9 +1,9 @@
 package ctx
 
 import (
-	"simplex/geom"
-	"simplex/geom/mbr"
-	"simplex/struct/sset"
+	"github.com/intdxdt/geom"
+	"github.com/intdxdt/mbr"
+	"github.com/intdxdt/sset"
 	"simplex/constdp/cmp"
 )
 

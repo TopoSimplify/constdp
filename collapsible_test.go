@@ -2,7 +2,7 @@ package constdp
 
 import (
 	"testing"
-	"simplex/geom"
+	"github.com/intdxdt/geom"
 	"simplex/constdp/ln"
 	"simplex/constdp/rng"
 	"github.com/franela/goblin"

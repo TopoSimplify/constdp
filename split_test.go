@@ -3,9 +3,9 @@ package constdp
 import (
 	"time"
 	"testing"
-	"simplex/geom"
 	"simplex/constdp/opts"
 	"simplex/constdp/offset"
+	"github.com/intdxdt/geom"
 	"github.com/franela/goblin"
 )
 

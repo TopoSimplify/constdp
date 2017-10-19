@@ -2,9 +2,9 @@ package constdp
 
 import (
 	"testing"
-	"simplex/geom"
-	"simplex/geom/mbr"
-	"simplex/struct/rtree"
+	"github.com/intdxdt/geom"
+	"github.com/intdxdt/mbr"
+	"github.com/intdxdt/rtree"
 	"simplex/constdp/box"
 	"github.com/franela/goblin"
 )

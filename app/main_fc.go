@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"simplex/geom"
+	"github.com/intdxdt/geom"
 	"simplex/constdp"
 	"simplex/constdp/opts"
 	"simplex/constdp/offset"

@@ -3,11 +3,11 @@ package constdp
 import (
 	"time"
 	"testing"
-	"simplex/geom"
+	"github.com/intdxdt/geom"
 	"simplex/constdp/cmp"
 	"simplex/constdp/opts"
-	"simplex/struct/sset"
-	"simplex/struct/rtree"
+	"github.com/intdxdt/sset"
+	"github.com/intdxdt/rtree"
 	"simplex/constdp/offset"
 	"github.com/franela/goblin"
 )

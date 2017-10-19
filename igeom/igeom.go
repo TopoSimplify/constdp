@@ -1,6 +1,6 @@
 package igeom
 
-import "simplex/geom"
+import "github.com/intdxdt/geom"
 
 type IGeom interface {
 	Geometry() geom.Geometry

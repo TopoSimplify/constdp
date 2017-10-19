@@ -1,10 +1,10 @@
 package main
 
 import (
-	"simplex/geom"
+	"github.com/intdxdt/geom"
 	"simplex/constdp/ln"
 	"simplex/constdp/rng"
-	"simplex/struct/sset"
+	"github.com/intdxdt/sset"
 	"sort"
 	"fmt"
 	"strings"

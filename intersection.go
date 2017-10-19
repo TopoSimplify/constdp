@@ -1,11 +1,11 @@
 package constdp
 
 import (
-	"simplex/geom"
+	"github.com/intdxdt/geom"
 	"simplex/constdp/ln"
 	"simplex/constdp/seg"
-	"simplex/struct/sset"
-	"simplex/struct/rtree"
+	"github.com/intdxdt/sset"
+	"github.com/intdxdt/rtree"
 	"simplex/constdp/cmp"
 	"simplex/constdp/ctx"
 )

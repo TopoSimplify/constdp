@@ -1,13 +1,13 @@
 package constdp
 
 import (
-	"testing"
-	"simplex/geom"
-	"simplex/constdp/ln"
-	"github.com/franela/goblin"
-	"simplex/constdp/opts"
 	"time"
+	"testing"
+	"simplex/constdp/ln"
+	"simplex/constdp/opts"
 	"simplex/constdp/ctx"
+	"github.com/intdxdt/geom"
+	"github.com/franela/goblin"
 )
 
 func TestRelate(t *testing.T) {

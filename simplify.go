@@ -1,9 +1,9 @@
 package constdp
 
 import (
-	"simplex/struct/rtree"
+	"github.com/intdxdt/rtree"
 	"simplex/constdp/opts"
-	"simplex/struct/sset"
+	"github.com/intdxdt/sset"
 )
 
 //Homotopic simplification at a given threshold

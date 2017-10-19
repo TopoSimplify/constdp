@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 	"testing"
-	"simplex/geom"
+	"github.com/intdxdt/geom"
 	"simplex/constdp/opts"
 	"simplex/constdp/offset"
 	"github.com/franela/goblin"
