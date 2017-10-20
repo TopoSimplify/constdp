@@ -33,8 +33,7 @@ func (self *ConstDP) merge_contiguous_fragments(ha, hb *node.Node) *node.Node {
 //Merge contiguous hulls by fragment size
 func (self *ConstDP) merge_contiguous_fragments_by_size(
 	hulls []*node.Node, hulldb *rtree.RTree, vertex_set *sset.SSet,
-	unmerged map[[2]int]*node.Node, fragment_size int,
-) ([]*node.Node, []*node.Node) {
+	unmerged map[[2]int]*node.Node, fragment_size int) ([]*node.Node, []*node.Node) {
 
 	//@formatter:off
 	var pln       = self.Polyline()

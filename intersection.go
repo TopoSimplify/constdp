@@ -1,10 +1,10 @@
 package constdp
 
 import (
+	"simplex/ctx"
 	"simplex/pln"
 	"simplex/seg"
 	"github.com/intdxdt/cmp"
-	"simplex/ctx"
 	"github.com/intdxdt/geom"
 	"github.com/intdxdt/sset"
 	"github.com/intdxdt/rtree"

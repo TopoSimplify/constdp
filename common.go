@@ -42,58 +42,6 @@ func cast_cdp(o lnr.SimpleAlgorithm) *ConstDP {
 	return o.(*ConstDP)
 }
 
-
 func is_same(a, b lnr.SimpleAlgorithm) bool{
 	return cast_cdp(a) == cast_cdp(b)
 }
-
-//Rtree nodes as hull nodes
-//func as_hullnodes(iter []*rtree.Node) []*node.Node {
-//	nodes := make([]*node.Node, len(iter))
-//	for i, h := range iter {
-//		nodes[i] = h.GetItem().(*node.Node)
-//	}
-//	return nodes
-//}
-
-//Rtree nodes boxes as hull nodes
-//func as_hullnodes_from_boxes(iter []rtree.BoxObj) []*node.Node {
-//	nodes := make([]*node.Node, len(iter))
-//	for i, h := range iter {
-//		nodes[i] = h.(*node.Node)
-//	}
-//	return nodes
-//}
-
-//Hull nodes as deque
-//func as_deque(iter []*node.Node) *deque.Deque {
-//	queue := deque.NewDeque()
-//	for _, h := range iter {
-//		queue.Append(h)
-//	}
-//	return queue
-//}
-
-//map[range]*node.Node to slice of node.Node
-//func map_to_slice(dict map[[2]int]*node.Node, s []*node.Node) []*node.Node {
-//	for _, o := range dict {
-//		s = append(s, o)
-//	}
-//	return s
-//}
-
-//func simple_hulls_as_ptset(hulls []*node.Node) *sset.SSet {
-//	var ptset = sset.NewSSet(cmp.Int)
-//	for _, o := range hulls {
-//		ptset.Extend(o.Range.I(), o.Range.J())
-//	}
-//	return ptset
-//}
-
-//func empty_hull_slice(ptr *[]*node.Node) {
-//	slice := *ptr
-//	for i := range slice {
-//		slice[i] = nil
-//	}
-//	*ptr = slice[:0]
-//}

@@ -10,6 +10,7 @@ import (
 )
 
 var fn = hullGeom
+
 type testD struct {
 	k   int
 	bln bool
