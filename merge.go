@@ -4,6 +4,7 @@ import (
 	"github.com/intdxdt/sset"
 	"simplex/rng"
 	"github.com/intdxdt/rtree"
+	"simplex/node"
 )
 
 //Merge two ranges
@@ -14,7 +15,7 @@ func merge_range(ra, rb *rng.Range) *rng.Range {
 }
 
 //Merge contiguous fragments based combined score
-func merge_contiguous_fragments_at_threshold(self *ConstDP, ha, hb *HullNode) *HullNode {
+func merge_contiguous_fragments_at_threshold(self *ConstDP, ha, hb *node.Node) *node.Node {
 	_, val := self.Score(self, merge_range(ha.Range, hb.Range))
 	if self.is_score_relate_valid(val) {
 		return self.merge_contiguous_fragments(ha, hb)
@@ -23,25 +24,25 @@ func merge_contiguous_fragments_at_threshold(self *ConstDP, ha, hb *HullNode) *H
 }
 
 //Merge contiguous hulls
-func (self *ConstDP) merge_contiguous_fragments(ha, hb *HullNode) *HullNode {
+func (self *ConstDP) merge_contiguous_fragments(ha, hb *node.Node) *node.Node {
 	var r = merge_range(ha.Range, hb.Range)
 	// i...[ha]...k...[hb]...j
-	return NewHullNode(self.Pln, r)
+	return node.New(self.Pln, r, hullGeom)
 }
 
 //Merge contiguous hulls by fragment size
 func (self *ConstDP) merge_contiguous_fragments_by_size(
-	hulls []*HullNode, hulldb *rtree.RTree, vertex_set *sset.SSet,
-	unmerged map[[2]int]*HullNode, fragment_size int,
-) ([]*HullNode, []*HullNode) {
+	hulls []*node.Node, hulldb *rtree.RTree, vertex_set *sset.SSet,
+	unmerged map[[2]int]*node.Node, fragment_size int,
+) ([]*node.Node, []*node.Node) {
 
 	//@formatter:off
 	var pln       = self.Polyline()
-	var keep      = make([]*HullNode, 0)
-	var rm        = make([]*HullNode, 0)
+	var keep      = make([]*node.Node, 0)
+	var rm        = make([]*node.Node, 0)
 
-	var hdict    = make(map[[2]int]*HullNode, 0)
-	var mrgdict  = make(map[[2]int]*HullNode, 0)
+	var hdict    = make(map[[2]int]*node.Node, 0)
+	var mrgdict  = make(map[[2]int]*node.Node, 0)
 
 	var is_merged = func(o *rng.Range) bool {
 		_, ok := mrgdict[o.AsArray()]
@@ -100,7 +101,7 @@ func (self *ConstDP) merge_contiguous_fragments_by_size(
 			delete(hdict, hr.AsArray())
 
 			// add merge
-			hdict[r.AsArray()] = NewHullNode(pln, r)
+			hdict[r.AsArray()] = node.New(pln, r, hullGeom)
 
 			// add to remove list to remove , after merge
 			rm = append(rm, s)

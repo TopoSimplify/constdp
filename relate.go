@@ -4,6 +4,7 @@ import (
 	"github.com/intdxdt/geom"
 	"simplex/pln"
 	"simplex/ctx"
+	"simplex/node"
 )
 
 //checks if score is valid at threshold of constrained dp
@@ -12,7 +13,7 @@ func (self *ConstDP) is_score_relate_valid(val float64) bool {
 }
 
 //geometry relate
-func (self *ConstDP) is_geom_relate_valid(hull *HullNode, ctx *ctx.CtxGeom) bool {
+func (self *ConstDP) is_geom_relate_valid(hull *node.Node, ctx *ctx.CtxGeom) bool {
 	var seg    = hull_segment(self, hull)
 	var subpln = self.Pln.SubPolyline(hull.Range)
 
@@ -32,7 +33,7 @@ func (self *ConstDP) is_geom_relate_valid(hull *HullNode, ctx *ctx.CtxGeom) bool
 }
 
 //distance relate
-func (self *ConstDP) is_dist_relate_valid(hull *HullNode, ctx *ctx.CtxGeom) bool {
+func (self *ConstDP) is_dist_relate_valid(hull *node.Node, ctx *ctx.CtxGeom) bool {
 	var mindist = self.Opts.MinDist
 	var seg     = hull_segment(self, hull)
 	var ln_geom = hull.SubPolyline().Geometry
@@ -55,7 +56,7 @@ func (self *ConstDP) is_dist_relate_valid(hull *HullNode, ctx *ctx.CtxGeom) bool
 }
 
 //direction relate
-func (self *ConstDP) is_dir_relate_valid(hull *HullNode, ctx *ctx.CtxGeom) bool {
+func (self *ConstDP) is_dir_relate_valid(hull *node.Node, ctx *ctx.CtxGeom) bool {
 	subpln  := self.Pln.SubPolyline(hull.Range)
 	segment := pln.New([]*geom.Point{
 		self.Pln.Coordinates[hull.Range.I()],

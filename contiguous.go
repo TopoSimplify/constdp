@@ -1,7 +1,9 @@
 package constdp
 
-func extract_neighbours(hull *HullNode, neighbs *HullNodes) (*HullNode, *HullNode) {
-	var prev, nxt *HullNode
+import "simplex/node"
+
+func extract_neighbours(hull *node.Node, neighbs *HullNodes) (*node.Node, *node.Node) {
+	var prev, nxt *node.Node
 	var i, j = hull.Range.I(), hull.Range.J()
 	for _, h := range neighbs.list {
 		if h != hull {
@@ -16,9 +18,9 @@ func extract_neighbours(hull *HullNode, neighbs *HullNodes) (*HullNode, *HullNod
 }
 
 //returns bool (intersects), bool(is contig at vertex)
-func is_contiguous(a, b *HullNode) (bool, bool, int) {
+func is_contiguous(a, b *node.Node) (bool, bool, int) {
 	//@formatter:off
-	pln         := a.Pln
+	pln         := a.Polyline
 	coords      := pln.Coordinates
 	ga          := a.Geom
 	gb          := b.Geom

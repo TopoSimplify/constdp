@@ -17,12 +17,13 @@ import (
 //Type DP
 type ConstDP struct {
 	Id        string
-	Simple    *sset.SSet
 	Opts      *opts.Opts
 	Hulls     *deque.Deque
 	Pln       *pln.Polyline
 	ContextDB *rtree.RTree
 	Meta      map[string]interface{}
+
+	simple    *sset.SSet
 	score     func(lnr.Linear, *rng.Range) (int, float64)
 }
 
@@ -30,12 +31,11 @@ type ConstDP struct {
 //	dp decomposition of linear geometries
 func NewConstDP(coordinates []*geom.Point,
 	constraints []geom.Geometry, options *opts.Opts,
-	offset_score func(lnr.Linear, *rng.Range) (int, float64),
-) *ConstDP {
+	offset_score func(lnr.Linear, *rng.Range) (int, float64)) *ConstDP {
 
 	self := &ConstDP{
 		Id:     random.String(10),
-		Simple: sset.NewSSet(cmp.Int),
+		simple: sset.NewSSet(cmp.Int),
 		Opts:   options,
 		Hulls:  deque.NewDeque(),
 		Pln:    pln.New(coordinates),
@@ -48,6 +48,11 @@ func NewConstDP(coordinates []*geom.Point,
 	//prepare databases
 	return self.build_context_db(constraints)
 }
+
+func (self *ConstDP) Simple() *sset.SSet {
+	return self.simple
+}
+
 
 func (self *ConstDP) Coordinates() []*geom.Point {
 	return self.Pln.Coordinates

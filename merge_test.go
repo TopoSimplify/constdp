@@ -10,6 +10,7 @@ import (
 	"github.com/intdxdt/rtree"
 	"simplex/offset"
 	"github.com/franela/goblin"
+	"simplex/node"
 )
 
 //@formatter:off
@@ -53,7 +54,7 @@ func TestMergeHull(t *testing.T) {
 			hulldb.Load(boxes)
 
 			vertex_set := sset.NewSSet(cmp.Int)
-			var unmerged = make(map[[2]int]*HullNode,0)
+			var unmerged = make(map[[2]int]*node.Node,0)
 			keep, rm := homo.merge_contiguous_fragments_by_size(splits, hulldb, vertex_set, unmerged, 1)
 			g.Assert(len(keep)).Equal(2)
 			g.Assert(len(rm)).Equal(2)
@@ -67,7 +68,7 @@ func TestMergeHull(t *testing.T) {
 			hulldb.Load(boxes)
 
 			vertex_set = sset.NewSSet(cmp.Int)
-			unmerged = make(map[[2]int]*HullNode,0)
+			unmerged = make(map[[2]int]*node.Node,0)
 			keep, rm = homo.merge_contiguous_fragments_by_size(splits, hulldb, vertex_set, unmerged, 1)
 			g.Assert(len(keep)).Equal(3)
 			g.Assert(len(rm)).Equal(4)

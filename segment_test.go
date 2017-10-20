@@ -6,17 +6,18 @@ import (
 	"github.com/franela/goblin"
 	"simplex/rng"
 	"simplex/pln"
+	"simplex/node"
 )
 
 func TestHullSeg(t *testing.T) {
 	var g = goblin.Goblin(t)
 
-	create_hulls := func(ranges [][]int, coords []*geom.Point) []*HullNode {
+	create_hulls := func(ranges [][]int, coords []*geom.Point) []*node.Node {
 		pln := pln.New(coords)
-		hulls := make([]*HullNode, 0)
+		hulls := make([]*node.Node, 0)
 		for _, r := range ranges {
 			i, j := r[0], r[len(r)-1]
-			h := NewHullNode(pln, rng.NewRange(i, j))
+			h := node.New(pln, rng.NewRange(i, j), hullGeom)
 			hulls = append(hulls, h)
 		}
 		return hulls

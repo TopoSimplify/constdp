@@ -57,7 +57,7 @@ func main() {
 	coords  := geom.NewLineStringFromWKT(wkt).Coordinates()
 	homo    := constdp.NewConstDP(coords, constraints, options, offset.MaxOffset)
 
-	ptset   := homo.Simplify(options).Simple
+	ptset   := homo.Simplify(options).simple
 
 	simplx := make([]*geom.Point, 0)
 	for _, i := range ptset.Values() {

@@ -1,9 +1,10 @@
 package constdp
 
 import (
-	"github.com/intdxdt/rtree"
 	"simplex/opts"
 	"github.com/intdxdt/sset"
+	"github.com/intdxdt/rtree"
+	"simplex/node"
 )
 
 //Homotopic simplification at a given threshold
@@ -14,7 +15,7 @@ func (self *ConstDP) Simplify(opts *opts.Opts, const_vertices ...[]int) *ConstDP
 		const_verts = const_vertices[0]
 	}
 
-	self.Simple.Empty()
+	self.simple.Empty()
 	self.Opts = opts
 	self.Hulls = self.decompose()
 
@@ -26,7 +27,7 @@ func (self *ConstDP) Simplify(opts *opts.Opts, const_vertices ...[]int) *ConstDP
 	//debug_print_ptset(self.Hulls)
 
 	var bln bool
-	var hull *HullNode
+	var hull *node.Node
 	var selections  = NewHullNodes()
 
 	var hulldb = rtree.NewRTree(8)
@@ -63,10 +64,10 @@ func (self *ConstDP) Simplify(opts *opts.Opts, const_vertices ...[]int) *ConstDP
 	self.merge_simple_segments(hulldb, const_vertex_set)
 
 	self.Hulls.Clear()
-	self.Simple.Empty()
+	self.simple.Empty()
 	for _, h := range NewHullNodesFromNodes(hulldb.All()).Sort().list {
 		self.Hulls.Append(h)
-		self.Simple.Extend(h.Range.I(), h.Range.J())
+		self.simple.Extend(h.Range.I(), h.Range.J())
 	}
 	return self
 }
@@ -74,7 +75,7 @@ func (self *ConstDP) Simplify(opts *opts.Opts, const_vertices ...[]int) *ConstDP
 //Merge segment fragments where possible
 func (self *ConstDP) merge_simple_segments(hulldb *rtree.RTree, const_vertex_set *sset.SSet) {
 	var fragment_size = 1
-	var hull *HullNode
+	var hull *node.Node
 	var neighbs *HullNodes
 	var cache = make(map[[4]int]bool)
 	var hulls = NewHullNodesFromNodes(hulldb.All()).Sort().AsDeque()
@@ -105,7 +106,7 @@ func (self *ConstDP) merge_simple_segments(hulldb *rtree.RTree, const_vertex_set
 
 		// find mergeable neihbs contig
 		var key [4]int
-		var merge_prev, merge_nxt *HullNode
+		var merge_prev, merge_nxt *node.Node
 
 		if prev != nil {
 			key = cache_key(prev, hull)
@@ -158,7 +159,7 @@ func (self *ConstDP) merge_simple_segments(hulldb *rtree.RTree, const_vertex_set
 	}
 }
 
-func (self *ConstDP) is_merge_simplx_valid(hull *HullNode, hulldb *rtree.RTree) bool {
+func (self *ConstDP) is_merge_simplx_valid(hull *node.Node, hulldb *rtree.RTree) bool {
 	var bln = true
 	var side_effects = NewHullNodes()
 
@@ -176,7 +177,7 @@ func (self *ConstDP) is_merge_simplx_valid(hull *HullNode, hulldb *rtree.RTree) 
 	return side_effects.IsEmpty() && bln
 }
 
-func cache_key(a, b *HullNode) [4]int {
+func cache_key(a, b *node.Node) [4]int {
 	ij := [4]int{a.Range.I(), a.Range.J(), b.Range.I(), b.Range.J()}
 	sort_ints(ij[:])
 	return ij

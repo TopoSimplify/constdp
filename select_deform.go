@@ -2,21 +2,22 @@ package constdp
 
 import (
 	"github.com/intdxdt/rtree"
+	"simplex/node"
 )
 
 //find context_geom deformable hulls
-func (self *ConstDP) select_ftclass_deformation_candidates(hulldb *rtree.RTree, hull *HullNode) []*HullNode {
+func (self *ConstDP) select_ftclass_deformation_candidates(hulldb *rtree.RTree, hull *node.Node) []*node.Node {
 	var n int
 	var inters, contig bool
 
-	seldict := make(map[[2]int]*HullNode, 0)
+	seldict := make(map[[2]int]*node.Node, 0)
 	ctx_hulls := find_context_hulls(hulldb, hull, EpsilonDist)
 	// for each item in the context_geom list
 	for _, cn := range ctx_hulls {
 		n = 0
 		h := cast_as_hullnode(cn)
 
-		same_feature := hull.DP == h.DP
+		same_feature := is_same(hull.Instance, h.Instance)
 		// find which item to deform against current hull
 		if same_feature { // check for contiguity
 			inters, contig, n = is_contiguous(hull, h)
@@ -37,7 +38,7 @@ func (self *ConstDP) select_ftclass_deformation_candidates(hulldb *rtree.RTree, 
 			continue
 		}
 
-		var sels = make([]*HullNode, 0)
+		var sels = make([]*node.Node, 0)
 		if contig && n > 1 { // contiguity with overlap greater than a vertex
 			sels = self._contiguous_candidates(hull, h)
 		} else if !contig {
@@ -50,7 +51,7 @@ func (self *ConstDP) select_ftclass_deformation_candidates(hulldb *rtree.RTree, 
 		}
 	}
 
-	items := make([]*HullNode, 0)
+	items := make([]*node.Node, 0)
 	for _, v := range seldict {
 		items = append(items, v)
 	}
@@ -58,8 +59,8 @@ func (self *ConstDP) select_ftclass_deformation_candidates(hulldb *rtree.RTree, 
 }
 
 //find context deformation list
-func (self *ConstDP) select_deformation_candidates(hulldb *rtree.RTree, hull *HullNode) []*HullNode {
-	seldict := make(map[[2]int]*HullNode, 0)
+func (self *ConstDP) select_deformation_candidates(hulldb *rtree.RTree, hull *node.Node) []*node.Node {
+	seldict := make(map[[2]int]*node.Node, 0)
 	ctx_hulls := find_context_hulls(hulldb, hull, EpsilonDist)
 
 	// for each item in the context list
@@ -72,7 +73,7 @@ func (self *ConstDP) select_deformation_candidates(hulldb *rtree.RTree, hull *Hu
 			continue
 		}
 
-		sels := make([]*HullNode, 0)
+		sels := make([]*node.Node, 0)
 		if contig && n > 1 { //contiguity with overlap greater than a vertex
 			sels = self._contiguous_candidates(hull, h)
 		} else if !contig {
@@ -85,7 +86,7 @@ func (self *ConstDP) select_deformation_candidates(hulldb *rtree.RTree, hull *Hu
 		}
 	}
 
-	items := make([]*HullNode, 0)
+	items := make([]*node.Node, 0)
 	for _, v := range seldict {
 		items = append(items, v)
 	}
@@ -93,8 +94,8 @@ func (self *ConstDP) select_deformation_candidates(hulldb *rtree.RTree, hull *Hu
 }
 
 //select contiguous candidates
-func (self *ConstDP) _contiguous_candidates(a, b *HullNode) []*HullNode {
-	var selection = make([]*HullNode, 0)
+func (self *ConstDP) _contiguous_candidates(a, b *node.Node) []*node.Node {
+	var selection = make([]*node.Node, 0)
 	// compute sidedness relation between contiguous hulls to avoid hull flip
 	hulls := NewHullNodes().Extend(a, b).Sort()
 	//future should not affect the past
@@ -119,7 +120,7 @@ func (self *ConstDP) _contiguous_candidates(a, b *HullNode) []*HullNode {
 }
 
 //select non-contiguous candidates
-func (self *ConstDP) _non_contiguous_candidates(a, b *HullNode) []*HullNode {
+func (self *ConstDP) _non_contiguous_candidates(a, b *node.Node) []*node.Node {
 	aseg := a.Segment()
 	bseg := b.Segment()
 
@@ -137,7 +138,7 @@ func (self *ConstDP) _non_contiguous_candidates(a, b *HullNode) []*HullNode {
 	bseg_inters_aln := bseg_geom.Intersects(aln_geom)
 	aln_inters_bln := aln_geom.Intersects(bln_geom)
 
-	selection := []*HullNode{}
+	selection := []*node.Node{}
 	if aseg_inters_bseg && aseg_inters_bln && (!aln_inters_bln) {
 		_add_to_selection(&selection, a)
 	} else if aseg_inters_bseg && bseg_inters_aln && (!aln_inters_bln) {
@@ -169,7 +170,7 @@ func (self *ConstDP) _non_contiguous_candidates(a, b *HullNode) []*HullNode {
 
 //add to hull selection based on range size
 // add if range size is greater than 1 : not a segment
-func _add_to_selection(selection *[]*HullNode, hulls ...*HullNode) {
+func _add_to_selection(selection *[]*node.Node, hulls ...*node.Node) {
 	for _, h := range hulls {
 		//add to selection for deformation - if polygon
 		if h.Range.Size() > 1 {

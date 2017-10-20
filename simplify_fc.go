@@ -5,20 +5,21 @@ import (
 	"simplex/opts"
 	"github.com/intdxdt/deque"
 	"github.com/intdxdt/rtree"
+	"simplex/node"
 )
 
 //Update hull nodes with dp instance
 func (self *ConstDP) self_update() {
-	var hull *HullNode
+	var hull *node.Node
 	for _, h := range *self.Hulls.DataView() {
 		hull = cast_as_hullnode(h)
-		hull.DP = self
+		hull.Instance = self
 	}
 }
 
 func deform_class_selections(queue *deque.Deque, hulldb *rtree.RTree, selections *HullNodes) {
 	for _, s := range selections.list {
-		self := s.DP
+		self := cast_cdp(s.Instance)
 		sels := NewHullNodes().Push(s)
 		self.deform_hulls(hulldb, sels)
 		self.self_update()
@@ -33,13 +34,13 @@ func deform_class_selections(queue *deque.Deque, hulldb *rtree.RTree, selections
 func group_hulls_by_self(hulldb *rtree.RTree) {
 	var ok bool
 	var self *ConstDP
-	var hull *HullNode
+	var hull *node.Node
 	var selfs = make([]*ConstDP, 0)
 	var smap = make(map[string]*HullNodes)
 
 	for _, h := range NewHullNodesFromNodes(hulldb.All()).list {
 		var lst *HullNodes
-		self = h.DP
+		self = cast_cdp(h.Instance)
 		if lst, ok = smap[self.Id]; !ok {
 			lst = NewHullNodes()
 		}
@@ -48,7 +49,7 @@ func group_hulls_by_self(hulldb *rtree.RTree) {
 	}
 
 	for _, lst := range smap {
-		self = lst.Get(0).DP
+		self = cast_cdp(lst.Get(0).Instance)
 		self.Hulls.Clear()
 		for _, h := range lst.Sort().list {
 			self.Hulls.Append(h)
@@ -57,10 +58,10 @@ func group_hulls_by_self(hulldb *rtree.RTree) {
 	}
 
 	for _, self := range selfs {
-		self.Simple.Empty() //update new simple
+		self.simple.Empty() //update new simple
 		for _, h := range *self.Hulls.DataView() {
 			hull = cast_as_hullnode(h)
-			self.Simple.Extend(hull.Range.I(), hull.Range.J())
+			self.simple.Extend(hull.Range.I(), hull.Range.J())
 		}
 	}
 }
@@ -83,7 +84,7 @@ func SimplifyFeatureClass(selfs []*ConstDP, opts *opts.Opts) {
 		self.Simplify(opts, const_verts)
 	}
 
-	var hlist = make([]*HullNode, 0)
+	var hlist = make([]*node.Node, 0)
 	var hulldb = rtree.NewRTree(8)
 	for _, self := range selfs {
 		self.self_update()
@@ -95,7 +96,7 @@ func SimplifyFeatureClass(selfs []*ConstDP, opts *opts.Opts) {
 
 	var bln bool
 	var self *ConstDP
-	var hull *HullNode
+	var hull *node.Node
 	var selections = NewHullNodes()
 	var dque = deque.NewDeque(len(hlist))
 
@@ -107,7 +108,7 @@ func SimplifyFeatureClass(selfs []*ConstDP, opts *opts.Opts) {
 		//fmt.Println("queue size :", dque.Len())
 		// assume poped hull to be valid
 		hull = cast_as_hullnode(dque.PopLeft())
-		self = hull.DP
+		self = hull.Instance.(*ConstDP)
 
 		// insert hull into hull db
 		hulldb.Insert(hull)

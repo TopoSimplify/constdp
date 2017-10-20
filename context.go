@@ -1,8 +1,9 @@
 package constdp
 
 import (
-	"github.com/intdxdt/rtree"
 	"simplex/igeom"
+	"simplex/node"
+	"github.com/intdxdt/rtree"
 )
 
 //find context neighbours
@@ -11,15 +12,15 @@ func find_context_neighbs(database *rtree.RTree, query igeom.IGeom, dist float64
 }
 
 //find context hulls
-func find_context_hulls(hulldb *rtree.RTree, hull *HullNode, dist float64) []rtree.BoxObj {
+func find_context_hulls(hulldb *rtree.RTree, hull *node.Node, dist float64) []rtree.BoxObj {
 	return find_knn(hulldb, hull.Geometry(), dist, score_fn(hull), hull_predicate(hull, dist))
 }
 
 //hull predicate within index range i, j.
-func hull_predicate(queryhull *HullNode, dist float64) func(*rtree.KObj) (bool, bool) {
+func hull_predicate(queryhull *node.Node, dist float64) func(*rtree.KObj) (bool, bool) {
 	//@formatter:off
 	return func(candidate *rtree.KObj) (bool, bool) {
-		candhull := candidate.GetItem().(*HullNode)
+		candhull := candidate.GetItem().(*node.Node)
 
 		qgeom    := queryhull.Geom
 		cgeom    := candhull.Geom

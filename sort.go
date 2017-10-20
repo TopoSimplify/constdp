@@ -7,13 +7,13 @@ import (
 
 
 //sort hulls
-//func sort_hulls(hulls []*HullNode) []*HullNode {
+//func sort_hulls(hulls []*node.Node) []*node.Node {
 //	sort.Sort(HullNodes(hulls))
 //	return hulls
 //}
 
 //reverse sort hulls
-//func sort_reverse(hulls []*HullNode) []*HullNode {
+//func sort_reverse(hulls []*node.Node) []*node.Node {
 //	sort.Sort(sort.Reverse(HullNodes(hulls)))
 //	return hulls
 //}

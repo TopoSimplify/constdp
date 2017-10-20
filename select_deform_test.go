@@ -11,6 +11,7 @@ import (
 	"github.com/franela/goblin"
 	"github.com/intdxdt/rtree"
 	"simplex/offset"
+	"simplex/node"
 )
 
 func TestDeform(t *testing.T) {
@@ -45,16 +46,16 @@ func TestDeform(t *testing.T) {
 			"LINESTRING ( 730 490, 730 520, 750 550, 770 590, 780 630, 760 660, 780 680, 860 690, 910 690, 930 650, 930 610, 960 580, 960 560, 960 540, 940 510, 910 490, 900 500, 900 560, 870 550, 870 520, 850 500, 830 500, 800 480, 740 460, 710 470, 670 500, 660 470, 670 440, 700 420, 730 400, 860 390, 890 390, 910 420 )"},
 	}
 
-	create_hulls_db_test := func(ranges [][]int, coords []*geom.Point) ([]*HullNode, *rtree.RTree) {
+	create_hulls_db_test := func(ranges [][]int, coords []*geom.Point) ([]*node.Node, *rtree.RTree) {
 		n := len(coords)
 		polyline := pln.New(coords)
-		hulls := []*HullNode{}
+		hulls := []*node.Node{}
 		for _, r := range ranges {
 			i, j := r[0], r[len(r)-1]
 			if j == -1 {
 				j = n - 1
 			}
-			h := NewHullNode(polyline, rng.NewRange(i, j))
+			h := node.New(polyline, rng.NewRange(i, j), hullGeom)
 			hulls = append(hulls, h)
 		}
 
@@ -82,7 +83,7 @@ func TestDeform(t *testing.T) {
 
 		g.It("should test selection of hulls for deformation", func() {
 			g.Timeout(60 * time.Minute)
-			contains := func(s *HullNode, slns []*HullNode) bool {
+			contains := func(s *node.Node, slns []*node.Node) bool {
 				bln := false
 				for _, h := range slns {
 					if s == h {

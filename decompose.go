@@ -4,6 +4,7 @@ import (
 	"github.com/intdxdt/deque"
 	"github.com/intdxdt/stack"
 	"simplex/rng"
+	"simplex/node"
 )
 
 
@@ -21,7 +22,7 @@ func (self *ConstDP) decompose() *deque.Deque {
 		rg = s.Pop().(*rng.Range)
 		k, val  = self.Score(self, rg)
 		if self.is_score_relate_valid(val) {
-			hque.Append(NewHullNode(pln, rg))
+			hque.Append(node.New(pln, rg, hullGeom))
 		} else {
 			s.Push(
 				rng.NewRange(k, rg.J()), // right

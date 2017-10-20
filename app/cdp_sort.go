@@ -8,9 +8,10 @@ import (
 	"simplex/rng"
 	"github.com/intdxdt/geom"
 	"github.com/intdxdt/sset"
+	"simplex/node"
 )
 
-type HullNodes []*HullNode
+type HullNodes []*node.Node
 
 func (s HullNodes) Len() int {
 	return len(s)
@@ -34,13 +35,13 @@ type HullNode struct {
 }
 
 //sort hulls
-func sort_hulls(hulls []*HullNode) []*HullNode {
+func sort_hulls(hulls []*node.Node) []*node.Node {
 	sort.Sort(HullNodes(hulls))
 	return hulls
 }
 
 //reverse sort hulls
-func sort_reverse(hulls []*HullNode) []*HullNode {
+func sort_reverse(hulls []*node.Node) []*node.Node {
 	sort.Sort(sort.Reverse(HullNodes(hulls)))
 	return hulls
 }
@@ -51,10 +52,10 @@ func main() {
 	sort.Sort(sort.Reverse(sort.IntSlice(example)))
 	fmt.Println(example)
 
-	a := &HullNode{Range: rng.NewRange(90, 97)}
-	b := &HullNode{Range: rng.NewRange(72, 76)}
-	c := &HullNode{Range: rng.NewRange(55, 61)}
-	hulls := []*HullNode{a, c, b}
+	a := &node.Node{Range: rng.NewRange(90, 97)}
+	b := &node.Node{Range: rng.NewRange(72, 76)}
+	c := &node.Node{Range: rng.NewRange(55, 61)}
+	hulls := []*node.Node{a, c, b}
 
 	hulls = sort_hulls(hulls)
 	for _, o := range hulls {

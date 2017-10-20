@@ -6,6 +6,7 @@ import (
 	"github.com/franela/goblin"
 	"simplex/opts"
 	"simplex/offset"
+	"simplex/node"
 )
 
 func TestDecompose(t *testing.T) {
@@ -39,7 +40,7 @@ func TestDecompose(t *testing.T) {
 			hulls = cdp.decompose()
 
 			g.Assert(hulls.Len()).Equal(1)
-			h := hulls.Get(0).(*HullNode)
+			h := hulls.Get(0).(*node.Node)
 			g.Assert(h.Range.AsSlice()).Equal([]int{0, len(coords) - 1})
 		})
 	})

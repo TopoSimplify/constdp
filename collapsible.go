@@ -1,18 +1,19 @@
 package constdp
 
 import (
+	"simplex/node"
 	"github.com/intdxdt/geom"
 )
 
 //Is hull_a collapsible with respect to hull_b
 //hull_a and hull_b should be contiguous
-func is_contig_hull_collapsible(ha, hb *HullNode) bool {
+func is_contig_hull_collapsible(ha, hb *node.Node) bool {
 	//segments are already collapsed
 	if ha.Range.Size() == 1 {
 		return true
 	}
 
-	pln := ha.Pln.Coordinates
+	pln := ha.Coordinates()
 	pt_at := func(i int) *geom.Point {
 		return geom.NewPoint(pln[i][:2])
 	}

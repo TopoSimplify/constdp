@@ -6,8 +6,10 @@ import (
 	"simplex/rng"
 	"github.com/intdxdt/geom"
 	"github.com/franela/goblin"
+	"simplex/node"
 )
 
+var fn = hullGeom
 type testD struct {
 	k   int
 	bln bool
@@ -40,7 +42,7 @@ func TestCollapsible(t *testing.T) {
 				coords := geom.NewLineStringFromWKT(wkt).Coordinates()
 				poly := pln.New(coords)
 				n := len(coords) - 1
-				ha, hb := NewHullNode(poly, rng.NewRange(0, k)), NewHullNode(poly, rng.NewRange(k, n))
+				ha, hb := node.New(poly, rng.NewRange(0, k), fn), node.New(poly, rng.NewRange(k, n),fn)
 				g.Assert(is_contig_hull_collapsible(hb, ha)).Equal(bln)
 			}
 		})
@@ -52,13 +54,13 @@ func TestCollapsible(t *testing.T) {
 			n := len(coords) - 1
 			polyline := pln.New(coords)
 
-			h1 := NewHullNode(polyline, rng.NewRange(0, k1))
-			h2 := NewHullNode(polyline, rng.NewRange(k1, k2))
-			h3 := NewHullNode(polyline, rng.NewRange(k2, k3))
-			h4 := NewHullNode(polyline, rng.NewRange(k3, k4))
-			h5 := NewHullNode(polyline, rng.NewRange(k4, n))
+			h1 := node.New(polyline, rng.NewRange(0, k1), fn)
+			h2 := node.New(polyline, rng.NewRange(k1, k2), fn)
+			h3 := node.New(polyline, rng.NewRange(k2, k3), fn)
+			h4 := node.New(polyline, rng.NewRange(k3, k4), fn)
+			h5 := node.New(polyline, rng.NewRange(k4, n), fn)
 
-			hulls := [][2]*HullNode{{h1, h4}, {h1, h2}, {h1, h5}, {h2, h3}, {h2, h4}, {h2, h5}}
+			hulls := [][2]*node.Node{{h1, h4}, {h1, h2}, {h1, h5}, {h2, h3}, {h2, h4}, {h2, h5}}
 			for _, o := range hulls {
 				ha, hb := o[0], o[1]
 				g.Assert(is_contig_hull_collapsible(hb, ha)).IsTrue()

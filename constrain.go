@@ -7,18 +7,19 @@ import (
 	"github.com/intdxdt/rtree"
 	"simplex/opts"
 	"github.com/intdxdt/deque"
+	"simplex/node"
 )
 
 //constrain hulls at self intersection fragments - planar self-intersection
 func (self *ConstDP) _const_at_self_intersect_fragments(hulldb *rtree.RTree,
-	self_inters []*ctx.CtxGeom, at_vertex_set *sset.SSet) map[[2]int]*HullNode {
+	self_inters []*ctx.CtxGeom, at_vertex_set *sset.SSet) map[[2]int]*node.Node {
 	//@formatter:off
 	var fragment_size = 1
 
-	var hsubs []*HullNode
+	var hsubs []*node.Node
 	var hulls *HullNodes
 	var idxs []int
-	var unmerged = make(map[[2]int]*HullNode, 0)
+	var unmerged = make(map[[2]int]*node.Node, 0)
 
 	for _, inter := range self_inters {
 		if !inter.IsSelfVertex() {
@@ -69,7 +70,7 @@ func (self *ConstDP) constrain_to_selfintersects(opts *opts.Opts, const_verts []
 
 	var data = make([]rtree.BoxObj, 0)
 	for _, v := range *self.Hulls.DataView() {
-		data = append(data, v.(*HullNode))
+		data = append(data, v.(*node.Node))
 	}
 	hulldb.Load(data)
 
@@ -109,7 +110,7 @@ func (self *ConstDP) constrain_to_selfintersects(opts *opts.Opts, const_verts []
 
 //Constrain for self-intersection as a result of simplification
 //returns boolean : is hull collapsible
-func (self *ConstDP) constrain_ftclass_intersection(hull *HullNode, hulldb *rtree.RTree, selections *HullNodes) bool {
+func (self *ConstDP) constrain_ftclass_intersection(hull *node.Node, hulldb *rtree.RTree, selections *HullNodes) bool {
 	var bln = true
 	//find hull neighbours
 	var hulls = self.select_ftclass_deformation_candidates(hulldb, hull)
@@ -125,7 +126,7 @@ func (self *ConstDP) constrain_ftclass_intersection(hull *HullNode, hulldb *rtre
 
 //Constrain for self-intersection as a result of simplification
 //returns boolean : is hull collapsible
-func (self *ConstDP) constrain_self_intersection(hull *HullNode, hulldb *rtree.RTree, selections *HullNodes) bool {
+func (self *ConstDP) constrain_self_intersection(hull *node.Node, hulldb *rtree.RTree, selections *HullNodes) bool {
 	//assume hull is valid and proof otherwise
 	var bln = true
 	// find hull neighbours
@@ -144,7 +145,7 @@ func (self *ConstDP) constrain_self_intersection(hull *HullNode, hulldb *rtree.R
 //Constrain for context neighbours
 // finds the collapsibility of hull with respect to context hull neighbours
 // if hull is deformable, its added to selections
-func (self *ConstDP) constrain_context_relation(hull *HullNode, selections *HullNodes) bool {
+func (self *ConstDP) constrain_context_relation(hull *node.Node, selections *HullNodes) bool {
 	var bln = true
 
 	// find context neighbours - if valid

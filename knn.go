@@ -6,6 +6,7 @@ import (
 	"github.com/intdxdt/mbr"
 	"simplex/ctx"
 	"simplex/box"
+	"simplex/node"
 )
 
 //find knn
@@ -32,9 +33,9 @@ func score_fn(query igeom.IGeom) func(_, item rtree.BoxObj) float64 {
 		//item is box from rtree
 		if mb, ok = item.(*mbr.MBR); ok {
 			other = box.MBRToPolygon(mb)
-		} else { //item is either ctxgeom or hullnode
+		} else { //item is either ctxgeom or node.Node
 			if other, ok = item.(*ctx.CtxGeom); !ok {
-				other = item.(*HullNode)
+				other = item.(*node.Node)
 			}
 		}
 		return query.Geometry().Distance(other.Geometry())

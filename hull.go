@@ -6,9 +6,26 @@ import (
 	"github.com/intdxdt/rtree"
 	"github.com/intdxdt/deque"
 	"github.com/intdxdt/sset"
+	"github.com/intdxdt/geom"
+	"simplex/node"
 )
 
-type nodes []*HullNode
+//hull geom
+func hullGeom(coords []*geom.Point) geom.Geometry {
+	var g geom.Geometry
+
+	if len(coords) > 2 {
+		g = geom.NewPolygon(coords)
+	} else if len(coords) == 2 {
+		g = geom.NewLineString(coords)
+	} else {
+		g = coords[0].Clone()
+	}
+	return g
+}
+
+
+type nodes []*node.Node
 
 func (s nodes) Len() int {
 	return len(s)
@@ -27,7 +44,7 @@ type HullNodes struct {
 }
 
 //Get at index
-func (self *HullNodes) Get(index int) *HullNode {
+func (self *HullNodes) Get(index int) *node.Node {
 	return self.list[index]
 }
 
@@ -43,12 +60,12 @@ func (self *HullNodes) Reverse() *HullNodes {
 	return self
 }
 
-func (self *HullNodes) Push(v *HullNode) *HullNodes {
+func (self *HullNodes) Push(v *node.Node) *HullNodes {
 	self.list = append(self.list, v)
 	return self
 }
 
-func (self *HullNodes) Extend(vals ...*HullNode) *HullNodes {
+func (self *HullNodes) Extend(vals ...*node.Node) *HullNodes {
 	for _, h := range vals {
 		self.list = append(self.list, h)
 	}
@@ -108,7 +125,7 @@ func NewHullNodes(size ...int) *HullNodes {
 func NewHullNodesFromBoxes(iter []rtree.BoxObj) *HullNodes {
 	var self = NewHullNodes(len(iter))
 	for i, h := range iter {
-		self.list [i] = h.(*HullNode)
+		self.list [i] = h.(*node.Node)
 	}
 	return self
 }
@@ -117,7 +134,7 @@ func NewHullNodesFromBoxes(iter []rtree.BoxObj) *HullNodes {
 func NewHullNodesFromNodes(iter []*rtree.Node) *HullNodes {
 	var self = NewHullNodes(len(iter))
 	for i, h := range iter {
-		self.list[i] = h.GetItem().(*HullNode)
+		self.list[i] = h.GetItem().(*node.Node)
 	}
 	return self
 }
