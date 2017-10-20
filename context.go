@@ -20,10 +20,9 @@ func find_context_hulls(hulldb *rtree.RTree, hull *node.Node, dist float64) []rt
 func hull_predicate(queryhull *node.Node, dist float64) func(*rtree.KObj) (bool, bool) {
 	//@formatter:off
 	return func(candidate *rtree.KObj) (bool, bool) {
-		candhull := candidate.GetItem().(*node.Node)
-
-		qgeom    := queryhull.Geom
-		cgeom    := candhull.Geom
+		var candhull = candidate.GetItem().(*node.Node)
+		var qgeom    = queryhull.Geom
+		var cgeom    = candhull.Geom
 
 		// same hull
 		if candhull.Range.Equals(queryhull.Range) {

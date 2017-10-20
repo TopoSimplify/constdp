@@ -1,10 +1,10 @@
 package constdp
 
 import (
-	"github.com/intdxdt/geom"
 	"simplex/pln"
 	"simplex/ctx"
 	"simplex/node"
+	"github.com/intdxdt/geom"
 )
 
 //checks if score is valid at threshold of constrained dp

@@ -2,12 +2,12 @@ package constdp
 
 import (
 	"sort"
+	"simplex/node"
 	"github.com/intdxdt/cmp"
 	"github.com/intdxdt/rtree"
 	"github.com/intdxdt/deque"
 	"github.com/intdxdt/sset"
 	"github.com/intdxdt/geom"
-	"simplex/node"
 )
 
 //hull geom

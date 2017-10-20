@@ -20,12 +20,12 @@ func extract_neighbours(hull *node.Node, neighbs *HullNodes) (*node.Node, *node.
 //returns bool (intersects), bool(is contig at vertex)
 func is_contiguous(a, b *node.Node) (bool, bool, int) {
 	//@formatter:off
-	pln         := a.Polyline
-	coords      := pln.Coordinates
-	ga          := a.Geom
-	gb          := b.Geom
-	contig      := false
-	inter_count := 0
+	var pln         = a.Polyline
+	var coords      = pln.Coordinates
+	var ga          = a.Geom
+	var gb          = b.Geom
+	var contig      = false
+	var inter_count = 0
 
 	bln := ga.Intersects(gb)
 	if bln {

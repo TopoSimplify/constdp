@@ -8,7 +8,6 @@ import (
 	"simplex/lnr"
 )
 
-var Debug = false
 
 const EpsilonDist = 1.0e-5
 

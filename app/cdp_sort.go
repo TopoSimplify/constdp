@@ -6,9 +6,9 @@ import (
 	"strings"
 	"simplex/pln"
 	"simplex/rng"
+	"simplex/node"
 	"github.com/intdxdt/geom"
 	"github.com/intdxdt/sset"
-	"simplex/node"
 )
 
 type HullNodes []*node.Node

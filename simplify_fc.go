@@ -1,11 +1,11 @@
 package constdp
 
 import (
-	"github.com/intdxdt/sset"
+	"simplex/node"
 	"simplex/opts"
+	"github.com/intdxdt/sset"
 	"github.com/intdxdt/deque"
 	"github.com/intdxdt/rtree"
-	"simplex/node"
 )
 
 //Update hull nodes with dp instance

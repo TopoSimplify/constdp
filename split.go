@@ -22,9 +22,9 @@ func split_at_score_selection(self lnr.Linear, hull *node.Node) (*node.Node, *no
 //split hull at indexes (index, index, ...)
 func split_at_index(self lnr.Linear, hull *node.Node, idxs []int) []*node.Node {
 	//formatter:off
-	pln         := self.Polyline()
-	ranges      := hull.Range.Split(idxs)
-	sub_hulls   := make([]*node.Node, 0)
+	var pln       = self.Polyline()
+	var ranges    = hull.Range.Split(idxs)
+	var sub_hulls = make([]*node.Node, 0)
 	for _, r := range ranges {
 		sub_hulls = append(sub_hulls, node.New(pln, r, hullGeom))
 	}

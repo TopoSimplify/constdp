@@ -1,10 +1,10 @@
 package constdp
 
 import (
-	"github.com/intdxdt/sset"
 	"simplex/rng"
-	"github.com/intdxdt/rtree"
 	"simplex/node"
+	"github.com/intdxdt/sset"
+	"github.com/intdxdt/rtree"
 )
 
 //Merge two ranges

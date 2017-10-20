@@ -2,10 +2,10 @@ package main
 
 import (
 	"fmt"
-	"github.com/intdxdt/geom"
-	"simplex/constdp"
 	"simplex/opts"
 	"simplex/offset"
+	"simplex/constdp"
+	"github.com/intdxdt/geom"
 )
 
 var constraints_wkt []string

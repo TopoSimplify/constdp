@@ -15,7 +15,6 @@ func (self *ConstDP) _const_at_self_intersect_fragments(hulldb *rtree.RTree,
 	self_inters []*ctx.CtxGeom, at_vertex_set *sset.SSet) map[[2]int]*node.Node {
 	//@formatter:off
 	var fragment_size = 1
-
 	var hsubs []*node.Node
 	var hulls *HullNodes
 	var idxs []int

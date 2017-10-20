@@ -4,9 +4,9 @@ import (
 	"testing"
 	"simplex/pln"
 	"simplex/rng"
+	"simplex/node"
 	"github.com/intdxdt/geom"
 	"github.com/franela/goblin"
-	"simplex/node"
 )
 
 var fn = hullGeom

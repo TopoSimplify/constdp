@@ -13,15 +13,15 @@ func is_contig_hull_collapsible(ha, hb *node.Node) bool {
 		return true
 	}
 
-	pln := ha.Coordinates()
-	pt_at := func(i int) *geom.Point {
+	var pln = ha.Coordinates()
+	var pt_at = func(i int) *geom.Point {
 		return geom.NewPoint(pln[i][:2])
 	}
 
-	ra := ha.Range
-	rb := hb.Range
-	ai, aj := pt_at(ra.I()), pt_at(ra.J())
-	bi, bj := pt_at(rb.I()), pt_at(rb.J())
+	var ra = ha.Range
+	var rb = hb.Range
+	var ai, aj = pt_at(ra.I()), pt_at(ra.J())
+	var bi, bj = pt_at(rb.I()), pt_at(rb.J())
 
 	var c *geom.Point
 	if ai.Equals2D(bi) || aj.Equals2D(bi) {
@@ -32,10 +32,10 @@ func is_contig_hull_collapsible(ha, hb *node.Node) bool {
 		return true
 	}
 
-	t := bj
+	var t = bj
 	if c.Equals2D(t) {
 		t = bi
 	}
-	ply := ha.Geom.(*geom.Polygon)
+	var ply = ha.Geom.(*geom.Polygon)
 	return !ply.Shell.PointCompletelyInRing(t)
 }

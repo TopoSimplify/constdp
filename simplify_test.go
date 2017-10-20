@@ -51,9 +51,6 @@ func TestConstDP(t *testing.T) {
 				var coords = geom.NewLineStringFromWKT(td.pln).Coordinates()
 				var dp = NewConstDP(coords, constraints, options, offset.MaxOffset)
 				var ptset = dp.Simplify(options).simple
-				if Debug{
-					fmt.Println(ptset.Values())
-				}
 
 				simplx := make([]*geom.Point, 0)
 				for _, i := range ptset.Values() {

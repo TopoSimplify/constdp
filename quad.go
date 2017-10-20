@@ -2,14 +2,14 @@ package constdp
 
 import (
 	"strings"
-	"github.com/intdxdt/geom"
-	"github.com/intdxdt/mbr"
-	"github.com/intdxdt/math"
-	"github.com/intdxdt/rtree"
 	"simplex/pln"
 	"simplex/seg"
 	"simplex/ctx"
 	"simplex/box"
+	"github.com/intdxdt/mbr"
+	"github.com/intdxdt/math"
+	"github.com/intdxdt/geom"
+	"github.com/intdxdt/rtree"
 )
 
 //Direction Relate

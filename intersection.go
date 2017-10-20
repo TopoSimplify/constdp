@@ -77,8 +77,8 @@ func linear_ftclass_self_intersection(ftcls []*ConstDP) map[string]*sset.SSet {
 func linear_self_intersection(polyline *pln.Polyline) []*ctx.CtxGeom {
 	var tree = *rtree.NewRTree(8)
 	var dict = make(map[[2]float64]*kvCount)
-
 	var data = make([]rtree.BoxObj, 0)
+
 	for _, s := range polyline.Segments() {
 		data = append(data, s)
 	}

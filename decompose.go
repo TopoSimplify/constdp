@@ -1,10 +1,10 @@
 package constdp
 
 import (
-	"github.com/intdxdt/deque"
-	"github.com/intdxdt/stack"
 	"simplex/rng"
 	"simplex/node"
+	"github.com/intdxdt/deque"
+	"github.com/intdxdt/stack"
 )
 
 

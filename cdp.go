@@ -63,7 +63,7 @@ func (self *ConstDP) Score(pln lnr.Linear, rg *rng.Range) (int, float64) {
 
 //creates constraint db from geometries
 func (self *ConstDP) build_context_db(geoms []geom.Geometry) *ConstDP {
-	lst := make([]rtree.BoxObj, 0)
+	var lst = make([]rtree.BoxObj, 0)
 	for _, g := range geoms {
 		lst = append(lst, ctx.NewCtxGeom(g, 0, -1).AsContextNeighbour())
 	}

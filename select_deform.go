@@ -1,8 +1,8 @@
 package constdp
 
 import (
-	"github.com/intdxdt/rtree"
 	"simplex/node"
+	"github.com/intdxdt/rtree"
 )
 
 //find context_geom deformable hulls
