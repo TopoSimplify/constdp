@@ -1,12 +1,12 @@
 package constdp
 
 import (
+	"simplex/knn"
 	"simplex/rng"
 	"simplex/node"
+	"simplex/merge"
 	"github.com/intdxdt/sset"
 	"github.com/intdxdt/rtree"
-	"simplex/merge"
-	"simplex/knn"
 )
 
 
