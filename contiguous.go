@@ -2,10 +2,10 @@ package constdp
 
 import "simplex/node"
 
-func extract_neighbours(hull *node.Node, neighbs *HullNodes) (*node.Node, *node.Node) {
+func extract_neighbours(hull *node.Node, neighbs *node.Nodes) (*node.Node, *node.Node) {
 	var prev, nxt *node.Node
 	var i, j = hull.Range.I(), hull.Range.J()
-	for _, h := range neighbs.list {
+	for _, h := range neighbs.DataView() {
 		if h != hull {
 			if i == h.Range.J() {
 				prev = h

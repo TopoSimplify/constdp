@@ -10,6 +10,7 @@ import (
 	"github.com/intdxdt/deque"
 	"simplex/relate"
 	"simplex/split"
+	"simplex/knn"
 )
 
 //constrain hulls at self intersection fragments - planar self-intersection
@@ -18,7 +19,7 @@ func (self *ConstDP) _const_at_self_intersect_fragments(hulldb *rtree.RTree,
 	//@formatter:off
 	var fragment_size = 1
 	var hsubs []*node.Node
-	var hulls *HullNodes
+	var hulls *node.Nodes
 	var idxs []int
 	var unmerged = make(map[[2]int]*node.Node, 0)
 
@@ -27,10 +28,10 @@ func (self *ConstDP) _const_at_self_intersect_fragments(hulldb *rtree.RTree,
 			continue
 		}
 
-		hulls = NewHullNodesFromBoxes(find_context_neighbs(hulldb, inter, EpsilonDist)).Sort()
+		hulls = nodesFromBoxes(knn.FindNeighbours(hulldb, inter, EpsilonDist)).Sort()
 
 		idxs = as_ints(inter.Meta.SelfVertices.Values())
-		for _, hull := range hulls.list {
+		for _, hull := range hulls.DataView() {
 			hsubs = split.AtIndex(self, hull, idxs, hullGeom)
 
 			if len(hsubs) == 0 && (hull.Range.Size() == fragment_size) {
@@ -106,12 +107,12 @@ func (self *ConstDP) constrain_to_selfintersects(opts *opts.Opts, const_verts []
 		}
 		mcount += -1
 	}
-	return NewHullNodesFromNodes(hulldb.All()).Sort().AsDeque(), true, at_vertex_set
+	return nodesFromRtreeNodes(hulldb.All()).Sort().AsDeque(), true, at_vertex_set
 }
 
 //Constrain for self-intersection as a result of simplification
 //returns boolean : is hull collapsible
-func (self *ConstDP) constrain_ftclass_intersection(hull *node.Node, hulldb *rtree.RTree, selections *HullNodes) bool {
+func (self *ConstDP) constrain_ftclass_intersection(hull *node.Node, hulldb *rtree.RTree, selections *node.Nodes) bool {
 	var bln = true
 	//find hull neighbours
 	var hulls = self.select_ftclass_deformation_candidates(hulldb, hull)
@@ -127,7 +128,7 @@ func (self *ConstDP) constrain_ftclass_intersection(hull *node.Node, hulldb *rtr
 
 //Constrain for self-intersection as a result of simplification
 //returns boolean : is hull collapsible
-func (self *ConstDP) constrain_self_intersection(hull *node.Node, hulldb *rtree.RTree, selections *HullNodes) bool {
+func (self *ConstDP) constrain_self_intersection(hull *node.Node, hulldb *rtree.RTree, selections *node.Nodes) bool {
 	//assume hull is valid and proof otherwise
 	var bln = true
 	// find hull neighbours
@@ -146,17 +147,17 @@ func (self *ConstDP) constrain_self_intersection(hull *node.Node, hulldb *rtree.
 //Constrain for context neighbours
 // finds the collapsibility of hull with respect to context hull neighbours
 // if hull is deformable, its added to selections
-func (self *ConstDP) constrain_context_relation(hull *node.Node, selections *HullNodes) bool {
+func (self *ConstDP) constrain_context_relation(hull *node.Node, selections *node.Nodes) bool {
 	var bln = true
 
 	// find context neighbours - if valid
-	ctxs := find_context_neighbs(self.ContextDB, hull, self.Opts.MinDist)
+	ctxs := knn.FindNeighbours(self.ContextDB, hull, self.Opts.MinDist)
 	for _, contxt := range ctxs {
 		if !bln {
 			break
 		}
 
-		cg := cast_as_context_geom(contxt)
+		cg := castAsContextGeom(contxt)
 		if bln && self.Opts.GeomRelation {
 			bln = relate.IsGeomRelateValid(self, hull, cg)
 		}

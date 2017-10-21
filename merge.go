@@ -6,6 +6,7 @@ import (
 	"github.com/intdxdt/sset"
 	"github.com/intdxdt/rtree"
 	"simplex/merge"
+	"simplex/knn"
 )
 
 
@@ -42,9 +43,9 @@ func (self *ConstDP) merge_contiguous_fragments_by_size(
 		}
 
 		// sort hulls for consistency
-		var hs = NewHullNodesFromBoxes(find_context_hulls(hulldb, h, EpsilonDist)).Sort()
+		var hs = nodesFromBoxes(knn.FindNeighbours(hulldb, h, EpsilonDist)).Sort()
 
-		for _, s := range hs.list {
+		for _, s := range hs.DataView() {
 			sr := s.Range
 			if is_merged(sr){
 				continue

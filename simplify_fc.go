@@ -12,15 +12,15 @@ import (
 func (self *ConstDP) self_update() {
 	var hull *node.Node
 	for _, h := range *self.Hulls.DataView() {
-		hull = cast_as_hullnode(h)
+		hull = castAsNode(h)
 		hull.Instance = self
 	}
 }
 
-func deform_class_selections(queue *deque.Deque, hulldb *rtree.RTree, selections *HullNodes) {
-	for _, s := range selections.list {
-		self := cast_cdp(s.Instance)
-		sels := NewHullNodes().Push(s)
+func deform_class_selections(queue *deque.Deque, hulldb *rtree.RTree, selections *node.Nodes) {
+	for _, s := range selections.DataView() {
+		self := castConstDP(s.Instance)
+		sels := node.NewNodes().Push(s)
 		self.deform_hulls(hulldb, sels)
 		self.self_update()
 		for self.Hulls.Len() > 0 {
@@ -36,22 +36,22 @@ func group_hulls_by_self(hulldb *rtree.RTree) {
 	var self *ConstDP
 	var hull *node.Node
 	var selfs = make([]*ConstDP, 0)
-	var smap = make(map[string]*HullNodes)
+	var smap = make(map[string]*node.Nodes)
 
-	for _, h := range NewHullNodesFromNodes(hulldb.All()).list {
-		var lst *HullNodes
-		self = cast_cdp(h.Instance)
+	for _, h := range nodesFromRtreeNodes(hulldb.All()).DataView() {
+		var lst *node.Nodes
+		self = castConstDP(h.Instance)
 		if lst, ok = smap[self.Id]; !ok {
-			lst = NewHullNodes()
+			lst = node.NewNodes()
 		}
 		lst.Push(h)
 		smap[self.Id] = lst
 	}
 
 	for _, lst := range smap {
-		self = cast_cdp(lst.Get(0).Instance)
+		self = castConstDP(lst.Get(0).Instance)
 		self.Hulls.Clear()
-		for _, h := range lst.Sort().list {
+		for _, h := range lst.Sort().DataView() {
 			self.Hulls.Append(h)
 		}
 		selfs = append(selfs, self)
@@ -60,7 +60,7 @@ func group_hulls_by_self(hulldb *rtree.RTree) {
 	for _, self := range selfs {
 		self.simple.Empty() //update new simple
 		for _, h := range *self.Hulls.DataView() {
-			hull = cast_as_hullnode(h)
+			hull = castAsNode(h)
 			self.simple.Extend(hull.Range.I(), hull.Range.J())
 		}
 	}
@@ -89,7 +89,7 @@ func SimplifyFeatureClass(selfs []*ConstDP, opts *opts.Opts) {
 	for _, self := range selfs {
 		self.self_update()
 		for _, h := range *self.Hulls.DataView() {
-			hlist = append(hlist, cast_as_hullnode(h))
+			hlist = append(hlist, castAsNode(h))
 		}
 		self.Hulls.Clear() // empty deque, this is for future splits
 	}
@@ -97,7 +97,7 @@ func SimplifyFeatureClass(selfs []*ConstDP, opts *opts.Opts) {
 	var bln bool
 	var self *ConstDP
 	var hull *node.Node
-	var selections = NewHullNodes()
+	var selections = node.NewNodes()
 	var dque = deque.NewDeque(len(hlist))
 
 	for _, h := range hlist {
@@ -107,7 +107,7 @@ func SimplifyFeatureClass(selfs []*ConstDP, opts *opts.Opts) {
 	for !dque.IsEmpty() {
 		//fmt.Println("queue size :", dque.Len())
 		// assume poped hull to be valid
-		hull = cast_as_hullnode(dque.PopLeft())
+		hull = castAsNode(dque.PopLeft())
 		self = hull.Instance.(*ConstDP)
 
 		// insert hull into hull db

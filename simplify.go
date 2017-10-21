@@ -6,12 +6,14 @@ import (
 	"github.com/intdxdt/sset"
 	"github.com/intdxdt/rtree"
 	"simplex/merge"
+	"simplex/knn"
 )
 
 //checks if score is valid at threshold of constrained dp
 func (self *ConstDP) is_score_relate_valid(val float64) bool {
 	return val <= self.Opts.Threshold
 }
+
 
 //Homotopic simplification at a given threshold
 func (self *ConstDP) Simplify(opts *opts.Opts, const_vertices ...[]int) *ConstDP {
@@ -34,7 +36,7 @@ func (self *ConstDP) Simplify(opts *opts.Opts, const_vertices ...[]int) *ConstDP
 
 	var bln bool
 	var hull *node.Node
-	var selections = NewHullNodes()
+	var selections  = node.NewNodes()
 
 	var hulldb = rtree.NewRTree(8)
 	for !self.Hulls.IsEmpty() {
@@ -42,7 +44,7 @@ func (self *ConstDP) Simplify(opts *opts.Opts, const_vertices ...[]int) *ConstDP
 		bln = true
 
 		// pop hull in queue
-		hull = pop_left_hull(self.Hulls)
+		hull = popLeftHull(self.Hulls)
 
 		// insert hull into hull db
 		hulldb.Insert(hull)
@@ -71,7 +73,7 @@ func (self *ConstDP) Simplify(opts *opts.Opts, const_vertices ...[]int) *ConstDP
 
 	self.Hulls.Clear()
 	self.simple.Empty()
-	for _, h := range NewHullNodesFromNodes(hulldb.All()).Sort().list {
+	for _, h := range nodesFromRtreeNodes(hulldb.All()).Sort().DataView() {
 		self.Hulls.Append(h)
 		self.simple.Extend(h.Range.I(), h.Range.J())
 	}
@@ -82,16 +84,16 @@ func (self *ConstDP) Simplify(opts *opts.Opts, const_vertices ...[]int) *ConstDP
 func (self *ConstDP) merge_simple_segments(hulldb *rtree.RTree, const_vertex_set *sset.SSet) {
 	var fragment_size = 1
 	var hull *node.Node
-	var neighbs *HullNodes
+	var neighbs *node.Nodes
 	var cache = make(map[[4]int]bool)
-	var hulls = NewHullNodesFromNodes(hulldb.All()).Sort().AsDeque()
+	var hulls = nodesFromRtreeNodes(hulldb.All()).Sort().AsDeque()
 
 	//fmt.Println("After constraints:")
 	//DebugPrintPtSet(hulls)
 
 	for !hulls.IsEmpty() {
 		// from left
-		hull = pop_left_hull(hulls)
+		hull = popLeftHull(hulls)
 
 		if hull.Range.Size() != fragment_size {
 			continue
@@ -105,7 +107,7 @@ func (self *ConstDP) merge_simple_segments(hulldb *rtree.RTree, const_vertex_set
 		hulldb.Remove(hull)
 
 		// find context neighbours
-		neighbs = NewHullNodesFromBoxes(find_context_hulls(hulldb, hull, EpsilonDist))
+		neighbs = nodesFromBoxes(knn.FindNodeNeighbours(hulldb, hull, EpsilonDist))
 
 		// find context neighbours
 		prev, nxt := extract_neighbours(hull, neighbs)
@@ -118,7 +120,7 @@ func (self *ConstDP) merge_simple_segments(hulldb *rtree.RTree, const_vertex_set
 			key = cache_key(prev, hull)
 			if !cache[key] {
 				add_to_merge_cache(cache, &key)
-				merge_prev = merge.ContiguousFragmentsAtThreshold(self, prev, hull, self.is_score_relate_valid, hullGeom)
+				merge_prev = merge.ContiguousFragmentsAtThreshold(self, prev, hull,self.is_score_relate_valid, hullGeom)
 			}
 		}
 
@@ -135,7 +137,7 @@ func (self *ConstDP) merge_simple_segments(hulldb *rtree.RTree, const_vertex_set
 		if !merged && merge_nxt != nil {
 			hulldb.Remove(nxt)
 			if self.is_merge_simplx_valid(merge_nxt, hulldb) {
-				var h = cast_as_hullnode(hulls.First())
+				var h = castAsNode(hulls.First())
 				if h == nxt {
 					hulls.PopLeft()
 				}
@@ -167,7 +169,7 @@ func (self *ConstDP) merge_simple_segments(hulldb *rtree.RTree, const_vertex_set
 
 func (self *ConstDP) is_merge_simplx_valid(hull *node.Node, hulldb *rtree.RTree) bool {
 	var bln = true
-	var side_effects = NewHullNodes()
+	var side_effects = node.NewNodes()
 
 	if bln && self.Opts.AvoidNewSelfIntersects {
 		// self intersection constraint

@@ -3,6 +3,7 @@ package constdp
 import (
 	"simplex/node"
 	"github.com/intdxdt/rtree"
+	"simplex/knn"
 )
 
 //find context_geom deformable hulls
@@ -11,13 +12,13 @@ func (self *ConstDP) select_ftclass_deformation_candidates(hulldb *rtree.RTree, 
 	var inters, contig bool
 
 	seldict := make(map[[2]int]*node.Node, 0)
-	ctx_hulls := find_context_hulls(hulldb, hull, EpsilonDist)
+	ctx_hulls := knn.FindNodeNeighbours(hulldb, hull, EpsilonDist)
 	// for each item in the context_geom list
 	for _, cn := range ctx_hulls {
 		n = 0
-		h := cast_as_hullnode(cn)
+		h := castAsNode(cn)
 
-		same_feature := is_same(hull.Instance, h.Instance)
+		same_feature := isSame(hull.Instance, h.Instance)
 		// find which item to deform against current hull
 		if same_feature { // check for contiguity
 			inters, contig, n = is_contiguous(hull, h)
@@ -61,12 +62,12 @@ func (self *ConstDP) select_ftclass_deformation_candidates(hulldb *rtree.RTree, 
 //find context deformation list
 func (self *ConstDP) select_deformation_candidates(hulldb *rtree.RTree, hull *node.Node) []*node.Node {
 	seldict := make(map[[2]int]*node.Node, 0)
-	ctx_hulls := find_context_hulls(hulldb, hull, EpsilonDist)
+	ctx_hulls := knn.FindNodeNeighbours(hulldb, hull, EpsilonDist)
 
 	// for each item in the context list
 	for _, cn := range ctx_hulls {
 		// find which item to deform against current hull
-		h := cast_as_hullnode(cn)
+		h := castAsNode(cn)
 		inters, contig, n := is_contiguous(hull, h)
 
 		if !inters {
@@ -97,9 +98,9 @@ func (self *ConstDP) select_deformation_candidates(hulldb *rtree.RTree, hull *no
 func (self *ConstDP) _contiguous_candidates(a, b *node.Node) []*node.Node {
 	var selection = make([]*node.Node, 0)
 	// compute sidedness relation between contiguous hulls to avoid hull flip
-	hulls := NewHullNodes().Extend(a, b).Sort()
+	hulls := node.NewNodes().Extend(a, b).Sort()
 	//future should not affect the past
-	ha, hb := hulls.list[0], hulls.list[1]
+	ha, hb := hulls.Get(0), hulls.Get(1)
 
 	//all hulls that are simple should be collapsible
 	// if not collapsible -- add to selection for deformation
