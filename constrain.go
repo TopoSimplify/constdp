@@ -11,6 +11,7 @@ import (
 	"simplex/relate"
 	"simplex/split"
 	"simplex/knn"
+	"simplex/merge"
 )
 
 //constrain hulls at self intersection fragments - planar self-intersection
@@ -43,8 +44,9 @@ func (self *ConstDP) _const_at_self_intersect_fragments(hulldb *rtree.RTree,
 			}
 
 			hulldb.Remove(hull)
-			keep, rm := self.merge_contiguous_fragments_by_size(
+			keep, rm := merge.ContiguousFragmentsBySize(self,
 				hsubs, hulldb, at_vertex_set, unmerged, fragment_size,
+				self.is_score_relate_valid, hullGeom, EpsilonDist,
 			)
 
 			for _, h := range rm {

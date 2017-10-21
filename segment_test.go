@@ -2,11 +2,11 @@ package constdp
 
 import (
 	"testing"
-	"github.com/intdxdt/geom"
-	"github.com/franela/goblin"
 	"simplex/rng"
 	"simplex/pln"
 	"simplex/node"
+	"github.com/intdxdt/geom"
+	"github.com/franela/goblin"
 )
 
 func TestHullSeg(t *testing.T) {
