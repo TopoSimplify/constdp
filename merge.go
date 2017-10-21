@@ -5,30 +5,10 @@ import (
 	"simplex/node"
 	"github.com/intdxdt/sset"
 	"github.com/intdxdt/rtree"
+	"simplex/merge"
 )
 
-//Merge two ranges
-func merge_range(ra, rb *rng.Range) *rng.Range {
-	var ranges = sort_ints(append(ra.AsSlice(), rb.AsSlice()...))
-	// i...[ra]...k...[rb]...j
-	return rng.NewRange(ranges[0], ranges[len(ranges)-1])
-}
 
-//Merge contiguous fragments based combined score
-func merge_contiguous_fragments_at_threshold(self *ConstDP, ha, hb *node.Node) *node.Node {
-	_, val := self.Score(self, merge_range(ha.Range, hb.Range))
-	if self.is_score_relate_valid(val) {
-		return self.merge_contiguous_fragments(ha, hb)
-	}
-	return nil
-}
-
-//Merge contiguous hulls
-func (self *ConstDP) merge_contiguous_fragments(ha, hb *node.Node) *node.Node {
-	var r = merge_range(ha.Range, hb.Range)
-	// i...[ha]...k...[hb]...j
-	return node.New(self.Pln, r, hullGeom)
-}
 
 //Merge contiguous hulls by fragment size
 func (self *ConstDP) merge_contiguous_fragments_by_size(
@@ -71,7 +51,7 @@ func (self *ConstDP) merge_contiguous_fragments_by_size(
 			}
 
 			//merged range
-			r := merge_range(sr, hr)
+			r := merge.Range(sr, hr)
 
 			//test whether sr.i or sr.j is a self inter-vertex -- split point
 			//not sr.i != hr.i or sr.j != hr.j without i/j being a inter-vertex

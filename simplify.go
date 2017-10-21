@@ -5,13 +5,13 @@ import (
 	"simplex/node"
 	"github.com/intdxdt/sset"
 	"github.com/intdxdt/rtree"
+	"simplex/merge"
 )
 
 //checks if score is valid at threshold of constrained dp
 func (self *ConstDP) is_score_relate_valid(val float64) bool {
 	return val <= self.Opts.Threshold
 }
-
 
 //Homotopic simplification at a given threshold
 func (self *ConstDP) Simplify(opts *opts.Opts, const_vertices ...[]int) *ConstDP {
@@ -34,7 +34,7 @@ func (self *ConstDP) Simplify(opts *opts.Opts, const_vertices ...[]int) *ConstDP
 
 	var bln bool
 	var hull *node.Node
-	var selections  = NewHullNodes()
+	var selections = NewHullNodes()
 
 	var hulldb = rtree.NewRTree(8)
 	for !self.Hulls.IsEmpty() {
@@ -118,7 +118,7 @@ func (self *ConstDP) merge_simple_segments(hulldb *rtree.RTree, const_vertex_set
 			key = cache_key(prev, hull)
 			if !cache[key] {
 				add_to_merge_cache(cache, &key)
-				merge_prev = merge_contiguous_fragments_at_threshold(self, prev, hull)
+				merge_prev = merge.ContiguousFragmentsAtThreshold(self, prev, hull, self.is_score_relate_valid, hullGeom)
 			}
 		}
 
@@ -126,7 +126,7 @@ func (self *ConstDP) merge_simple_segments(hulldb *rtree.RTree, const_vertex_set
 			key = cache_key(hull, nxt)
 			if !cache[key] {
 				add_to_merge_cache(cache, &key)
-				merge_nxt = merge_contiguous_fragments_at_threshold(self, hull, nxt)
+				merge_nxt = merge.ContiguousFragmentsAtThreshold(self, hull, nxt, self.is_score_relate_valid, hullGeom)
 			}
 		}
 
