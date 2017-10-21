@@ -9,6 +9,7 @@ import (
 	"github.com/intdxdt/rtree"
 	"github.com/intdxdt/deque"
 	"simplex/relate"
+	"simplex/split"
 )
 
 //constrain hulls at self intersection fragments - planar self-intersection
@@ -30,7 +31,7 @@ func (self *ConstDP) _const_at_self_intersect_fragments(hulldb *rtree.RTree,
 
 		idxs = as_ints(inter.Meta.SelfVertices.Values())
 		for _, hull := range hulls.list {
-			hsubs = split_at_index(self, hull, idxs)
+			hsubs = split.AtIndex(self, hull, idxs, hullGeom)
 
 			if len(hsubs) == 0 && (hull.Range.Size() == fragment_size) {
 				hsubs = append(hsubs, hull)

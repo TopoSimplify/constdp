@@ -3,14 +3,15 @@ package constdp
 import (
 	"time"
 	"testing"
-	"github.com/intdxdt/geom"
-	"github.com/intdxdt/cmp"
 	"simplex/opts"
+	"simplex/node"
+	"simplex/split"
+	"simplex/offset"
+	"github.com/intdxdt/cmp"
+	"github.com/intdxdt/geom"
 	"github.com/intdxdt/sset"
 	"github.com/intdxdt/rtree"
-	"simplex/offset"
 	"github.com/franela/goblin"
-	"simplex/node"
 )
 
 //@formatter:off
@@ -39,11 +40,11 @@ func TestMergeHull(t *testing.T) {
 			homo    := NewConstDP(coords, constraints, options, offset.MaxOffset)
 
 			hull    := create_hulls([][]int{{0, n}}, coords)[0]
-			ha, hb  := split_at_score_selection(homo, hull)
-			splits  := split_at_index(homo, hull, []int{
+			ha, hb  := split.AtScoreSelection(homo, hull, hullGeom)
+			splits  := split.AtIndex(homo, hull, []int{
 				ha.Range.I(), ha.Range.J(), hb.Range.I(),
 				hb.Range.I() - 1, hb.Range.J(),
-			})
+			}, hullGeom)
 			g.Assert(len(splits)).Equal(3)
 
 			hulldb := rtree.NewRTree(8)
@@ -59,7 +60,7 @@ func TestMergeHull(t *testing.T) {
 			g.Assert(len(keep)).Equal(2)
 			g.Assert(len(rm)).Equal(2)
 
-			splits  = split_at_index(homo, hull, []int{0, 5, 6, 7, 8, 12,})
+			splits  = split.AtIndex(homo, hull, []int{0, 5, 6, 7, 8, 12}, hullGeom)
 			g.Assert(len(splits)).Equal(5)
 
 			hulldb  = rtree.NewRTree(8)
