@@ -8,6 +8,7 @@ import (
 	"github.com/intdxdt/sset"
 	"github.com/intdxdt/rtree"
 	"github.com/intdxdt/deque"
+	"simplex/relate"
 )
 
 //constrain hulls at self intersection fragments - planar self-intersection
@@ -156,15 +157,15 @@ func (self *ConstDP) constrain_context_relation(hull *node.Node, selections *Hul
 
 		cg := cast_as_context_geom(contxt)
 		if bln && self.Opts.GeomRelation {
-			bln = self.is_geom_relate_valid(hull, cg)
+			bln = relate.IsGeomRelateValid(self, hull, cg)
 		}
 
 		if bln && self.Opts.DistRelation {
-			bln = self.is_dist_relate_valid(hull, cg)
+			bln = relate.IsDistRelateValid(self, hull, cg)
 		}
 
 		if bln && self.Opts.DirRelation {
-			bln = self.is_dir_relate_valid(hull, cg)
+			bln = relate.IsDirRelateValid(self, hull, cg)
 		}
 	}
 

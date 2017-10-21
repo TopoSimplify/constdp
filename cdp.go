@@ -24,7 +24,7 @@ type ConstDP struct {
 	Meta      map[string]interface{}
 
 	simple *sset.SSet
-	score  func(lnr.Linear, *rng.Range) (int, float64)
+	score  lnr.ScoreFn
 }
 
 //Creates a new constrained DP Simplification instance
@@ -47,6 +47,10 @@ func NewConstDP(coordinates []*geom.Point, constraints []geom.Geometry,
 
 func (self *ConstDP) Simple() *sset.SSet {
 	return self.simple
+}
+
+func (self *ConstDP) Options() *opts.Opts {
+	return self.Opts
 }
 
 func (self *ConstDP) Coordinates() []*geom.Point {

@@ -7,6 +7,12 @@ import (
 	"github.com/intdxdt/rtree"
 )
 
+//checks if score is valid at threshold of constrained dp
+func (self *ConstDP) is_score_relate_valid(val float64) bool {
+	return val <= self.Opts.Threshold
+}
+
+
 //Homotopic simplification at a given threshold
 func (self *ConstDP) Simplify(opts *opts.Opts, const_vertices ...[]int) *ConstDP {
 	var const_vertex_set *sset.SSet
