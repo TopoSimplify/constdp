@@ -40,10 +40,10 @@ func TestCollapsible(t *testing.T) {
 		g.It("should test hull collapsibility", func() {
 			for _, o := range lnwkts {
 				k, bln, wkt := o.k, o.bln, o.wkt
-				coords := geom.NewLineStringFromWKT(wkt).Coordinates()
-				poly := pln.New(coords)
-				n := len(coords) - 1
-				ha, hb := node.New(poly, rng.NewRange(0, k), fn), node.New(poly, rng.NewRange(k, n),fn)
+				var coords = geom.NewLineStringFromWKT(wkt).Coordinates()
+				var poly = pln.New(coords)
+				var n = len(coords) - 1
+				var ha, hb = node.New(poly, rng.NewRange(0, k), fn), node.New(poly, rng.NewRange(k, n),fn)
 				g.Assert(is_contig_hull_collapsible(hb, ha)).Equal(bln)
 			}
 		})
