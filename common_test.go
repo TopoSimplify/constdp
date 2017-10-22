@@ -1,11 +1,11 @@
 package constdp
 
 import (
+	"simplex/dp"
 	"simplex/pln"
 	"simplex/rng"
 	"simplex/node"
 	"github.com/intdxdt/geom"
-	"simplex/dp"
 )
 
 func linear_coords(wkt string) []*geom.Point{

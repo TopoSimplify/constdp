@@ -1,18 +1,19 @@
 package constdp
 
 import (
+	"simplex/dp"
+	"simplex/knn"
 	"simplex/ctx"
 	"simplex/node"
 	"simplex/opts"
+	"simplex/split"
+	"simplex/merge"
+	"simplex/relate"
 	"github.com/intdxdt/cmp"
 	"github.com/intdxdt/sset"
 	"github.com/intdxdt/rtree"
 	"github.com/intdxdt/deque"
-	"simplex/relate"
-	"simplex/split"
-	"simplex/knn"
-	"simplex/merge"
-	"simplex/dp"
+	"simplex/lnr"
 )
 
 //constrain hulls at self intersection fragments - planar self-intersection
@@ -71,7 +72,7 @@ func (self *ConstDP) constrain_to_selfintersects(opts *opts.Opts, const_verts []
 	}
 
 	var hulldb = rtree.NewRTree(8)
-	var self_inters = linear_self_intersection(self.Pln)
+	var self_inters = lnr.SelfIntersection(self)
 
 	var data = make([]rtree.BoxObj, 0)
 	for _, v := range *self.Hulls.DataView() {

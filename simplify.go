@@ -8,6 +8,7 @@ import (
 	"github.com/intdxdt/sset"
 	"github.com/intdxdt/rtree"
 	"simplex/dp"
+	"simplex/split"
 )
 
 //checks if score is valid at threshold of constrained dp
@@ -57,7 +58,7 @@ func (self *ConstDP) Simplify(opts *opts.Opts, const_vertices ...[]int) *ConstDP
 		}
 
 		if !selections.IsEmpty() {
-			self.deform_hulls(hulldb, selections)
+			split.SplitNodesInDB(self, hulldb, selections, dp.NodeGeometry)
 		}
 
 		if !bln {
@@ -67,7 +68,7 @@ func (self *ConstDP) Simplify(opts *opts.Opts, const_vertices ...[]int) *ConstDP
 		// context_geom geometry constraint
 		bln = self.constrain_context_relation(hull, selections)
 		if !selections.IsEmpty() {
-			self.deform_hulls(hulldb, selections)
+			split.SplitNodesInDB(self, hulldb, selections, dp.NodeGeometry)
 		}
 	}
 

@@ -6,6 +6,9 @@ import (
 	"github.com/intdxdt/sset"
 	"github.com/intdxdt/deque"
 	"github.com/intdxdt/rtree"
+	"simplex/split"
+	"simplex/dp"
+	"simplex/lnr"
 )
 
 //Update hull nodes with dp instance
@@ -21,7 +24,7 @@ func deform_class_selections(queue *deque.Deque, hulldb *rtree.RTree, selections
 	for _, s := range selections.DataView() {
 		self := castConstDP(s.Instance)
 		sels := node.NewNodes().Push(s)
-		self.deform_hulls(hulldb, sels)
+		split.SplitNodesInDB(self, hulldb, sels, dp.NodeGeometry)
 		self.self_update()
 		for self.Hulls.Len() > 0 {
 			queue.AppendLeft(self.Hulls.Pop())
@@ -33,23 +36,22 @@ func deform_class_selections(queue *deque.Deque, hulldb *rtree.RTree, selections
 // Group hulls in hulldb by instance of ConstDP
 func group_hulls_by_self(hulldb *rtree.RTree) {
 	var ok bool
-	var self *ConstDP
 	var hull *node.Node
 	var selfs = make([]*ConstDP, 0)
 	var smap = make(map[string]*node.Nodes)
-
 	for _, h := range nodesFromRtreeNodes(hulldb.All()).DataView() {
 		var lst *node.Nodes
-		self = castConstDP(h.Instance)
-		if lst, ok = smap[self.Id]; !ok {
+		var self = castConstDP(h.Instance)
+		var id = self.Id()
+		if lst, ok = smap[id]; !ok {
 			lst = node.NewNodes()
 		}
 		lst.Push(h)
-		smap[self.Id] = lst
+		smap[id] = lst
 	}
 
 	for _, lst := range smap {
-		self = castConstDP(lst.Get(0).Instance)
+		var self = castConstDP(lst.Get(0).Instance)
 		self.Hulls.Clear()
 		for _, h := range lst.Sort().DataView() {
 			self.Hulls.Append(h)
@@ -68,15 +70,20 @@ func group_hulls_by_self(hulldb *rtree.RTree) {
 
 //Simplify a feature class of linear geometries
 func SimplifyFeatureClass(selfs []*ConstDP, opts *opts.Opts) {
+
 	var junctions = make(map[string]*sset.SSet, 0)
 	if opts.KeepSelfIntersects {
-		junctions = linear_ftclass_self_intersection(selfs)
+		instances := make([]lnr.Linear, len(selfs))
+		for i, v := range selfs {
+			instances[i] = v
+		}
+		junctions = lnr.FeatureClassSelfIntersection(instances)
 	}
 
 	// return common.simple_hulls_as_ptset
 	for _, self := range selfs {
 		var const_verts []int
-		if v, ok := junctions[self.Id]; ok {
+		if v, ok := junctions[self.Id()]; ok {
 			const_verts = as_ints(v.Values())
 		} else {
 			const_verts = make([]int, 0)
