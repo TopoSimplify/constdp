@@ -7,9 +7,10 @@ import (
 	"simplex/node"
 	"github.com/intdxdt/geom"
 	"github.com/franela/goblin"
+	"simplex/dp"
 )
 
-var fn = hullGeom
+var fn =  dp.NodeGeometry
 
 type testD struct {
 	k   int

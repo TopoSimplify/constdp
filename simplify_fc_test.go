@@ -25,7 +25,7 @@ func TestConstDP_FC(t *testing.T) {
 		var simple_lns = []*geom.LineString{}
 		for _, tree := range forest {
 			var coords = make([]*geom.Point, 0)
-			for _, i := range tree.simple.Values() {
+			for _, i := range tree.SimpleSet.Values() {
 				coords = append(coords, tree.Pln.Coordinates[i.(int)])
 			}
 			simple_lns = append(simple_lns, geom.NewLineString(coords))

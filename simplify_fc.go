@@ -58,10 +58,10 @@ func group_hulls_by_self(hulldb *rtree.RTree) {
 	}
 
 	for _, self := range selfs {
-		self.simple.Empty() //update new simple
+		self.SimpleSet.Empty() //update new simple
 		for _, h := range *self.Hulls.DataView() {
 			hull = castAsNode(h)
-			self.simple.Extend(hull.Range.I(), hull.Range.J())
+			self.SimpleSet.Extend(hull.Range.I(), hull.Range.J())
 		}
 	}
 }

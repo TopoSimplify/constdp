@@ -12,11 +12,12 @@ import (
 	"simplex/split"
 	"simplex/knn"
 	"simplex/merge"
+	"simplex/dp"
 )
 
 //constrain hulls at self intersection fragments - planar self-intersection
 func (self *ConstDP) _const_at_self_intersect_fragments(hulldb *rtree.RTree,
-	self_inters []*ctx.CtxGeom, at_vertex_set *sset.SSet) map[[2]int]*node.Node {
+	self_inters *ctx.ContextGeometries, at_vertex_set *sset.SSet) map[[2]int]*node.Node {
 	//@formatter:off
 	var fragment_size = 1
 	var hsubs []*node.Node
@@ -24,7 +25,7 @@ func (self *ConstDP) _const_at_self_intersect_fragments(hulldb *rtree.RTree,
 	var idxs []int
 	var unmerged = make(map[[2]int]*node.Node, 0)
 
-	for _, inter := range self_inters {
+	for _, inter := range self_inters.DataView() {
 		if !inter.IsSelfVertex() {
 			continue
 		}
@@ -33,7 +34,7 @@ func (self *ConstDP) _const_at_self_intersect_fragments(hulldb *rtree.RTree,
 
 		idxs = as_ints(inter.Meta.SelfVertices.Values())
 		for _, hull := range hulls.DataView() {
-			hsubs = split.AtIndex(self, hull, idxs, hullGeom)
+			hsubs = split.AtIndex(self, hull, idxs, dp.NodeGeometry)
 
 			if len(hsubs) == 0 && (hull.Range.Size() == fragment_size) {
 				hsubs = append(hsubs, hull)
@@ -46,7 +47,7 @@ func (self *ConstDP) _const_at_self_intersect_fragments(hulldb *rtree.RTree,
 			hulldb.Remove(hull)
 			keep, rm := merge.ContiguousFragmentsBySize(self,
 				hsubs, hulldb, at_vertex_set, unmerged, fragment_size,
-				self.is_score_relate_valid, hullGeom, EpsilonDist,
+				self.is_score_relate_valid, dp.NodeGeometry, EpsilonDist,
 			)
 
 			for _, h := range rm {
@@ -79,7 +80,7 @@ func (self *ConstDP) constrain_to_selfintersects(opts *opts.Opts, const_verts []
 	hulldb.Load(data)
 
 	at_vertex_set = sset.NewSSet(cmp.Int)
-	for _, inter := range self_inters {
+	for _, inter := range self_inters.DataView() {
 		if inter.IsSelfVertex() {
 			at_vertex_set = at_vertex_set.Union(inter.Meta.SelfVertices)
 		}
@@ -93,10 +94,10 @@ func (self *ConstDP) constrain_to_selfintersects(opts *opts.Opts, const_verts []
 		}
 		at_vertex_set.Add(i)
 		pt := self.Pln.Coordinate(i)
-		cg := ctx.NewCtxGeom(pt.Clone(), i, i).AsSelfVertex()
+		cg := ctx.New(pt.Clone(), i, i).AsSelfVertex()
 		cg.Meta.SelfVertices = sset.NewSSet(cmp.Int, 4).Add(i)
 		cg.Meta.SelfNonVertices = sset.NewSSet(cmp.Int, 4)
-		self_inters = append(self_inters, cg)
+		self_inters.Push(cg)
 	}
 
 	//constrain fragments aroud self intersects

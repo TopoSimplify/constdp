@@ -21,7 +21,7 @@ func (self *ConstDP) select_ftclass_deformation_candidates(hulldb *rtree.RTree, 
 		same_feature := isSame(hull.Instance, h.Instance)
 		// find which item to deform against current hull
 		if same_feature { // check for contiguity
-			inters, contig, n = is_contiguous(hull, h)
+			inters, contig, n = node.IsContiguous(hull, h)
 		} else {
 			// contiguity is by default false for different features
 			contig = false
@@ -68,7 +68,7 @@ func (self *ConstDP) select_deformation_candidates(hulldb *rtree.RTree, hull *no
 	for _, cn := range ctx_hulls {
 		// find which item to deform against current hull
 		h := castAsNode(cn)
-		inters, contig, n := is_contiguous(hull, h)
+		inters, contig, n := node.IsContiguous(hull, h)
 
 		if !inters {
 			continue

@@ -74,7 +74,7 @@ func linear_ftclass_self_intersection(ftcls []*ConstDP) map[string]*sset.SSet {
 	return fc_junctions
 }
 
-func linear_self_intersection(polyline *pln.Polyline) []*ctx.CtxGeom {
+func linear_self_intersection(polyline *pln.Polyline) *ctx.ContextGeometries {
 	var tree = *rtree.NewRTree(8)
 	var dict = make(map[[2]float64]*kvCount)
 	var data = make([]rtree.BoxObj, 0)
@@ -126,21 +126,21 @@ func linear_self_intersection(polyline *pln.Polyline) []*ctx.CtxGeom {
 		}
 	}
 
-	results := make([]*ctx.CtxGeom, 0)
+	results := ctx.NewContexts()
 	for _, val := range self_intersects {
-		cg := ctx.NewCtxGeom(val.point, 0, -1).AsSelfNonVertex()
+		cg := ctx.New(val.point, 0, -1).AsSelfNonVertex()
 		cg.Meta.SelfNonVertices = val.keyset
-		results = append(results, cg)
+		results.Push(cg)
 	}
 
 	for k, v := range dict {
 		if v.count > 2 {
 			i := v.indxset.First().(int)
-			cg := ctx.NewCtxGeom(geom.NewPoint(k[:]), i, i).AsSelfVertex()
+			cg := ctx.New(geom.NewPoint(k[:]), i, i).AsSelfVertex()
 			cg.Meta.SelfVertices = v.indxset
-			results = append(results, cg)
+			results.Push(cg)
 		}
 	}
 
-	return sort_context_geoms(results)
+	return results.Sort()
 }

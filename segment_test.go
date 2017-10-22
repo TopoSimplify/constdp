@@ -7,6 +7,7 @@ import (
 	"simplex/node"
 	"github.com/intdxdt/geom"
 	"github.com/franela/goblin"
+	"simplex/dp"
 )
 
 func TestHullSeg(t *testing.T) {
@@ -17,7 +18,7 @@ func TestHullSeg(t *testing.T) {
 		hulls := make([]*node.Node, 0)
 		for _, r := range ranges {
 			i, j := r[0], r[len(r)-1]
-			h := node.New(pln, rng.NewRange(i, j), hullGeom)
+			h := node.New(pln, rng.NewRange(i, j),  dp.NodeGeometry)
 			hulls = append(hulls, h)
 		}
 		return hulls

@@ -6,7 +6,6 @@ import (
 	"simplex/ctx"
 	"simplex/node"
 	"github.com/intdxdt/rtree"
-	"github.com/intdxdt/geom"
 	"github.com/intdxdt/deque"
 )
 
@@ -26,8 +25,8 @@ func as_ints(iter []interface{}) []int {
 	return ints
 }
 
-func castAsContextGeom(o interface{}) *ctx.CtxGeom {
-	return o.(*ctx.CtxGeom)
+func castAsContextGeom(o interface{}) *ctx.ContextGeometry {
+	return o.(*ctx.ContextGeometry)
 }
 
 func castAsNode(o interface{}) *node.Node {
@@ -44,20 +43,6 @@ func castConstDP(o lnr.SimpleAlgorithm) *ConstDP {
 
 func isSame(a, b lnr.SimpleAlgorithm) bool {
 	return castConstDP(a) == castConstDP(b)
-}
-
-//hull geom
-func hullGeom(coords []*geom.Point) geom.Geometry {
-	var g geom.Geometry
-
-	if len(coords) > 2 {
-		g = geom.NewPolygon(coords)
-	} else if len(coords) == 2 {
-		g = geom.NewLineString(coords)
-	} else {
-		g = coords[0].Clone()
-	}
-	return g
 }
 
 //node.Nodes from Rtree boxes

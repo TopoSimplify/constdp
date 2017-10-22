@@ -12,6 +12,7 @@ import (
 	"github.com/intdxdt/rtree"
 	"simplex/offset"
 	"simplex/node"
+	"simplex/dp"
 )
 
 func TestDeform(t *testing.T) {
@@ -55,7 +56,7 @@ func TestDeform(t *testing.T) {
 			if j == -1 {
 				j = n - 1
 			}
-			h := node.New(polyline, rng.NewRange(i, j), hullGeom)
+			h := node.New(polyline, rng.NewRange(i, j),  dp.NodeGeometry)
 			hulls = append(hulls, h)
 		}
 
@@ -79,7 +80,10 @@ func TestDeform(t *testing.T) {
 			DistRelation:           false,
 			DirRelation:            false,
 		}
-		cdp := &ConstDP{Opts:options, score:offset.MaxOffset}
+
+		var cdp = ConstDP{DouglasPeucker: &dp.DouglasPeucker{
+				Opts: options, ScoreFn: offset.MaxOffset,
+			}}
 
 		g.It("should test selection of hulls for deformation", func() {
 			g.Timeout(60 * time.Minute)

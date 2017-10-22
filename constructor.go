@@ -6,47 +6,35 @@ import (
 	"simplex/opts"
 	"simplex/lnr"
 	"simplex/ctx"
-	"github.com/intdxdt/cmp"
 	"github.com/intdxdt/geom"
 	"github.com/intdxdt/sset"
-	"github.com/intdxdt/deque"
 	"github.com/intdxdt/rtree"
-	"github.com/intdxdt/random"
+	"simplex/dp"
 )
 
 //Type DP
 type ConstDP struct {
-	Id        string
-	Opts      *opts.Opts
-	Hulls     *deque.Deque
-	Pln       *pln.Polyline
+	*dp.DouglasPeucker
 	ContextDB *rtree.RTree
-	Meta      map[string]interface{}
-
-	simple *sset.SSet
-	score  lnr.ScoreFn
 }
 
 //Creates a new constrained DP Simplification instance
 //	dp decomposition of linear geometries
 func NewConstDP(coordinates []*geom.Point, constraints []geom.Geometry,
-	options *opts.Opts, offset_score lnr.ScoreFn) *ConstDP {
-	return (&ConstDP{
-		Id:    random.String(10),
-		Opts:  options,
-		Hulls: deque.NewDeque(),
-		Pln:   pln.New(coordinates),
-
-		ContextDB: rtree.NewRTree(16),
-		Meta:      make(map[string]interface{}, 0),
-
-		simple: sset.NewSSet(cmp.Int),
-		score:  offset_score,
+	options *opts.Opts, offsetScore lnr.ScoreFn) *ConstDP {
+	var instance = (&ConstDP{
+		DouglasPeucker: dp.New(coordinates, options, offsetScore),
+		ContextDB:      rtree.NewRTree(16),
 	}).build_context_db(constraints) //prepare databases
+
+	if len(coordinates) > 1 {
+		instance.Pln = pln.New(coordinates)
+	}
+	return instance
 }
 
 func (self *ConstDP) Simple() *sset.SSet {
-	return self.simple
+	return self.SimpleSet
 }
 
 func (self *ConstDP) Options() *opts.Opts {
@@ -62,14 +50,14 @@ func (self *ConstDP) Polyline() *pln.Polyline {
 }
 
 func (self *ConstDP) Score(pln lnr.Linear, rg *rng.Range) (int, float64) {
-	return self.score(pln, rg)
+	return self.ScoreFn(pln, rg)
 }
 
 //creates constraint db from geometries
 func (self *ConstDP) build_context_db(geoms []geom.Geometry) *ConstDP {
 	var lst = make([]rtree.BoxObj, 0)
 	for _, g := range geoms {
-		lst = append(lst, ctx.NewCtxGeom(g, 0, -1).AsContextNeighbour())
+		lst = append(lst, ctx.New(g, 0, -1).AsContextNeighbour())
 	}
 	self.ContextDB.Clear().Load(lst)
 	return self

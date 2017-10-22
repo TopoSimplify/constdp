@@ -1,12 +1,13 @@
 package constdp
 
 import (
+	"simplex/knn"
 	"simplex/opts"
 	"simplex/node"
+	"simplex/merge"
 	"github.com/intdxdt/sset"
 	"github.com/intdxdt/rtree"
-	"simplex/merge"
-	"simplex/knn"
+	"simplex/dp"
 )
 
 //checks if score is valid at threshold of constrained dp
@@ -18,14 +19,15 @@ func (self *ConstDP) is_score_relate_valid(val float64) bool {
 //Homotopic simplification at a given threshold
 func (self *ConstDP) Simplify(opts *opts.Opts, const_vertices ...[]int) *ConstDP {
 	var const_vertex_set *sset.SSet
-	var const_verts = make([]int, 0)
+	var const_verts = []int{}
+
 	if len(const_vertices) > 0 {
 		const_verts = const_vertices[0]
 	}
 
-	self.simple.Empty()
-	self.Opts = opts
-	self.Hulls = self.decompose()
+	self.SimpleSet.Empty()
+	self.Opts  = opts
+	self.Hulls = self.Decompose()
 
 	//debug_print_ptset(self.Hulls)
 
@@ -72,10 +74,10 @@ func (self *ConstDP) Simplify(opts *opts.Opts, const_vertices ...[]int) *ConstDP
 	self.merge_simple_segments(hulldb, const_vertex_set)
 
 	self.Hulls.Clear()
-	self.simple.Empty()
+	self.SimpleSet.Empty()
 	for _, h := range nodesFromRtreeNodes(hulldb.All()).Sort().DataView() {
 		self.Hulls.Append(h)
-		self.simple.Extend(h.Range.I(), h.Range.J())
+		self.SimpleSet.Extend(h.Range.I(), h.Range.J())
 	}
 	return self
 }
@@ -110,7 +112,7 @@ func (self *ConstDP) merge_simple_segments(hulldb *rtree.RTree, const_vertex_set
 		neighbs = nodesFromBoxes(knn.FindNodeNeighbours(hulldb, hull, EpsilonDist))
 
 		// find context neighbours
-		prev, nxt := extract_neighbours(hull, neighbs)
+		prev, nxt := node.Neighbours(hull, neighbs)
 
 		// find mergeable neihbs contig
 		var key [4]int
@@ -120,7 +122,7 @@ func (self *ConstDP) merge_simple_segments(hulldb *rtree.RTree, const_vertex_set
 			key = cache_key(prev, hull)
 			if !cache[key] {
 				add_to_merge_cache(cache, &key)
-				merge_prev = merge.ContiguousFragmentsAtThreshold(self, prev, hull,self.is_score_relate_valid, hullGeom)
+				merge_prev = merge.ContiguousFragmentsAtThreshold(self, prev, hull,self.is_score_relate_valid, dp.NodeGeometry)
 			}
 		}
 
@@ -128,7 +130,7 @@ func (self *ConstDP) merge_simple_segments(hulldb *rtree.RTree, const_vertex_set
 			key = cache_key(hull, nxt)
 			if !cache[key] {
 				add_to_merge_cache(cache, &key)
-				merge_nxt = merge.ContiguousFragmentsAtThreshold(self, hull, nxt, self.is_score_relate_valid, hullGeom)
+				merge_nxt = merge.ContiguousFragmentsAtThreshold(self, hull, nxt, self.is_score_relate_valid,  dp.NodeGeometry)
 			}
 		}
 

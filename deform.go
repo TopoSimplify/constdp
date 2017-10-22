@@ -4,14 +4,15 @@ import (
 	"simplex/node"
 	"simplex/split"
 	"github.com/intdxdt/rtree"
+	"simplex/dp"
 )
 
 //split hull based on score selected vertex
-func (self *ConstDP) deform_hulls(hulldb *rtree.RTree, selections *node.Nodes) {
+func (self *ConstDP) deform_hulls(nodedb *rtree.RTree, selections *node.Nodes) {
 	selections.Reverse()
 	for _, hull := range selections.DataView() {
-		ha, hb := split.AtScoreSelection(self, hull, hullGeom)
-		hulldb.Remove(hull)
+		var ha, hb = split.AtScoreSelection(self, hull, dp.NodeGeometry)
+		nodedb.Remove(hull)
 
 		self.Hulls.AppendLeft(hb)
 		self.Hulls.AppendLeft(ha)
