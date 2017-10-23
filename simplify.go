@@ -6,9 +6,9 @@ import (
 	"simplex/node"
 	"simplex/merge"
 	"simplex/split"
+	"simplex/constrain"
 	"github.com/intdxdt/sset"
 	"github.com/intdxdt/rtree"
-	"simplex/constrain"
 )
 
 //Homotopic simplification at a given threshold

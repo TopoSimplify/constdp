@@ -4,7 +4,6 @@ import (
 	"simplex/dp"
 	"simplex/ctx"
 	"simplex/pln"
-	"simplex/rng"
 	"simplex/opts"
 	"simplex/lnr"
 	"github.com/intdxdt/geom"
@@ -24,7 +23,7 @@ func NewConstDP(coordinates []*geom.Point, constraints []geom.Geometry,
 	var instance = (&ConstDP{
 		DouglasPeucker: dp.New(coordinates, options, offsetScore),
 		ContextDB:      rtree.NewRTree(16),
-	}).build_context_db(constraints) //prepare databases
+	}).BuildContextDB(constraints) //prepare databases
 
 	if len(coordinates) > 1 {
 		instance.Pln = pln.New(coordinates)
@@ -32,25 +31,8 @@ func NewConstDP(coordinates []*geom.Point, constraints []geom.Geometry,
 	return instance
 }
 
-
-func (self *ConstDP) Options() *opts.Opts {
-	return self.Opts
-}
-
-func (self *ConstDP) Coordinates() []*geom.Point {
-	return self.Pln.Coordinates
-}
-
-func (self *ConstDP) Polyline() *pln.Polyline {
-	return self.Pln
-}
-
-func (self *ConstDP) Score(pln lnr.Linear, rg *rng.Range) (int, float64) {
-	return self.ScoreFn(pln, rg)
-}
-
 //creates constraint db from geometries
-func (self *ConstDP) build_context_db(geoms []geom.Geometry) *ConstDP {
+func (self *ConstDP) BuildContextDB(geoms []geom.Geometry) *ConstDP {
 	var lst = make([]rtree.BoxObj, 0)
 	for _, g := range geoms {
 		lst = append(lst, ctx.New(g, 0, -1).AsContextNeighbour())
