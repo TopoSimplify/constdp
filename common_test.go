@@ -1,22 +1,33 @@
 package constdp
 
 import (
-	"simplex/dp"
-	"simplex/pln"
-	"simplex/rng"
-	"simplex/node"
+	"testing"
 	"github.com/intdxdt/geom"
+	"github.com/franela/goblin"
 )
 
-func linear_coords(wkt string) []*geom.Point{
-	return geom.NewLineStringFromWKT(wkt).Coordinates()
+type TestDat struct {
+	pln     string
+	relates ReLates
+	idxs    []interface{}
+	simple  string
 }
 
-func create_hulls(indxs [][]int, coords []*geom.Point) []*node.Node {
-	poly := pln.New(coords)
-	hulls := make([]*node.Node, 0)
-	for _, o := range indxs {
-		hulls = append(hulls, node.New(poly, rng.NewRange(o[0], o[1]), dp.NodeGeometry))
-	}
-	return hulls
+type ReLates struct {
+	geom bool
+	dir  bool
+	dist bool
+}
+
+func TestCmp(t *testing.T) {
+	g := goblin.Goblin(t)
+	g.Describe("cmp point index", func() {
+		g.It("should test comparison of points by index", func() {
+			a, b, c := &geom.Point{0, 0, 0}, &geom.Point{0, 0, 1}, &geom.Point{0, 0, 2}
+			g.Assert(PointIndexCmp(a, b)).Equal(-1)
+			g.Assert(PointIndexCmp(b, a)).Equal(1)
+			g.Assert(PointIndexCmp(b, b)).Equal(0)
+			g.Assert(PointIndexCmp(c, c)).Equal(0)
+		})
+	})
 }

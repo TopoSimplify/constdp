@@ -1,14 +1,15 @@
 package constdp
 
 import (
+	"simplex/dp"
+	"simplex/lnr"
 	"simplex/node"
 	"simplex/opts"
+	"simplex/split"
+	"simplex/constrain"
 	"github.com/intdxdt/sset"
 	"github.com/intdxdt/deque"
 	"github.com/intdxdt/rtree"
-	"simplex/split"
-	"simplex/dp"
-	"simplex/lnr"
 )
 
 //Update hull nodes with dp instance
@@ -123,7 +124,7 @@ func SimplifyFeatureClass(selfs []*ConstDP, opts *opts.Opts) {
 		// find hull neighbours
 		// self intersection constraint
 		// can self intersect with itself but not with other lines
-		bln = self.constrain_ftclass_intersection(hull, hulldb, selections)
+		bln = constrain.FeatureClassIntersection(self, hull, hulldb, selections)
 
 		if !selections.IsEmpty() {
 			deform_class_selections(dque, hulldb, selections)
@@ -134,7 +135,7 @@ func SimplifyFeatureClass(selfs []*ConstDP, opts *opts.Opts) {
 		}
 
 		// context_geom geometry constraint
-		self.constrain_context_relation(hull, selections)
+		constrain.ContextRelation(self, self.ContextDB, hull, selections)
 
 		if !selections.IsEmpty() {
 			deform_class_selections(dque, hulldb, selections)

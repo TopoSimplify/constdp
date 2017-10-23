@@ -7,6 +7,8 @@ import (
 	"simplex/node"
 	"github.com/intdxdt/rtree"
 	"github.com/intdxdt/deque"
+	"github.com/intdxdt/geom"
+	"github.com/intdxdt/math"
 )
 
 const EpsilonDist = 1.0e-5
@@ -61,4 +63,17 @@ func nodesFromRtreeNodes(iter []*rtree.Node) *node.Nodes {
 		self.Push(h.GetItem().(*node.Node))
 	}
 	return self
+}
+
+
+//hull point compare
+func PointIndexCmp(a interface{}, b interface{}) int {
+	var self, other = a.(*geom.Point), b.(*geom.Point)
+	var d = self[2] - other[2]
+	if math.FloatEqual(d, 0.0) {
+		return 0
+	} else if d < 0 {
+		return -1
+	}
+	return 1
 }
