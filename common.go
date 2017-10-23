@@ -37,11 +37,11 @@ func popLeftHull(que *deque.Deque) *node.Node {
 	return que.PopLeft().(*node.Node)
 }
 
-func castConstDP(o lnr.SimpleAlgorithm) *ConstDP {
+func castConstDP(o lnr.Linegen) *ConstDP {
 	return o.(*ConstDP)
 }
 
-func isSame(a, b lnr.SimpleAlgorithm) bool {
+func isSame(a, b lnr.Linegen) bool {
 	return castConstDP(a) == castConstDP(b)
 }
 

@@ -1,15 +1,14 @@
 package constdp
 
 import (
+	"simplex/dp"
+	"simplex/ctx"
 	"simplex/pln"
 	"simplex/rng"
 	"simplex/opts"
 	"simplex/lnr"
-	"simplex/ctx"
 	"github.com/intdxdt/geom"
-	"github.com/intdxdt/sset"
 	"github.com/intdxdt/rtree"
-	"simplex/dp"
 )
 
 //Type DP
@@ -33,9 +32,6 @@ func NewConstDP(coordinates []*geom.Point, constraints []geom.Geometry,
 	return instance
 }
 
-func (self *ConstDP) Simple() *sset.SSet {
-	return self.SimpleSet
-}
 
 func (self *ConstDP) Options() *opts.Opts {
 	return self.Opts

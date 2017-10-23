@@ -14,6 +14,7 @@ import (
 	"github.com/intdxdt/rtree"
 	"github.com/intdxdt/deque"
 	"simplex/lnr"
+	"simplex/deform"
 )
 
 //constrain hulls at self intersection fragments - planar self-intersection
@@ -119,7 +120,7 @@ func (self *ConstDP) constrain_to_selfintersects(opts *opts.Opts, const_verts []
 func (self *ConstDP) constrain_ftclass_intersection(hull *node.Node, hulldb *rtree.RTree, selections *node.Nodes) bool {
 	var bln = true
 	//find hull neighbours
-	var hulls = self.select_ftclass_deformation_candidates(hulldb, hull)
+	var hulls = deform.SelectFeatureClass(self, hulldb, hull)
 	for _, h := range hulls {
 		//if bln & selection contains current hull : bln : false
 		if bln && (h == hull) {
@@ -136,7 +137,7 @@ func (self *ConstDP) constrain_self_intersection(hull *node.Node, hulldb *rtree.
 	//assume hull is valid and proof otherwise
 	var bln = true
 	// find hull neighbours
-	hulls := self.select_deformation_candidates(hulldb, hull)
+	hulls := deform.Select(self, hulldb, hull)
 	for _, h := range hulls {
 		//if bln & selection contains current hull : bln : false
 		if bln && (h == hull) {
