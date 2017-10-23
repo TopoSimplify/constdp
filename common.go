@@ -1,9 +1,7 @@
 package constdp
 
 import (
-	"sort"
 	"simplex/lnr"
-	"simplex/ctx"
 	"simplex/node"
 	"github.com/intdxdt/rtree"
 	"github.com/intdxdt/deque"
@@ -13,11 +11,6 @@ import (
 
 const EpsilonDist = 1.0e-5
 
-func sort_ints(iter []int) []int {
-	sort.Ints(iter)
-	return iter
-}
-
 //Convert slice of interface to ints
 func as_ints(iter []interface{}) []int {
 	ints := make([]int, len(iter))
@@ -25,10 +18,6 @@ func as_ints(iter []interface{}) []int {
 		ints[i] = o.(int)
 	}
 	return ints
-}
-
-func castAsContextGeom(o interface{}) *ctx.ContextGeometry {
-	return o.(*ctx.ContextGeometry)
 }
 
 func castAsNode(o interface{}) *node.Node {
@@ -43,19 +32,6 @@ func castConstDP(o lnr.Linegen) *ConstDP {
 	return o.(*ConstDP)
 }
 
-func isSame(a, b lnr.Linegen) bool {
-	return castConstDP(a) == castConstDP(b)
-}
-
-//node.Nodes from Rtree boxes
-func nodesFromBoxes(iter []rtree.BoxObj) *node.Nodes {
-	var self = node.NewNodes(len(iter))
-	for _, h := range iter {
-		self.Push(h.(*node.Node))
-	}
-	return self
-}
-
 //node.Nodes from Rtree nodes
 func nodesFromRtreeNodes(iter []*rtree.Node) *node.Nodes {
 	var self = node.NewNodes(len(iter))
@@ -64,7 +40,6 @@ func nodesFromRtreeNodes(iter []*rtree.Node) *node.Nodes {
 	}
 	return self
 }
-
 
 //hull point compare
 func PointIndexCmp(a interface{}, b interface{}) int {
