@@ -48,7 +48,7 @@ func (self *ConstDP) Simplify(opts *opts.Opts, const_vertices ...[]int) *ConstDP
 
 		// self intersection constraint
 		if bln && self.Opts.AvoidNewSelfIntersects {
-			bln = constrain.SelfIntersection(self, hull, hulldb, selections)
+			bln = constrain.BySelfIntersection(self, hull, hulldb, selections)
 		}
 
 		if !selections.IsEmpty() {
@@ -60,7 +60,8 @@ func (self *ConstDP) Simplify(opts *opts.Opts, const_vertices ...[]int) *ConstDP
 		}
 
 		// context_geom geometry constraint
-		bln = constrain.ContextRelation(self, self.ContextDB, hull, selections)
+		bln = self.ValidateContextRelation(hull, selections)
+
 		if !selections.IsEmpty() {
 			split.SplitNodesInDB(self, hulldb, selections, dp.NodeGeometry)
 		}

@@ -135,7 +135,7 @@ func SimplifyFeatureClass(selfs []*ConstDP, opts *opts.Opts) {
 		}
 
 		// context_geom geometry constraint
-		constrain.ContextRelation(self, self.ContextDB, hull, selections)
+		self.ValidateContextRelation(hull, selections)
 
 		if !selections.IsEmpty() {
 			deform_class_selections(dque, hulldb, selections)

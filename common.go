@@ -7,6 +7,7 @@ import (
 	"github.com/intdxdt/deque"
 	"github.com/intdxdt/geom"
 	"github.com/intdxdt/math"
+	"simplex/ctx"
 )
 
 const EpsilonDist = 1.0e-5
@@ -18,6 +19,10 @@ func as_ints(iter []interface{}) []int {
 		ints[i] = o.(int)
 	}
 	return ints
+}
+
+func castAsContextGeom(o interface{}) *ctx.ContextGeometry {
+	return o.(*ctx.ContextGeometry)
 }
 
 func castAsNode(o interface{}) *node.Node {
