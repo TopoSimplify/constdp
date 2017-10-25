@@ -2,12 +2,12 @@ package constdp
 
 import (
 	"simplex/lnr"
+	"simplex/ctx"
 	"simplex/node"
+	"github.com/intdxdt/geom"
 	"github.com/intdxdt/rtree"
 	"github.com/intdxdt/deque"
-	"github.com/intdxdt/geom"
 	"github.com/intdxdt/math"
-	"simplex/ctx"
 )
 
 const EpsilonDist = 1.0e-5

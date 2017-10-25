@@ -12,8 +12,8 @@ func (self *ConstDP) ValidateMerge(hull *node.Node, hulldb *rtree.RTree) bool {
 	var sideEffects = node.NewNodes()
 	var options = self.Options()
 
+	// self intersection constraint
 	if options.AvoidNewSelfIntersects {
-		// self intersection constraint
 		bln = constrain.BySelfIntersection(self, hull, hulldb, sideEffects)
 	}
 
