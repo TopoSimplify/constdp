@@ -52,7 +52,7 @@ func TestConstDP_FC(t *testing.T) {
 		}
 
 		for _, tree := range forest {
-			tree.Simplify(opts)
+			tree.Simplify()
 		}
 
 		return extract_simple_segs(forest)

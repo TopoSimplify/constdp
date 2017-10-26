@@ -2,7 +2,6 @@ package constdp
 
 import (
 	"simplex/dp"
-	"simplex/opts"
 	"simplex/node"
 	"simplex/merge"
 	"simplex/split"
@@ -12,30 +11,27 @@ import (
 )
 
 //Homotopic simplification at a given threshold
-func (self *ConstDP) Simplify(opts *opts.Opts, const_vertices ...[]int) *ConstDP {
-	var const_vertex_set *sset.SSet
-	var const_verts = []int{}
+func (self *ConstDP) Simplify(constVertices ...[]int) *ConstDP {
+	var constVertexSet *sset.SSet
+	var constVerts = []int{}
 
-	if len(const_vertices) > 0 {
-		const_verts = const_vertices[0]
+	if len(constVertices) > 0 {
+		constVerts = constVertices[0]
 	}
 
 	self.SimpleSet.Empty()
-	self.Opts = opts
 	self.Hulls = self.Decompose()
 
-	//debug_print_ptset(self.Hulls)
-
-	//debug_print_hulls(self.Hulls)
 	// constrain hulls to self intersects
-	self.Hulls, _, const_vertex_set = constrain.ToSelfIntersects(self, const_verts, self.ScoreRelation)
-	//debug_print_ptset(self.Hulls)
+	self.Hulls, _, constVertexSet = constrain.ToSelfIntersects(
+		self, constVerts, self.ScoreRelation,
+	)
 
 	var bln bool
 	var hull *node.Node
 	var selections = node.NewNodes()
 
-	var hulldb = rtree.NewRTree(8)
+	var hulldb = rtree.NewRTree(16)
 	for !self.Hulls.IsEmpty() {
 		// assume popped hull to be valid
 		bln = true
@@ -67,7 +63,7 @@ func (self *ConstDP) Simplify(opts *opts.Opts, const_vertices ...[]int) *ConstDP
 		}
 	}
 
-	merge.SimpleSegments(self, hulldb, const_vertex_set, self.ScoreRelation, self.ValidateMerge)
+	merge.SimpleSegments(self, hulldb, constVertexSet, self.ScoreRelation, self.ValidateMerge)
 
 	self.Hulls.Clear()
 	self.SimpleSet.Empty()

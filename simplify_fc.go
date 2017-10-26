@@ -71,8 +71,8 @@ func group_hulls_by_self(hulldb *rtree.RTree) {
 
 //Simplify a feature class of linear geometries
 func SimplifyFeatureClass(selfs []*ConstDP, opts *opts.Opts) {
-
 	var junctions = make(map[string]*sset.SSet, 0)
+
 	if opts.KeepSelfIntersects {
 		instances := make([]lnr.Linear, len(selfs))
 		for i, v := range selfs {
@@ -89,11 +89,11 @@ func SimplifyFeatureClass(selfs []*ConstDP, opts *opts.Opts) {
 		} else {
 			const_verts = make([]int, 0)
 		}
-		self.Simplify(opts, const_verts)
+		self.Simplify(const_verts)
 	}
 
 	var hlist = make([]*node.Node, 0)
-	var hulldb = rtree.NewRTree(8)
+	var hulldb = rtree.NewRTree(16)
 	for _, self := range selfs {
 		self.self_update()
 		for _, h := range *self.Hulls.DataView() {

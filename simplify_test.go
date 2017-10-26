@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"time"
 	"testing"
-	"github.com/intdxdt/geom"
 	"simplex/opts"
 	"simplex/offset"
+	"github.com/intdxdt/geom"
 	"github.com/franela/goblin"
 )
 //@formatter:off
@@ -50,7 +50,7 @@ func TestConstDP(t *testing.T) {
 
 				var coords = geom.NewLineStringFromWKT(td.pln).Coordinates()
 				var dp = NewConstDP(coords, constraints, options, offset.MaxOffset)
-				var ptset = dp.Simplify(options).SimpleSet
+				var ptset = dp.Simplify().SimpleSet
 
 				simplx := make([]*geom.Point, 0)
 				for _, i := range ptset.Values() {
@@ -98,7 +98,7 @@ func TestConstSED(t *testing.T) {
 				{0.5, 3.0, 4.5}, {1.2, 3.2, 5.0}, {1.4, 2.6, 6.0},
 				{2.0, 3.5, 10.0}}
 			homo := NewConstDP(coords, constraints, options, offset.MaxSEDOffset)
-			homo.Simplify(options)
+			homo.Simplify()
 		})
 	})
 }
