@@ -9,7 +9,6 @@ import (
 	"github.com/intdxdt/rtree"
 )
 
-var DEBUG = false
 //Homotopic simplification at a given threshold
 func (self *ConstDP) Simplify(constVertices ...[]int) *ConstDP {
 	var constVertexSet *sset.SSet
