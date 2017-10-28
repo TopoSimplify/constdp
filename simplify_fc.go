@@ -25,7 +25,10 @@ func deform_class_selections(queue *deque.Deque, hulldb *rtree.RTree, selections
 	for _, s := range selections.DataView() {
 		self := castConstDP(s.Instance)
 		sels := node.NewNodes().Push(s)
-		split.SplitNodesInDB(self, hulldb, sels, dp.NodeGeometry)
+		split.SplitNodesInDB(
+			self.NodeQueue(), hulldb, sels,
+			self.Score, dp.NodeGeometry,
+		)
 		self.self_update()
 		for self.Hulls.Len() > 0 {
 			queue.AppendLeft(self.Hulls.Pop())
@@ -85,7 +88,7 @@ func SimplifyFeatureClass(selfs []*ConstDP, opts *opts.Opts) {
 	for _, self := range selfs {
 		var const_verts []int
 		if v, ok := junctions[self.Id()]; ok {
-			const_verts = as_ints(v.Values())
+			const_verts = asInts(v.Values())
 		} else {
 			const_verts = make([]int, 0)
 		}

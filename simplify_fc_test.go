@@ -34,7 +34,7 @@ func TestConstDP_FC(t *testing.T) {
 	}
 
 	var simplify_forest = func(lns []*geom.LineString, opts *opts.Opts) []*geom.LineString {
-		forest := []*ConstDP{}
+		var forest = []*ConstDP{}
 		for _, l := range lns {
 			dp := NewConstDP(l.Coordinates(), constraints, opts, offset.MaxOffset)
 			forest = append(forest, dp)

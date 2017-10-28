@@ -3,13 +3,13 @@ package constdp
 import (
 	"simplex/dp"
 	"simplex/node"
-	"simplex/merge"
 	"simplex/split"
 	"simplex/constrain"
 	"github.com/intdxdt/sset"
 	"github.com/intdxdt/rtree"
 )
 
+var DEBUG = false
 //Homotopic simplification at a given threshold
 func (self *ConstDP) Simplify(constVertices ...[]int) *ConstDP {
 	var constVertexSet *sset.SSet
@@ -24,7 +24,8 @@ func (self *ConstDP) Simplify(constVertices ...[]int) *ConstDP {
 
 	// constrain hulls to self intersects
 	self.Hulls, _, constVertexSet = constrain.ToSelfIntersects(
-		self, constVerts, self.ScoreRelation,
+		self.NodeQueue(), self.Polyline(), self.Options(),
+		constVerts, self.Score, self.ScoreRelation,
 	)
 
 	var bln bool
@@ -48,7 +49,10 @@ func (self *ConstDP) Simplify(constVertices ...[]int) *ConstDP {
 		}
 
 		if !selections.IsEmpty() {
-			split.SplitNodesInDB(self, hulldb, selections, dp.NodeGeometry)
+			split.SplitNodesInDB(
+				self.NodeQueue(), hulldb, selections,
+				self.Score, dp.NodeGeometry,
+			)
 		}
 
 		if !bln {
@@ -59,11 +63,17 @@ func (self *ConstDP) Simplify(constVertices ...[]int) *ConstDP {
 		bln = self.ValidateContextRelation(hull, selections)
 
 		if !selections.IsEmpty() {
-			split.SplitNodesInDB(self, hulldb, selections, dp.NodeGeometry)
+			split.SplitNodesInDB(
+				self.NodeQueue(), hulldb, selections,
+				self.Score, dp.NodeGeometry,
+			)
 		}
 	}
 
-	merge.SimpleSegments(self, hulldb, constVertexSet, self.ScoreRelation, self.ValidateMerge)
+	self.AggregateSimpleSegments(
+		hulldb, constVertexSet,
+		self.ScoreRelation, self.ValidateMerge,
+	)
 
 	self.Hulls.Clear()
 	self.SimpleSet.Empty()
