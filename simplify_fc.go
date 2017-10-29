@@ -13,7 +13,7 @@ import (
 )
 
 //Update hull nodes with dp instance
-func (self *ConstDP) self_update() {
+func (self *ConstDP) selfUpdate() {
 	var hull *node.Node
 	for _, h := range *self.Hulls.DataView() {
 		hull = castAsNode(h)
@@ -21,7 +21,7 @@ func (self *ConstDP) self_update() {
 	}
 }
 
-func deform_class_selections(queue *deque.Deque, hulldb *rtree.RTree, selections *node.Nodes) {
+func deformClassSelections(queue *deque.Deque, hulldb *rtree.RTree, selections *node.Nodes) {
 	for _, s := range selections.DataView() {
 		self := castConstDP(s.Instance)
 		sels := node.NewNodes().Push(s)
@@ -29,7 +29,7 @@ func deform_class_selections(queue *deque.Deque, hulldb *rtree.RTree, selections
 			self.NodeQueue(), hulldb, sels,
 			self.Score, dp.NodeGeometry,
 		)
-		self.self_update()
+		self.selfUpdate()
 		for self.Hulls.Len() > 0 {
 			queue.AppendLeft(self.Hulls.Pop())
 		}
@@ -38,7 +38,7 @@ func deform_class_selections(queue *deque.Deque, hulldb *rtree.RTree, selections
 }
 
 // Group hulls in hulldb by instance of ConstDP
-func group_hulls_by_self(hulldb *rtree.RTree) {
+func groupHullsBySelf(hulldb *rtree.RTree) {
 	var ok bool
 	var hull *node.Node
 	var selfs = make([]*ConstDP, 0)
@@ -86,19 +86,19 @@ func SimplifyFeatureClass(selfs []*ConstDP, opts *opts.Opts) {
 
 	// return common.simple_hulls_as_ptset
 	for _, self := range selfs {
-		var const_verts []int
+		var constVerts []int
 		if v, ok := junctions[self.Id()]; ok {
-			const_verts = asInts(v.Values())
+			constVerts = asInts(v.Values())
 		} else {
-			const_verts = make([]int, 0)
+			constVerts = make([]int, 0)
 		}
-		self.Simplify(const_verts)
+		self.Simplify(constVerts)
 	}
 
 	var hlist = make([]*node.Node, 0)
 	var hulldb = rtree.NewRTree(16)
 	for _, self := range selfs {
-		self.self_update()
+		self.selfUpdate()
 		for _, h := range *self.Hulls.DataView() {
 			hlist = append(hlist, castAsNode(h))
 		}
@@ -130,7 +130,7 @@ func SimplifyFeatureClass(selfs []*ConstDP, opts *opts.Opts) {
 		bln = constrain.FeatureClassIntersection(self.Options(), hull, hulldb, selections)
 
 		if !selections.IsEmpty() {
-			deform_class_selections(dque, hulldb, selections)
+			deformClassSelections(dque, hulldb, selections)
 		}
 
 		if !bln {
@@ -141,8 +141,8 @@ func SimplifyFeatureClass(selfs []*ConstDP, opts *opts.Opts) {
 		self.ValidateContextRelation(hull, selections)
 
 		if !selections.IsEmpty() {
-			deform_class_selections(dque, hulldb, selections)
+			deformClassSelections(dque, hulldb, selections)
 		}
 	}
-	group_hulls_by_self(hulldb)
+	groupHullsBySelf(hulldb)
 }

@@ -3,8 +3,8 @@ package constdp
 import (
 	"simplex/knn"
 	"simplex/node"
-	"simplex/constrain"
 	"github.com/intdxdt/rtree"
+	"simplex/constrain"
 )
 
 func (self *ConstDP) ValidateMerge(hull *node.Node, hulldb *rtree.RTree) bool {
