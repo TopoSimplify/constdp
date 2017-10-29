@@ -14,7 +14,7 @@ func (self *ConstDP) ValidateMerge(hull *node.Node, hulldb *rtree.RTree) bool {
 
 	// self intersection constraint
 	if options.AvoidNewSelfIntersects {
-		bln = constrain.BySelfIntersection(self, hull, hulldb, sideEffects)
+		bln = constrain.BySelfIntersection(self.Options(), hull, hulldb, sideEffects)
 	}
 
 	if !sideEffects.IsEmpty() || !bln {
@@ -45,15 +45,15 @@ func (self *ConstDP) ValidateContextRelation(hull *node.Node, selections *node.N
 
 		var cg = castAsContextGeom(contxt)
 		if bln && options.GeomRelation {
-			bln = constrain.ByGeometricRelation(self, hull, cg)
+			bln = constrain.ByGeometricRelation(hull, cg)
 		}
 
 		if bln && options.DistRelation {
-			bln = constrain.ByMinDistRelation(self, hull, cg)
+			bln = constrain.ByMinDistRelation(self.Options(), hull, cg)
 		}
 
 		if bln && options.DirRelation {
-			bln = constrain.BySideRelation(self, hull, cg)
+			bln = constrain.BySideRelation(hull, cg)
 		}
 	}
 

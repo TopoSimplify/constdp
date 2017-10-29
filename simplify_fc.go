@@ -127,7 +127,7 @@ func SimplifyFeatureClass(selfs []*ConstDP, opts *opts.Opts) {
 		// find hull neighbours
 		// self intersection constraint
 		// can self intersect with itself but not with other lines
-		bln = constrain.FeatureClassIntersection(self, hull, hulldb, selections)
+		bln = constrain.FeatureClassIntersection(self.Options(), hull, hulldb, selections)
 
 		if !selections.IsEmpty() {
 			deform_class_selections(dque, hulldb, selections)

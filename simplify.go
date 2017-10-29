@@ -44,7 +44,7 @@ func (self *ConstDP) Simplify(constVertices ...[]int) *ConstDP {
 
 		// self intersection constraint
 		if bln && self.Opts.AvoidNewSelfIntersects {
-			bln = constrain.BySelfIntersection(self, hull, hulldb, selections)
+			bln = constrain.BySelfIntersection(self.Options(), hull, hulldb, selections)
 		}
 
 		if !selections.IsEmpty() {
