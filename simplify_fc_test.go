@@ -115,6 +115,8 @@ func TestConstDP_FC(t *testing.T) {
 				"LINESTRING ( 100 200, 0 300, 100 500, 100 700, 300 800, 300 1100, 333.48668893714955 1263.8423649803672, 400 1300, 800 1100, 1100 1100, 1100 900, 1200 900, 1300 700, 1600 700, 1500 500, 1700 400, 1630.634600565117 122.53840226046754, 1600 0, 1100 -200, 600 -200 )",
 				"LINESTRING ( 100 -100, -100 0, -100 100, -200 200, -200 400, -400 500, -500 400, -600 300, -500 100, -300 100, -200 400, -300 700, -200 800, -200 900, 0 800, 300 1100, 300 1300, 600 1400, 900 1500, 1100 1300, 1400 900, 1700 900, 1800 600, 1800 -200 )",
 			}
+			var constraints = make([]geom.Geometry, 0)
+			constraints = append(constraints, geom.NewPoint([]float64{1400, 1000}))
 			var plns = make([]*geom.LineString, 0)
 			for _, wkt := range wkts {
 				plns = append(plns, geom.NewLineStringFromWKT(wkt))
@@ -130,14 +132,22 @@ func TestConstDP_FC(t *testing.T) {
 			g.Assert(l0l1.Distance(g0g1)).Equal(0.0)
 			g.Assert(l1l2.Distance(g1g2)).Equal(0.0)
 
-			gs := simplify_forest(plns, options)
+			//gs := simplify_forest(plns, options)
+			var forest = []*ConstDP{}
+			for _, l := range plns {
+				dp := NewConstDP(l.Coordinates(), constraints, options, offset.MaxOffset)
+				forest = append(forest, dp)
+			}
+
+			SimplifyFeatureClass(forest, options)
+			gs := extract_simple_segs(forest)
+
 			g0, g1, g2 := gs[0], gs[1], gs[2]
 			s0s1 := g0.Intersection(g1)[0]
 			s1s2 := g1.Intersection(g2)[0]
 
 			g.Assert(s0s1.Distance(g0g1)).Equal(0.0)
 			g.Assert(s1s2.Distance(g1g2)).Equal(0.0)
-
 		})
 	})
 }
