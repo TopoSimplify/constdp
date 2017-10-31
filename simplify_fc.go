@@ -10,7 +10,10 @@ import (
 	"github.com/intdxdt/sset"
 	"github.com/intdxdt/deque"
 	"github.com/intdxdt/rtree"
+	"github.com/intdxdt/fan"
 )
+
+const RtreeBucketSize = 4
 
 //Update hull nodes with dp instance
 func (self *ConstDP) selfUpdate() {
@@ -84,19 +87,11 @@ func SimplifyFeatureClass(selfs []*ConstDP, opts *opts.Opts) {
 		junctions = lnr.FeatureClassSelfIntersection(instances)
 	}
 
-	// return common.simple_hulls_as_ptset
-	for _, self := range selfs {
-		var constVerts []int
-		if v, ok := junctions[self.Id()]; ok {
-			constVerts = asInts(v.Values())
-		} else {
-			constVerts = make([]int, 0)
-		}
-		self.Simplify(constVerts)
-	}
+
+	simplifyClass(selfs, opts, junctions)
 
 	var hlist = make([]*node.Node, 0)
-	var hulldb = rtree.NewRTree(16)
+	var hulldb = rtree.NewRTree(RtreeBucketSize)
 	for _, self := range selfs {
 		self.selfUpdate()
 		for _, h := range *self.Hulls.DataView() {
@@ -104,6 +99,8 @@ func SimplifyFeatureClass(selfs []*ConstDP, opts *opts.Opts) {
 		}
 		self.Hulls.Clear() // empty deque, this is for future splits
 	}
+
+
 
 	var bln bool
 	var self *ConstDP
@@ -145,4 +142,36 @@ func SimplifyFeatureClass(selfs []*ConstDP, opts *opts.Opts) {
 		}
 	}
 	groupHullsBySelf(hulldb)
+}
+
+func simplifyClass(selfs []*ConstDP, opts *opts.Opts, junctions map[string]*sset.SSet)  {
+	var stream = make(chan interface{})
+	var exit = make(chan struct{})
+	defer close(exit)
+
+	go func() {
+		for _, self := range selfs {
+			stream <- self
+		}
+		close(stream)
+	}()
+
+	var worker = func(v interface{}) interface{} {
+		var self = v.(*ConstDP)
+		var constVerts []int
+		if v, ok := junctions[self.Id()]; ok {
+			constVerts = asInts(v.Values())
+		} else {
+			constVerts = make([]int, 0)
+		}
+		self.Simplify(constVerts)
+		return self
+	}
+
+	var out = fan.Stream(stream, worker, 8, exit)
+	//var results = make([]*ConstDP, 0)
+	for _ = range out {
+		//results = append(results, o.(*ConstDP))
+	}
+	//return results
 }

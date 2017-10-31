@@ -31,7 +31,7 @@ func (self *ConstDP) Simplify(constVertices ...[]int) *ConstDP {
 	var hull *node.Node
 	var selections = node.NewNodes()
 
-	var hulldb = rtree.NewRTree(16)
+	var hulldb = rtree.NewRTree(RtreeBucketSize)
 	for !self.Hulls.IsEmpty() {
 		// assume popped hull to be valid
 		bln = true
@@ -82,3 +82,5 @@ func (self *ConstDP) Simplify(constVertices ...[]int) *ConstDP {
 	}
 	return self
 }
+
+
