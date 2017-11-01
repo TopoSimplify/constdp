@@ -1,12 +1,12 @@
 package constdp
 
 import (
+	"simplex/db"
 	"simplex/dp"
 	"simplex/node"
 	"simplex/split"
 	"simplex/constrain"
 	"github.com/intdxdt/sset"
-	"github.com/intdxdt/rtree"
 )
 
 //Homotopic simplification at a given threshold
@@ -31,7 +31,7 @@ func (self *ConstDP) Simplify(constVertices ...[]int) *ConstDP {
 	var hull *node.Node
 	var selections = node.NewNodes()
 
-	var hulldb = rtree.NewRTree(RtreeBucketSize)
+	var hulldb = db.NewDB(RtreeBucketSize)
 	for !self.Hulls.IsEmpty() {
 		// assume popped hull to be valid
 		bln = true

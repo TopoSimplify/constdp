@@ -1,69 +1,69 @@
 package constdp
 
 import (
-	"simplex/knn"
-	"simplex/node"
-	"github.com/intdxdt/rtree"
-	"simplex/constrain"
+    "simplex/db"
+    "simplex/knn"
+    "simplex/node"
+    "simplex/constrain"
 )
 
-func (self *ConstDP) ValidateMerge(hull *node.Node, hulldb *rtree.RTree) bool {
-	var bln = true
-	var sideEffects = node.NewNodes()
-	var options = self.Options()
+func (self *ConstDP) ValidateMerge(hull *node.Node, hulldb *db.DB) bool {
+    var bln = true
+    var sideEffects = node.NewNodes()
+    var options = self.Options()
 
-	// self intersection constraint
-	if options.AvoidNewSelfIntersects {
-		bln = constrain.BySelfIntersection(self.Options(), hull, hulldb, sideEffects)
-	}
+    // self intersection constraint
+    if options.AvoidNewSelfIntersects {
+        bln = constrain.BySelfIntersection(self.Options(), hull, hulldb, sideEffects)
+    }
 
-	if !sideEffects.IsEmpty() || !bln {
-		return false
-	}
+    if !sideEffects.IsEmpty() || !bln {
+        return false
+    }
 
-	// context geometry constraint
-	bln = self.ValidateContextRelation(hull, sideEffects)
-	return sideEffects.IsEmpty() && bln
+    // context geometry constraint
+    bln = self.ValidateContextRelation(hull, sideEffects)
+    return sideEffects.IsEmpty() && bln
 }
 
 //Constrain for context neighbours
 // finds the collapsibility of hull with respect to context hull neighbours
 // if hull is deformable, its added to selections
 func (self *ConstDP) ValidateContextRelation(hull *node.Node, selections *node.Nodes) bool {
-	if !self.checkContextRelations() {
-		return true
-	}
+    if !self.checkContextRelations() {
+        return true
+    }
 
-	var bln = true
-	var options = self.Options()
-	// find context neighbours - if valid
-	var ctxs = knn.FindNeighbours(self.ContextDB, hull, options.MinDist)
-	for _, contxt := range ctxs {
-		if !bln {
-			break
-		}
+    var bln = true
+    var options = self.Options()
+    // find context neighbours - if valid
+    var ctxs = knn.FindNeighbours(self.ContextDB, hull, options.MinDist)
+    for _, contxt := range ctxs {
+        if !bln {
+            break
+        }
 
-		var cg = castAsContextGeom(contxt)
-		if bln && options.GeomRelation {
-			bln = constrain.ByGeometricRelation(hull, cg)
-		}
+        var cg = castAsContextGeom(contxt)
+        if bln && options.GeomRelation {
+            bln = constrain.ByGeometricRelation(hull, cg)
+        }
 
-		if bln && options.DistRelation {
-			bln = constrain.ByMinDistRelation(self.Options(), hull, cg)
-		}
+        if bln && options.DistRelation {
+            bln = constrain.ByMinDistRelation(self.Options(), hull, cg)
+        }
 
-		if bln && options.DirRelation {
-			bln = constrain.BySideRelation(hull, cg)
-		}
-	}
+        if bln && options.DirRelation {
+            bln = constrain.BySideRelation(hull, cg)
+        }
+    }
 
-	if !bln {
-		selections.Push(hull)
-	}
+    if !bln {
+        selections.Push(hull)
+    }
 
-	return bln
+    return bln
 }
 
 func (self *ConstDP) checkContextRelations() bool {
-	return self.Opts.GeomRelation || self.Opts.DistRelation || self.Opts.DirRelation
+    return self.Opts.GeomRelation || self.Opts.DistRelation || self.Opts.DirRelation
 }
