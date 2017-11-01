@@ -11,6 +11,7 @@ import (
     "github.com/intdxdt/deque"
     "github.com/intdxdt/sset"
     "github.com/intdxdt/fan"
+    "simplex/cmap"
 )
 
 func processFeatClassNodes(selfs []*ConstDP, opts *opts.Opts) {
@@ -43,7 +44,7 @@ func processFeatClassNodes(selfs []*ConstDP, opts *opts.Opts) {
     var selections = node.NewNodes()
     var dque = deque.NewDeque(len(hlist))
 
-    var dict = NewMap()
+    var dict = cmap.NewMap()
 
     for _, h := range hlist {
         dque.Append(h)
@@ -63,7 +64,7 @@ func processFeatClassNodes(selfs []*ConstDP, opts *opts.Opts) {
             time.Sleep(8 * time.Millisecond)
         }
     }()
-
+    //var historyMap =  make(map[string]bool)
     var worker = func(v interface{}) interface{} {
         //fmt.Println("queue size :", dque.Len())
         // assume poped hull to be valid
@@ -79,7 +80,7 @@ func processFeatClassNodes(selfs []*ConstDP, opts *opts.Opts) {
         bln = constrain.ByFeatureClassIntersection(self.Options(), hull, hulldb, selections)
 
         if !selections.IsEmpty() {
-            deformClassSelections(dque, hulldb, selections)
+            deformClassSelections(dque, hulldb, selections, cmap.NewMap())
         }
 
         if !bln {
@@ -90,7 +91,7 @@ func processFeatClassNodes(selfs []*ConstDP, opts *opts.Opts) {
         self.ValidateContextRelation(hull, selections)
 
         if !selections.IsEmpty() {
-            deformClassSelections(dque, hulldb, selections)
+            deformClassSelections(dque, hulldb, selections, cmap.NewMap())
         }
         return bln
     }

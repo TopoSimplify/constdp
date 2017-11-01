@@ -11,6 +11,8 @@ import (
     "github.com/intdxdt/deque"
     "github.com/intdxdt/fan"
     "simplex/db"
+    "github.com/intdxdt/rtree"
+    "simplex/cmap"
 )
 
 const RtreeBucketSize = 4
@@ -24,13 +26,13 @@ func (self *ConstDP) selfUpdate() {
     }
 }
 
-func deformClassSelections(queue *deque.Deque, hulldb *db.DB, selections *node.Nodes) {
+func deformClassSelections(queue *deque.Deque, hulldb *db.DB, selections *node.Nodes, historyMap *cmap.Map) {
     for _, s := range selections.DataView() {
         self := castConstDP(s.Instance)
         sels := node.NewNodes().Push(s)
         split.SplitNodesInDB(
             self.NodeQueue(), hulldb, sels,
-            self.Score, dp.NodeGeometry,
+            self.Score, dp.NodeGeometry, historyMap,
         )
         self.selfUpdate()
         for self.Hulls.Len() > 0 {
@@ -91,6 +93,8 @@ func SimplifyFeatureClass(selfs []*ConstDP, opts *opts.Opts) {
 
     var hlist = make([]*node.Node, 0)
     var hulldb = db.NewDB(RtreeBucketSize)
+    var historyMap = cmap.NewMap()
+
     for _, self := range selfs {
         self.selfUpdate()
         for _, h := range *self.Hulls.DataView() {
@@ -105,9 +109,13 @@ func SimplifyFeatureClass(selfs []*ConstDP, opts *opts.Opts) {
     var selections = node.NewNodes()
     var dque = deque.NewDeque(len(hlist))
 
-    for _, h := range hlist {
+    var boxes = make([]rtree.BoxObj, len(hlist))
+    for i, h := range hlist {
         dque.Append(h)
+        boxes[i] = h
+        historyMap.Set(h.Id())
     }
+    hulldb.Load(boxes)
 
     for !dque.IsEmpty() {
         //fmt.Println("queue size :", dque.Len())
@@ -116,7 +124,12 @@ func SimplifyFeatureClass(selfs []*ConstDP, opts *opts.Opts) {
         self = hull.Instance.(*ConstDP)
 
         // insert hull into hull db
-        hulldb.Insert(hull)
+        //hulldb.Insert(hull)
+
+        //check state in history map
+        if !historyMap.HasKey(hull.Id()){
+            continue
+        }
 
         // find hull neighbours
         // self intersection constraint
@@ -124,7 +137,7 @@ func SimplifyFeatureClass(selfs []*ConstDP, opts *opts.Opts) {
         bln = constrain.ByFeatureClassIntersection(self.Options(), hull, hulldb, selections)
 
         if !selections.IsEmpty() {
-            deformClassSelections(dque, hulldb, selections)
+            deformClassSelections(dque, hulldb, selections, historyMap)
         }
 
         if !bln {
@@ -135,7 +148,7 @@ func SimplifyFeatureClass(selfs []*ConstDP, opts *opts.Opts) {
         self.ValidateContextRelation(hull, selections)
 
         if !selections.IsEmpty() {
-            deformClassSelections(dque, hulldb, selections)
+            deformClassSelections(dque, hulldb, selections, historyMap)
         }
     }
     groupHullsBySelf(hulldb)
