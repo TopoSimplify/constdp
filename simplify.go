@@ -1,14 +1,10 @@
 package constdp
 
 import (
-    "simplex/dp"
     "simplex/node"
-    "simplex/split"
     "simplex/constrain"
     "github.com/intdxdt/sset"
     "github.com/intdxdt/rtree"
-    "github.com/intdxdt/avl"
-    "github.com/intdxdt/cmp"
 )
 
 //Homotopic simplification at a given threshold
@@ -28,65 +24,40 @@ func (self *ConstDP) Simplify(constVertices ...[]int) *ConstDP {
         self.NodeQueue(), self.Polyline(), self.Options(),
         constVerts, self.Score, self.ScoreRelation,
     )
+    self.selfUpdate()
 
-    var bln bool
     var hull *node.Node
-    var selections = node.NewNodes()
-
-    var historyMap = avl.NewAVL(cmp.Str)
-
+    var selections map[string]*node.Node
     var hulldb = rtree.NewRTree(rtreeBucketSize)
-    var boxes = make([]rtree.BoxObj, self.Hulls.Len())
-    for i, v := range *self.Hulls.DataView() {
-        hull = v.(*node.Node)
-        boxes[i] = hull
-        historyMap.Insert(hull.Id())
+    var boxes = make([]rtree.BoxObj, 0)
+
+    var deformables = make([]*node.Node, 0)
+    for _, o := range *self.Hulls.DataView() {
+        hull = castAsNode(o)
+        deformables = append(deformables, hull)
+        boxes = append(boxes, hull)
     }
+    self.Hulls.Clear() // empty deque, this is for future splits
 
     hulldb.Load(boxes)
 
-    for !self.Hulls.IsEmpty() {
-        // assume popped hull to be valid
-        bln = true
-
-        // pop hull in queue
-        hull = popLeftHull(self.Hulls)
-
-        //check state in history map
-        if ! historyMap.Contains(hull.Id()) {
-            continue
-        }
-
-        // self intersection constraint
-        if bln && self.Opts.AvoidNewSelfIntersects {
-            bln = constrain.BySelfIntersection(self.Options(), hull, hulldb, selections)
-        }
-
-        if !selections.IsEmpty() {
-            //split.SplitNodesInDB(self.NodeQueue(), hulldb, selections, self.Score, dp.NodeGeometry,historyMap)
-            split.SplitNodesInDB(self.NodeQueue(), hulldb, selections, self.Score, dp.NodeGeometry, historyMap)
-        }
-
-        if !bln {
-            continue
-        }
-
-        // context_geom geometry constraint
-        bln = self.ValidateContextRelation(hull, selections)
-
-        if !selections.IsEmpty() {
-            //split.SplitNodesInDB(self.NodeQueue(), hulldb, selections, self.Score, dp.NodeGeometry, historyMap)
-            split.SplitNodesInDB(self.NodeQueue(), hulldb, selections, self.Score, dp.NodeGeometry, historyMap)
-        }
+    for len(deformables) > 0 {
+        // 1. find deformable node
+        selections = findDeformableNodes(deformables, hulldb)
+        // 2. deform selected nodes
+        deformables = deformNodes(selections)
+        // 2. remove selected nodes from db
+        cleanUpDB(hulldb, selections)
+        // 2. add new deformations to db
+        updateDB(hulldb, deformables)
+        // 3. repeat until there are no deformables
     }
 
-    self.AggregateSimpleSegments(
-        hulldb, constVertexSet,
-        self.ScoreRelation, self.ValidateMerge,
-    )
+    self.AggregateSimpleSegments(hulldb, constVertexSet, self.ScoreRelation, self.ValidateMerge)
 
     self.Hulls.Clear()
     self.SimpleSet.Empty()
+
     for _, h := range nodesFromRtreeNodes(hulldb.All()).Sort().DataView() {
         self.Hulls.Append(h)
         self.SimpleSet.Extend(h.Range.I(), h.Range.J())

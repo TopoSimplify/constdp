@@ -1,25 +1,18 @@
 package constdp
 
 import (
+    "simplex/lnr"
     "simplex/node"
     "simplex/opts"
     "github.com/intdxdt/fan"
     "github.com/intdxdt/sset"
     "github.com/intdxdt/rtree"
-    "simplex/lnr"
 )
 
 const rtreeBucketSize = 4
-const concurProcs = 8
+const concurProcs = 7
 
-//Update hull nodes with dp instance
-func (self *ConstDP) selfUpdate() {
-    var hull *node.Node
-    for _, h := range *self.Hulls.DataView() {
-        hull = castAsNode(h)
-        hull.Instance = self
-    }
-}
+
 
 //Simplify a feature class of linear geometries
 func SimplifyFeatureClass(selfs []*ConstDP, opts *opts.Opts) {
@@ -36,29 +29,33 @@ func SimplifyFeatureClass(selfs []*ConstDP, opts *opts.Opts) {
 
     var hull *node.Node
     var selections map[string]*node.Node
-    var hlist = make([]*node.Node, 0)
     var hulldb = rtree.NewRTree(rtreeBucketSize)
     var boxes = make([]rtree.BoxObj, 0)
 
+    var deformables = make([]*node.Node, 0)
     for _, self := range selfs {
         self.selfUpdate()
         for _, o := range *self.Hulls.DataView() {
             hull = castAsNode(o)
-            hlist = append(hlist, hull)
+            deformables = append(deformables, hull)
             boxes = append(boxes, hull)
         }
         self.Hulls.Clear() // empty deque, this is for future splits
     }
     hulldb.Load(boxes)
 
-    for len(hlist) > 0 {
-        selections = findDeformableNodes(hlist, hulldb)
-        hlist = deformNodes(selections)
+    for len(deformables) > 0 {
+        // 1. find deformable node
+        selections = findDeformableNodes(deformables, hulldb)
+        // 2. deform selected nodes
+        deformables = deformNodes(selections)
+        // 2. remove selected nodes from db
         cleanUpDB(hulldb, selections)
-        updateDB(hulldb, hlist)
+        // 2. add new deformations to db
+        updateDB(hulldb, deformables)
+        // 3. repeat until there are no deformables
     }
     groupHullsByFC(hulldb)
-
 }
 
 func simplifyClass(selfs []*ConstDP, junctions map[string]*sset.SSet) {
@@ -86,6 +83,5 @@ func simplifyClass(selfs []*ConstDP, junctions map[string]*sset.SSet) {
     }
 
     var out = fan.Stream(stream, worker, concurProcs, exit)
-    for range out {
-    }
+    for range out {}
 }

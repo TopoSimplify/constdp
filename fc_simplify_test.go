@@ -21,19 +21,19 @@ func TestConstDP_FC(t *testing.T) {
         constraints = append(constraints, geom.NewGeometry(wkt))
     }
 
-    var extract_simple_segs = func(forest []*ConstDP) []*geom.LineString {
-        var simple_lns = []*geom.LineString{}
+    var extractSimpleSegs = func(forest []*ConstDP) []*geom.LineString {
+        var simpleLns = []*geom.LineString{}
         for _, tree := range forest {
             var coords = make([]*geom.Point, 0)
             for _, i := range tree.SimpleSet.Values() {
                 coords = append(coords, tree.Pln.Coordinates[i.(int)])
             }
-            simple_lns = append(simple_lns, geom.NewLineString(coords))
+            simpleLns = append(simpleLns, geom.NewLineString(coords))
         }
-        return simple_lns
+        return simpleLns
     }
 
-    var simplify_forest = func(lns []*geom.LineString, opts *opts.Opts) []*geom.LineString {
+    var simplifyForest = func(lns []*geom.LineString, opts *opts.Opts) []*geom.LineString {
         var forest = []*ConstDP{}
         for _, l := range lns {
             dp := NewConstDP(l.Coordinates(), constraints, opts, offset.MaxOffset)
@@ -41,10 +41,10 @@ func TestConstDP_FC(t *testing.T) {
         }
 
         SimplifyFeatureClass(forest, opts)
-        return extract_simple_segs(forest)
+        return extractSimpleSegs(forest)
     }
 
-    var simplify_in_isolation = func(lns []*geom.LineString, opts *opts.Opts) []*geom.LineString {
+    var simplifyInIsolation = func(lns []*geom.LineString, opts *opts.Opts) []*geom.LineString {
         forest := []*ConstDP{}
         for _, l := range lns {
             dp := NewConstDP(l.Coordinates(), constraints, opts, offset.MaxOffset)
@@ -55,7 +55,7 @@ func TestConstDP_FC(t *testing.T) {
             tree.Simplify()
         }
 
-        return extract_simple_segs(forest)
+        return extractSimpleSegs(forest)
     }
 
     options := &opts.Opts{
@@ -83,7 +83,7 @@ func TestConstDP_FC(t *testing.T) {
             }
             l0, l1, l2 := plns[0], plns[1], plns[2]
 
-            gs := simplify_in_isolation(plns, options)
+            gs := simplifyInIsolation(plns, options)
             g0, g1, g2 := gs[0], gs[1], gs[2]
 
             g.Assert(l0.Intersects(l1)).IsFalse()
@@ -95,7 +95,7 @@ func TestConstDP_FC(t *testing.T) {
             g.Assert(l0.Intersects(l2)).IsFalse()
             g.Assert(g0.Intersects(g2)).IsFalse()
 
-            gs = simplify_forest(plns, options)
+            gs = simplifyForest(plns, options)
             g0, g1, g2 = gs[0], gs[1], gs[2]
 
             g.Assert(l0.Intersects(l1)).IsFalse()
@@ -140,7 +140,7 @@ func TestConstDP_FC(t *testing.T) {
             }
 
             SimplifyFeatureClass(forest, options)
-            gs := extract_simple_segs(forest)
+            gs := extractSimpleSegs(forest)
 
             g0, g1, g2 := gs[0], gs[1], gs[2]
             s0s1 := g0.Intersection(g1)[0]

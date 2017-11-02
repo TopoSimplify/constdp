@@ -10,8 +10,6 @@ import (
     "github.com/intdxdt/deque"
 )
 
-const EpsilonDist = 1.0e-5
-
 //Convert slice of interface to ints
 func asInts(iter []interface{}) []int {
     ints := make([]int, len(iter))

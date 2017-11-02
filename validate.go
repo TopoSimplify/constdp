@@ -26,6 +26,7 @@ func (self *ConstDP) ValidateMerge(hull *node.Node, hulldb *rtree.RTree) bool {
     return sideEffects.IsEmpty() && bln
 }
 
+
 //Constrain for context neighbours
 // finds the collapsibility of hull with respect to context hull neighbours
 // if hull is deformable, its added to selections
