@@ -35,7 +35,7 @@ func (self *ConstDP) Simplify(constVertices ...[]int) *ConstDP {
 
     var historyMap = avl.NewAVL(cmp.Str)
 
-    var hulldb = rtree.NewRTree(RtreeBucketSize)
+    var hulldb = rtree.NewRTree(rtreeBucketSize)
     var boxes = make([]rtree.BoxObj, self.Hulls.Len())
     for i, v := range *self.Hulls.DataView() {
         hull = v.(*node.Node)
@@ -53,7 +53,9 @@ func (self *ConstDP) Simplify(constVertices ...[]int) *ConstDP {
         hull = popLeftHull(self.Hulls)
 
         //check state in history map
-        if ! historyMap.Contains(hull.Id()) {continue}
+        if ! historyMap.Contains(hull.Id()) {
+            continue
+        }
 
         // self intersection constraint
         if bln && self.Opts.AvoidNewSelfIntersects {
@@ -61,9 +63,8 @@ func (self *ConstDP) Simplify(constVertices ...[]int) *ConstDP {
         }
 
         if !selections.IsEmpty() {
-            split.SplitNodesInDB(
-                self.NodeQueue(), hulldb, selections, self.Score, dp.NodeGeometry, historyMap,
-            )
+            //split.SplitNodesInDB(self.NodeQueue(), hulldb, selections, self.Score, dp.NodeGeometry,historyMap)
+            split.SplitNodesInDB(self.NodeQueue(), hulldb, selections, self.Score, dp.NodeGeometry, historyMap)
         }
 
         if !bln {
@@ -74,9 +75,8 @@ func (self *ConstDP) Simplify(constVertices ...[]int) *ConstDP {
         bln = self.ValidateContextRelation(hull, selections)
 
         if !selections.IsEmpty() {
-            split.SplitNodesInDB(
-                self.NodeQueue(), hulldb, selections, self.Score, dp.NodeGeometry, historyMap,
-            )
+            //split.SplitNodesInDB(self.NodeQueue(), hulldb, selections, self.Score, dp.NodeGeometry, historyMap)
+            split.SplitNodesInDB(self.NodeQueue(), hulldb, selections, self.Score, dp.NodeGeometry, historyMap)
         }
     }
 

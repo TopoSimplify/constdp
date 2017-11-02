@@ -22,7 +22,7 @@ func NewConstDP(coordinates []*geom.Point, constraints []geom.Geometry,
     options *opts.Opts, offsetScore lnr.ScoreFn) *ConstDP {
     var instance = (&ConstDP{
         DouglasPeucker: dp.New(coordinates, options, offsetScore),
-        ContextDB:      rtree.NewRTree(RtreeBucketSize),
+        ContextDB:      rtree.NewRTree(rtreeBucketSize),
     }).BuildContextDB(constraints) //prepare databases
 
     if len(coordinates) > 1 {
