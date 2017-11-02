@@ -1,13 +1,13 @@
 package constdp
 
 import (
-    "simplex/db"
     "simplex/knn"
     "simplex/node"
     "simplex/constrain"
+    "github.com/intdxdt/rtree"
 )
 
-func (self *ConstDP) ValidateMerge(hull *node.Node, hulldb *db.DB) bool {
+func (self *ConstDP) ValidateMerge(hull *node.Node, hulldb *rtree.RTree) bool {
     var bln = true
     var sideEffects = node.NewNodes()
     var options = self.Options()

@@ -1,7 +1,6 @@
 package constdp
 
 import (
-    "simplex/db"
     "simplex/dp"
     "simplex/node"
     "simplex/split"
@@ -34,10 +33,11 @@ func (self *ConstDP) Simplify(constVertices ...[]int) *ConstDP {
     var hull *node.Node
     var selections = node.NewNodes()
 
-    var hulldb = db.NewDB(RtreeBucketSize)
     var historyMap = avl.NewAVL(cmp.Str)
+
+    var hulldb = rtree.NewRTree(RtreeBucketSize)
     var boxes = make([]rtree.BoxObj, self.Hulls.Len())
-    for i, v := range self.Hulls.Nodes() {
+    for i, v := range *self.Hulls.DataView() {
         hull = v.(*node.Node)
         boxes[i] = hull
         historyMap.Insert(hull.Id())
@@ -53,9 +53,7 @@ func (self *ConstDP) Simplify(constVertices ...[]int) *ConstDP {
         hull = popLeftHull(self.Hulls)
 
         //check state in history map
-        if ! historyMap.Contains(hull.Id()) {
-            continue
-        }
+        if ! historyMap.Contains(hull.Id()) {continue}
 
         // self intersection constraint
         if bln && self.Opts.AvoidNewSelfIntersects {

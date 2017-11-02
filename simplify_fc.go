@@ -2,11 +2,9 @@ package constdp
 
 import (
     "simplex/dp"
-    "simplex/db"
     "simplex/lnr"
     "simplex/node"
     "simplex/opts"
-    "simplex/nque"
     "simplex/split"
     "github.com/intdxdt/sset"
     "github.com/intdxdt/fan"
@@ -14,6 +12,7 @@ import (
     "github.com/intdxdt/cmp"
     "simplex/constrain"
     "github.com/intdxdt/rtree"
+    "github.com/intdxdt/deque"
 )
 
 const RtreeBucketSize = 4
@@ -21,13 +20,13 @@ const RtreeBucketSize = 4
 //Update hull nodes with dp instance
 func (self *ConstDP) selfUpdate() {
     var hull *node.Node
-    for _, h := range self.Hulls.Nodes() {
+    for _, h := range *self.Hulls.DataView() {
         hull = castAsNode(h)
         hull.Instance = self
     }
 }
 
-func deformClassSelections(queue *nque.Queue, hulldb *db.DB, selections *node.Nodes, historyMap *avl.AVL) {
+func deformClassSelections(queue *deque.Deque, hulldb *rtree.RTree, selections *node.Nodes, historyMap *avl.AVL) {
     for _, s := range selections.DataView() {
         self := castConstDP(s.Instance)
         sels := node.NewNodes().Push(s)
@@ -43,7 +42,7 @@ func deformClassSelections(queue *nque.Queue, hulldb *db.DB, selections *node.No
 }
 
 // Group hulls in hulldb by instance of ConstDP
-func groupHullsBySelf(hulldb *db.DB) {
+func groupHullsBySelf(hulldb *rtree.RTree) {
     var ok bool
     var hull *node.Node
     var selfs = make([]*ConstDP, 0)
@@ -70,7 +69,7 @@ func groupHullsBySelf(hulldb *db.DB) {
 
     for _, self := range selfs {
         self.SimpleSet.Empty() //update new simple
-        for _, h := range self.Hulls.Nodes() {
+        for _, h := range *self.Hulls.DataView() {
             hull = castAsNode(h)
             self.SimpleSet.Extend(hull.Range.I(), hull.Range.J())
         }
@@ -90,23 +89,22 @@ func SimplifyFeatureClass(selfs []*ConstDP, opts *opts.Opts) {
     }
 
     simplifyClass(selfs, opts, junctions)
-    //processFeatClassNodes(selfs, opts)
 
     var bln bool
     var self *ConstDP
     var hull *node.Node
-    var dque = nque.NewQueue()
+    var dque = deque.NewDeque()
     //var historyMap = cmap.NewMap()
     var historyMap = avl.NewAVL(cmp.Str)
     var selections = node.NewNodes()
     var hlist = make([]*node.Node, 0)
-    var hulldb = db.NewDB(RtreeBucketSize)
+    var hulldb = rtree.NewRTree(RtreeBucketSize)
 
     var boxes = make([]rtree.BoxObj, 0)
 
     for _, self := range selfs {
         self.selfUpdate()
-        for _, o := range self.Hulls.Nodes() {
+        for _, o := range *self.Hulls.DataView() {
             hull = castAsNode(o)
             dque.Append(hull)
             historyMap.Insert(hull.Id())

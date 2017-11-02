@@ -8,13 +8,12 @@ import (
     "simplex/lnr"
     "github.com/intdxdt/geom"
     "github.com/intdxdt/rtree"
-    "simplex/db"
 )
 
 //Type DP
 type ConstDP struct {
     *dp.DouglasPeucker
-    ContextDB *db.DB
+    ContextDB *rtree.RTree
 }
 
 //Creates a new constrained DP Simplification instance
@@ -23,7 +22,7 @@ func NewConstDP(coordinates []*geom.Point, constraints []geom.Geometry,
     options *opts.Opts, offsetScore lnr.ScoreFn) *ConstDP {
     var instance = (&ConstDP{
         DouglasPeucker: dp.New(coordinates, options, offsetScore),
-        ContextDB:      db.NewDB(RtreeBucketSize),
+        ContextDB:      rtree.NewRTree(RtreeBucketSize),
     }).BuildContextDB(constraints) //prepare databases
 
     if len(coordinates) > 1 {

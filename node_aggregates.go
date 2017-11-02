@@ -7,13 +7,13 @@ import (
     "simplex/node"
     "simplex/merge"
     "github.com/intdxdt/sset"
-    "simplex/db"
+    "github.com/intdxdt/rtree"
 )
 
 //Merge segment fragments where possible
-func (self *ConstDP) AggregateSimpleSegments(nodeDB *db.DB,
+func (self *ConstDP) AggregateSimpleSegments(nodeDB *rtree.RTree,
     constVertexSet *sset.SSet, scoreRelation func(float64) bool,
-    validateMerge func(node *node.Node, nodeDB *db.DB) bool) {
+    validateMerge func(node *node.Node, nodeDB *rtree.RTree) bool) {
 
     var hull *node.Node
     var fragmentSize = 1

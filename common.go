@@ -7,7 +7,7 @@ import (
     "github.com/intdxdt/geom"
     "github.com/intdxdt/rtree"
     "github.com/intdxdt/math"
-    "simplex/nque"
+    "github.com/intdxdt/deque"
 )
 
 const EpsilonDist = 1.0e-5
@@ -29,7 +29,7 @@ func castAsNode(o interface{}) *node.Node {
     return o.(*node.Node)
 }
 
-func popLeftHull(que *nque.Queue) *node.Node {
+func popLeftHull(que *deque.Deque) *node.Node {
     return que.PopLeft().(*node.Node)
 }
 
