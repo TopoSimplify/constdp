@@ -1,55 +1,42 @@
 package constdp
 
 import (
-    "time"
     "runtime"
     "simplex/db"
-    "simplex/lnr"
+    "simplex/nque"
     "simplex/opts"
     "simplex/node"
     "simplex/constrain"
-    "github.com/intdxdt/deque"
-    "github.com/intdxdt/sset"
     "github.com/intdxdt/fan"
-    "simplex/cmap"
+    "github.com/intdxdt/rtree"
+    "github.com/intdxdt/avl"
+    "github.com/intdxdt/cmp"
 )
 
 func processFeatClassNodes(selfs []*ConstDP, opts *opts.Opts) {
     var ConCur = 8
-    var junctions = make(map[string]*sset.SSet, 0)
 
-    if opts.KeepSelfIntersects {
-        instances := make([]lnr.Linear, len(selfs))
-        for i, v := range selfs {
-            instances[i] = v
-        }
-        junctions = lnr.FeatureClassSelfIntersection(instances)
-    }
-
-    simplifyClass(selfs, opts, junctions)
+    var bln bool
+    var queue = nque.NewQueue()
+    var historyMap = avl.NewAVL(cmp.Str)
 
     var hlist = make([]*node.Node, 0)
     var hulldb = db.NewDB(RtreeBucketSize)
+    var boxes = make([]rtree.BoxObj, 0)
+
     for _, self := range selfs {
         self.selfUpdate()
-        for _, h := range *self.Hulls.DataView() {
-            hlist = append(hlist, castAsNode(h))
+        for _, o := range self.Hulls.Nodes() {
+            hull := castAsNode(o)
+            queue.Append(hull)
+            historyMap.Insert(hull.Id())
+            hlist = append(hlist, hull)
+            boxes = append(boxes, hull)
         }
         self.Hulls.Clear() // empty deque, this is for future splits
     }
 
-    var bln bool
-    var self *ConstDP
-    var hull *node.Node
-    var selections = node.NewNodes()
-    var dque = deque.NewDeque(len(hlist))
-
-    var dict = cmap.NewMap()
-
-    for _, h := range hlist {
-        dque.Append(h)
-        dict.Set(h.Id())
-    }
+    hulldb.Load(boxes)
 
     var stream = make(chan interface{})
     var exit = make(chan struct{})
@@ -57,22 +44,40 @@ func processFeatClassNodes(selfs []*ConstDP, opts *opts.Opts) {
     //go pool
     go func() {
         for {
-            for !dque.IsEmpty() {
-                stream <- dque.PopLeft()
+            select {
+            case <-exit:
+                return
+            default:
+                var flip = false
+                for !queue.IsEmpty() {
+                    if flip {
+                        stream <- queue.PopLeft()
+                    }else{
+                        stream <- queue.Pop()
+                    }
+                    flip  = !flip
+                }
+                runtime.Gosched()
             }
-            runtime.Gosched()
-            time.Sleep(8 * time.Millisecond)
+
         }
     }()
+
     //var historyMap =  make(map[string]bool)
     var worker = func(v interface{}) interface{} {
-        //fmt.Println("queue size :", dque.Len())
+        var selections = node.NewNodes()
+        //fmt.Println("queue size :", queue.Len())
         // assume poped hull to be valid
-        hull = castAsNode(v)
-        self = hull.Instance.(*ConstDP)
+        var hull = castAsNode(v)
+        var self = hull.Instance.(*ConstDP)
 
         // insert hull into hull db
-        hulldb.Insert(hull)
+        //hulldb.Insert(hull)
+
+        //check state in history map
+        if !historyMap.Contains(hull.Id()) {
+            return struct{}{} //continue
+        }
 
         // find hull neighbours
         // self intersection constraint
@@ -80,20 +85,20 @@ func processFeatClassNodes(selfs []*ConstDP, opts *opts.Opts) {
         bln = constrain.ByFeatureClassIntersection(self.Options(), hull, hulldb, selections)
 
         if !selections.IsEmpty() {
-            deformClassSelections(dque, hulldb, selections, cmap.NewMap())
+            deformClassSelections(queue, hulldb, selections, historyMap)
         }
 
         if !bln {
-            return bln
+            return struct{}{}
         }
 
         // context_geom geometry constraint
         self.ValidateContextRelation(hull, selections)
 
         if !selections.IsEmpty() {
-            deformClassSelections(dque, hulldb, selections, cmap.NewMap())
+            deformClassSelections(queue, hulldb, selections, historyMap)
         }
-        return bln
+        return struct{}{}
     }
 
     var done = make(chan struct{})
@@ -106,7 +111,7 @@ func processFeatClassNodes(selfs []*ConstDP, opts *opts.Opts) {
             case <-out:
             default:
                 //halting condition all data served and processed
-                if dque.IsEmpty() && pool.IsIdle() {
+                if queue.IsEmpty() && pool.IsIdle() {
                     close(exit)
                     close(done)
                     return

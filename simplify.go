@@ -8,7 +8,8 @@ import (
     "simplex/constrain"
     "github.com/intdxdt/sset"
     "github.com/intdxdt/rtree"
-    "simplex/cmap"
+    "github.com/intdxdt/avl"
+    "github.com/intdxdt/cmp"
 )
 
 //Homotopic simplification at a given threshold
@@ -34,13 +35,14 @@ func (self *ConstDP) Simplify(constVertices ...[]int) *ConstDP {
     var selections = node.NewNodes()
 
     var hulldb = db.NewDB(RtreeBucketSize)
-    var historyMap = cmap.NewMap()
+    var historyMap = avl.NewAVL(cmp.Str)
     var boxes = make([]rtree.BoxObj, self.Hulls.Len())
-    for i, v := range *self.Hulls.DataView() {
-        n := v.(*node.Node)
-        boxes[i] = n
-        historyMap.Set(n.Id())
+    for i, v := range self.Hulls.Nodes() {
+        hull = v.(*node.Node)
+        boxes[i] = hull
+        historyMap.Insert(hull.Id())
     }
+
     hulldb.Load(boxes)
 
     for !self.Hulls.IsEmpty() {
@@ -50,11 +52,8 @@ func (self *ConstDP) Simplify(constVertices ...[]int) *ConstDP {
         // pop hull in queue
         hull = popLeftHull(self.Hulls)
 
-        // insert hull into hull db
-        //hulldb.Insert(hull)
-
         //check state in history map
-        if !historyMap.HasKey(hull.Id()){
+        if ! historyMap.Contains(hull.Id()) {
             continue
         }
 

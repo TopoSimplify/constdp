@@ -2,17 +2,18 @@ package constdp
 
 import (
     "simplex/dp"
+    "simplex/db"
     "simplex/lnr"
     "simplex/node"
     "simplex/opts"
+    "simplex/nque"
     "simplex/split"
-    "simplex/constrain"
     "github.com/intdxdt/sset"
-    "github.com/intdxdt/deque"
     "github.com/intdxdt/fan"
-    "simplex/db"
+    "github.com/intdxdt/avl"
+    "github.com/intdxdt/cmp"
+    "simplex/constrain"
     "github.com/intdxdt/rtree"
-    "simplex/cmap"
 )
 
 const RtreeBucketSize = 4
@@ -20,19 +21,18 @@ const RtreeBucketSize = 4
 //Update hull nodes with dp instance
 func (self *ConstDP) selfUpdate() {
     var hull *node.Node
-    for _, h := range *self.Hulls.DataView() {
+    for _, h := range self.Hulls.Nodes() {
         hull = castAsNode(h)
         hull.Instance = self
     }
 }
 
-func deformClassSelections(queue *deque.Deque, hulldb *db.DB, selections *node.Nodes, historyMap *cmap.Map) {
+func deformClassSelections(queue *nque.Queue, hulldb *db.DB, selections *node.Nodes, historyMap *avl.AVL) {
     for _, s := range selections.DataView() {
         self := castConstDP(s.Instance)
         sels := node.NewNodes().Push(s)
         split.SplitNodesInDB(
-            self.NodeQueue(), hulldb, sels,
-            self.Score, dp.NodeGeometry, historyMap,
+            self.NodeQueue(), hulldb, sels, self.Score, dp.NodeGeometry, historyMap,
         )
         self.selfUpdate()
         for self.Hulls.Len() > 0 {
@@ -70,7 +70,7 @@ func groupHullsBySelf(hulldb *db.DB) {
 
     for _, self := range selfs {
         self.SimpleSet.Empty() //update new simple
-        for _, h := range *self.Hulls.DataView() {
+        for _, h := range self.Hulls.Nodes() {
             hull = castAsNode(h)
             self.SimpleSet.Extend(hull.Range.I(), hull.Range.J())
         }
@@ -90,31 +90,32 @@ func SimplifyFeatureClass(selfs []*ConstDP, opts *opts.Opts) {
     }
 
     simplifyClass(selfs, opts, junctions)
-
-    var hlist = make([]*node.Node, 0)
-    var hulldb = db.NewDB(RtreeBucketSize)
-    var historyMap = cmap.NewMap()
-
-    for _, self := range selfs {
-        self.selfUpdate()
-        for _, h := range *self.Hulls.DataView() {
-            hlist = append(hlist, castAsNode(h))
-        }
-        self.Hulls.Clear() // empty deque, this is for future splits
-    }
+    //processFeatClassNodes(selfs, opts)
 
     var bln bool
     var self *ConstDP
     var hull *node.Node
+    var dque = nque.NewQueue()
+    //var historyMap = cmap.NewMap()
+    var historyMap = avl.NewAVL(cmp.Str)
     var selections = node.NewNodes()
-    var dque = deque.NewDeque(len(hlist))
+    var hlist = make([]*node.Node, 0)
+    var hulldb = db.NewDB(RtreeBucketSize)
 
-    var boxes = make([]rtree.BoxObj, len(hlist))
-    for i, h := range hlist {
-        dque.Append(h)
-        boxes[i] = h
-        historyMap.Set(h.Id())
+    var boxes = make([]rtree.BoxObj, 0)
+
+    for _, self := range selfs {
+        self.selfUpdate()
+        for _, o := range self.Hulls.Nodes() {
+            hull = castAsNode(o)
+            dque.Append(hull)
+            historyMap.Insert(hull.Id())
+            hlist = append(hlist, hull)
+            boxes = append(boxes, hull)
+        }
+        self.Hulls.Clear() // empty deque, this is for future splits
     }
+
     hulldb.Load(boxes)
 
     for !dque.IsEmpty() {
@@ -127,7 +128,7 @@ func SimplifyFeatureClass(selfs []*ConstDP, opts *opts.Opts) {
         //hulldb.Insert(hull)
 
         //check state in history map
-        if !historyMap.HasKey(hull.Id()){
+        if !historyMap.Contains(hull.Id()) {
             continue
         }
 
@@ -180,8 +181,7 @@ func simplifyClass(selfs []*ConstDP, opts *opts.Opts, junctions map[string]*sset
 
     var out = fan.Stream(stream, worker, 8, exit)
     //var results = make([]*ConstDP, 0)
-    for _ = range out {
-        //results = append(results, o.(*ConstDP))
+    for range out {
     }
     //return results
 }
