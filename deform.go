@@ -22,18 +22,17 @@ func findDeformableNodes(hulls []*node.Node, hulldb *rtree.RTree) map[string]*no
     }()
 
     var worker = func(v interface{}) interface{} {
-        var selections = node.NewNodes()
-
-        var hull = castAsNode(v)
+        var selections = make([]*node.Node, 0)
+        var hull = v.(*node.Node)
         var self = hull.Instance.(*ConstDP)
 
         // find hull neighbours
         // self intersection constraint
         // can self intersect with itself but not with other lines
-        constrain.ByFeatureClassIntersection(self.Options(), hull, hulldb, selections)
+        constrain.ByFeatureClassIntersection(self.Options(), hull, hulldb, &selections)
 
         // context_geom geometry constraint
-        self.ValidateContextRelation(hull, selections)
+        self.ValidateContextRelation(hull, &selections)
 
         return selections
     }
@@ -41,8 +40,8 @@ func findDeformableNodes(hulls []*node.Node, hulldb *rtree.RTree) map[string]*no
     var out = fan.Stream(stream, worker, concurProcs, exit)
     var results = make(map[string]*node.Node)
     for sel := range out {
-        selections := sel.(*node.Nodes)
-        for _, n := range selections.DataView() {
+        selections := sel.([]*node.Node)
+        for _, n := range selections{
             results[n.Id()] = n
         }
     }
@@ -51,7 +50,7 @@ func findDeformableNodes(hulls []*node.Node, hulldb *rtree.RTree) map[string]*no
 
 
 func deformNodes(nodes map[string]*node.Node) []*node.Node {
-    var stream = make(chan interface{}, concurProcs)
+    var stream = make(chan interface{}, 4*concurProcs)
     var exit = make(chan struct{})
     defer close(exit)
 
@@ -63,7 +62,7 @@ func deformNodes(nodes map[string]*node.Node) []*node.Node {
     }()
 
     var worker = func(v interface{}) interface{} {
-        var hull = castAsNode(v)
+        var hull = v.(*node.Node)
         var self = hull.Instance.(*ConstDP)
         var ha, hb = split.AtScoreSelection(hull, self.Score, dp.NodeGeometry)
         return [2]*node.Node{ha, hb}

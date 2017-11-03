@@ -7,12 +7,11 @@ import (
     "github.com/intdxdt/fan"
     "github.com/intdxdt/sset"
     "github.com/intdxdt/rtree"
+	"simplex/common"
 )
 
 const rtreeBucketSize = 4
 const concurProcs = 7
-
-
 
 //Simplify a feature class of linear geometries
 func SimplifyFeatureClass(selfs []*ConstDP, opts *opts.Opts) {
@@ -27,7 +26,6 @@ func SimplifyFeatureClass(selfs []*ConstDP, opts *opts.Opts) {
     }
     simplifyClass(selfs, junctions)
 
-    var hull *node.Node
     var selections map[string]*node.Node
     var hulldb = rtree.NewRTree(rtreeBucketSize)
     var boxes = make([]rtree.BoxObj, 0)
@@ -35,12 +33,11 @@ func SimplifyFeatureClass(selfs []*ConstDP, opts *opts.Opts) {
     var deformables = make([]*node.Node, 0)
     for _, self := range selfs {
         self.selfUpdate()
-        for _, o := range *self.Hulls.DataView() {
-            hull = castAsNode(o)
+        for _, hull := range self.Hulls {
             deformables = append(deformables, hull)
             boxes = append(boxes, hull)
         }
-        self.Hulls.Clear() // empty deque, this is for future splits
+        node.Clear(&self.Hulls)  // empty deque, this is for future splits
     }
     hulldb.Load(boxes)
 
@@ -74,7 +71,7 @@ func simplifyClass(selfs []*ConstDP, junctions map[string]*sset.SSet) {
         var self = v.(*ConstDP)
         var constVerts []int
         if v, ok := junctions[self.Id()]; ok {
-            constVerts = asInts(v.Values())
+            constVerts = common.AsInts(v.Values())
         } else {
             constVerts = make([]int, 0)
         }

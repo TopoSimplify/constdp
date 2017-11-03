@@ -1,70 +1,69 @@
 package constdp
 
 import (
-    "simplex/knn"
-    "simplex/node"
-    "simplex/constrain"
-    "github.com/intdxdt/rtree"
+	"simplex/knn"
+	"simplex/node"
+	"simplex/constrain"
+	"github.com/intdxdt/rtree"
 )
 
 func (self *ConstDP) ValidateMerge(hull *node.Node, hulldb *rtree.RTree) bool {
-    var bln = true
-    var sideEffects = node.NewNodes()
-    var options = self.Options()
+	var bln = true
+	var sideEffects = make([]*node.Node, 0)
+	var options = self.Options()
 
-    // self intersection constraint
-    if options.AvoidNewSelfIntersects {
-        bln = constrain.BySelfIntersection(self.Options(), hull, hulldb, sideEffects)
-    }
+	// self intersection constraint
+	if options.AvoidNewSelfIntersects {
+		bln = constrain.BySelfIntersection(self.Options(), hull, hulldb, &sideEffects)
+	}
 
-    if !sideEffects.IsEmpty() || !bln {
-        return false
-    }
+	if len(sideEffects) != 0 || !bln {
+		return false
+	}
 
-    // context geometry constraint
-    bln = self.ValidateContextRelation(hull, sideEffects)
-    return sideEffects.IsEmpty() && bln
+	// context geometry constraint
+	bln = self.ValidateContextRelation(hull, &sideEffects)
+	return bln && (len(sideEffects) == 0)
 }
-
 
 //Constrain for context neighbours
 // finds the collapsibility of hull with respect to context hull neighbours
 // if hull is deformable, its added to selections
-func (self *ConstDP) ValidateContextRelation(hull *node.Node, selections *node.Nodes) bool {
-    if !self.checkContextRelations() {
-        return true
-    }
+func (self *ConstDP) ValidateContextRelation(hull *node.Node, selections *[]*node.Node) bool {
+	if !self.checkContextRelations() {
+		return true
+	}
 
-    var bln = true
-    var options = self.Options()
-    // find context neighbours - if valid
-    var ctxs = knn.FindNeighbours(self.ContextDB, hull, options.MinDist)
-    for _, contxt := range ctxs {
-        if !bln {
-            break
-        }
+	var bln = true
+	var options = self.Options()
+	// find context neighbours - if valid
+	var ctxs = knn.FindNeighbours(self.ContextDB, hull, options.MinDist)
+	for _, contxt := range ctxs {
+		if !bln {
+			break
+		}
 
-        var cg = castAsContextGeom(contxt)
-        if bln && options.GeomRelation {
-            bln = constrain.ByGeometricRelation(hull, cg)
-        }
+		var cg = castAsContextGeom(contxt)
+		if bln && options.GeomRelation {
+			bln = constrain.ByGeometricRelation(hull, cg)
+		}
 
-        if bln && options.DistRelation {
-            bln = constrain.ByMinDistRelation(self.Options(), hull, cg)
-        }
+		if bln && options.DistRelation {
+			bln = constrain.ByMinDistRelation(self.Options(), hull, cg)
+		}
 
-        if bln && options.DirRelation {
-            bln = constrain.BySideRelation(hull, cg)
-        }
-    }
+		if bln && options.DirRelation {
+			bln = constrain.BySideRelation(hull, cg)
+		}
+	}
 
-    if !bln {
-        selections.Push(hull)
-    }
+	if !bln {
+		*selections = append(*selections, hull)
+	}
 
-    return bln
+	return bln
 }
 
 func (self *ConstDP) checkContextRelations() bool {
-    return self.Opts.GeomRelation || self.Opts.DistRelation || self.Opts.DirRelation
+	return self.Opts.GeomRelation || self.Opts.DistRelation || self.Opts.DirRelation
 }
