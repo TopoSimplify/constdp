@@ -10,8 +10,7 @@ import (
 	"simplex/common"
 )
 
-const rtreeBucketSize = 4
-const concurProcs = 7
+
 
 //Simplify a feature class of linear geometries
 func SimplifyFeatureClass(selfs []*ConstDP, opts *opts.Opts) {

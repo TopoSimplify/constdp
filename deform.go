@@ -5,8 +5,8 @@ import (
     "simplex/node"
     "simplex/split"
     "simplex/constrain"
-    "github.com/intdxdt/rtree"
     "github.com/intdxdt/fan"
+    "github.com/intdxdt/rtree"
 )
 
 func findDeformableNodes(hulls []*node.Node, hulldb *rtree.RTree) map[string]*node.Node {
