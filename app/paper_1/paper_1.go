@@ -165,21 +165,22 @@ func main() {
 		DirRelation:            true,
 		DistRelation:           false,
 	}
-	var pitkin = Task{
-		thresholds: []float64{5, 10, 15, 20, 25, 30, 35, 40, math.MaxFloat64},
-		outPrefix:  "pitkin",
-		inputFname: "/media/titus/dat/tmp/pitkin_county_contours_prj.shp",
-	}
 
 	var nb = Task{
 		thresholds: []float64{2, 4, 6, 8, 10, 12, 14, 16, 18, 20, math.MaxFloat64},
 		outPrefix:  "nb",
 		inputFname: "/media/titus/dat/data/geonb_nbrn-rrnb_shp/RoadSegmentEntity.shp",
 	}
+	var pitkin = Task{
+		//thresholds: []float64{5, 10, 15, 20, 25, 30, 35, 40, math.MaxFloat64},
+		thresholds: []float64{ 35, 40, math.MaxFloat64},
+		outPrefix:  "pitkin",
+		inputFname: "/media/titus/dat/tmp/pitkin_county_contours_prj.shp",
+	}
 
 	var NumIters = 10
 	var tasks = []Task{nb, pitkin}
-	for _, task := range tasks {
+	for _, task := range tasks[1:] {
 		for _, t := range task.thresholds {
 			fmt.Println("Processing  Threshold : ", t)
 			options.Threshold = t
