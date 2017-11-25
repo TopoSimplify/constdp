@@ -30,7 +30,8 @@ func (self *ConstDP) AggregateSimpleSegments(nodeDB *rtree.RTree,
 		}
 
 		//make sure hull index is not part of vertex with degree > 2
-		if constVertexSet.Contains(hull.Range.I()) || constVertexSet.Contains(hull.Range.J()) {
+		if constVertexSet.Contains(hull.Range.I) ||
+			constVertexSet.Contains(hull.Range.J) {
 			continue
 		}
 
@@ -52,7 +53,9 @@ func (self *ConstDP) AggregateSimpleSegments(nodeDB *rtree.RTree,
 			key = cacheKey(prev, hull)
 			if !cache[key] {
 				addToMergeCache(cache, &key)
-				mergePrev = merge.ContiguousFragmentsAtThreshold(self.Score, prev, hull, scoreRelation, dp.NodeGeometry)
+				mergePrev = merge.ContiguousFragmentsAtThreshold(
+					self.Score, prev, hull, scoreRelation, dp.NodeGeometry,
+				)
 			}
 		}
 
@@ -60,7 +63,9 @@ func (self *ConstDP) AggregateSimpleSegments(nodeDB *rtree.RTree,
 			key = cacheKey(hull, nxt)
 			if !cache[key] {
 				addToMergeCache(cache, &key)
-				mergeNxt = merge.ContiguousFragmentsAtThreshold(self.Score, hull, nxt, scoreRelation, dp.NodeGeometry)
+				mergeNxt = merge.ContiguousFragmentsAtThreshold(
+					self.Score, hull, nxt, scoreRelation, dp.NodeGeometry,
+				)
 			}
 		}
 
@@ -99,7 +104,7 @@ func (self *ConstDP) AggregateSimpleSegments(nodeDB *rtree.RTree,
 }
 
 func cacheKey(a, b *node.Node) [4]int {
-	var ij = [4]int{a.Range.I(), a.Range.J(), b.Range.I(), b.Range.J()}
+	var ij = [4]int{a.Range.I, a.Range.J, b.Range.I, b.Range.J}
 	sort.Ints(ij[:])
 	return ij
 }

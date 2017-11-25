@@ -7,9 +7,8 @@ import (
 	"github.com/intdxdt/math"
 )
 
-const rtreeBucketSize = 4
 const concurProcs = 8
-
+const rtreeBucketSize = 4
 
 func castAsContextGeom(o interface{}) *ctx.ContextGeometry {
 	return o.(*ctx.ContextGeometry)

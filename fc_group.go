@@ -2,8 +2,8 @@ package constdp
 
 import (
 	"simplex/node"
-	"github.com/intdxdt/rtree"
 	"simplex/common"
+	"github.com/intdxdt/rtree"
 )
 
 // Group hulls in hulldb by instance of ConstDP
@@ -34,7 +34,7 @@ func groupHullsByFC(hulldb *rtree.RTree) {
 	for _, self := range selfs {
 		self.SimpleSet.Empty() //update new simple
 		for _, hull := range self.Hulls {
-			self.SimpleSet.Extend(hull.Range.I(), hull.Range.J())
+			self.SimpleSet.Extend(hull.Range.I, hull.Range.J)
 		}
 	}
 }

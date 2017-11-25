@@ -11,7 +11,11 @@ import (
 )
 
 //Simplify a feature class of linear geometries
-func SimplifyFeatureClass(selfs []*ConstDP, opts *opts.Opts, deformablesFn ... func(n int)) {
+func SimplifyFeatureClass(
+	selfs []*ConstDP,
+	opts *opts.Opts,
+	deformablesFn ... func(n int),
+) {
 	var junctions = make(map[string]*sset.SSet, 0)
 
 	if opts.KeepSelfIntersects {
@@ -28,8 +32,8 @@ func SimplifyFeatureClass(selfs []*ConstDP, opts *opts.Opts, deformablesFn ... f
 	var selections map[string]*node.Node
 	var hulldb = rtree.NewRTree(rtreeBucketSize)
 	var boxes = make([]rtree.BoxObj, 0)
-
 	var deformables = make([]*node.Node, 0)
+
 	for _, self := range selfs {
 		self.selfUpdate()
 		for _, hull := range self.Hulls {

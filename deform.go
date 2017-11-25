@@ -6,6 +6,7 @@ import (
 	"simplex/split"
 	"simplex/constrain"
 	"github.com/intdxdt/fan"
+	"github.com/intdxdt/geom"
 	"github.com/intdxdt/rtree"
 )
 
@@ -25,6 +26,14 @@ func findDeformableNodes(hulls []*node.Node, hulldb *rtree.RTree) map[string]*no
 		var selections = make([]*node.Node, 0)
 		var hull = v.(*node.Node)
 		var self = hull.Instance.(*ConstDP)
+		//if hull is segment
+		if hull.Range.Size() == 1 {
+			return selections
+		}
+		//if hull geometry is line then points are collinear
+		if _, ok := hull.Geom.(*geom.LineString); ok {
+			return selections
+		}
 
 		// find hull neighbours
 		// self intersection constraint
