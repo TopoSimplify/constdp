@@ -54,7 +54,8 @@ func (self *ConstDP) Simplify(constVertices ...[]int) *ConstDP {
 
 	self.AggregateSimpleSegments(
 		hulldb, constVertexSet,
-		self.ScoreRelation, self.ValidateMerge,
+		self.ScoreRelation,
+		self.ValidateMerge,
 	)
 
 	node.Clear(&self.Hulls)

@@ -3,9 +3,9 @@ package constdp
 import (
     "simplex/dp"
     "simplex/ctx"
+    "simplex/lnr"
     "simplex/pln"
     "simplex/opts"
-    "simplex/lnr"
     "github.com/intdxdt/geom"
     "github.com/intdxdt/rtree"
 )
