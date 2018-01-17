@@ -48,7 +48,7 @@ func TestConstDP(t *testing.T) {
 				}
 
 				options.GeomRelation = td.relates.geom
-				options.DirRelation  = td.relates.dir
+				options.DirRelation = td.relates.dir
 				options.DistRelation = td.relates.dist
 
 				var coords = geom.NewLineStringFromWKT(td.pln).Coordinates()
@@ -81,7 +81,6 @@ func TestConstSED(t *testing.T) {
 
 	g.Describe("const sed", func() {
 		g.It("should test constraint sed algorithm", func() {
-
 			var options = &opts.Opts{
 				Threshold:              1.0,
 				MinDist:                20.0,
@@ -99,9 +98,10 @@ func TestConstSED(t *testing.T) {
 			}
 
 			var coords = []*geom.Point{
-				{3.0, 1.6, 0.0}, {3.0, 2.0, 1.0}, {2.4, 2.8, 3.0},
-				{0.5, 3.0, 4.5}, {1.2, 3.2, 5.0}, {1.4, 2.6, 6.0},
-				{2.0, 3.5, 10.0}}
+				{3.0, 1.6,  0.0}, {3.0, 2.0, 1.0}, {2.4, 2.8, 3.0},
+				{0.5, 3.0,  4.5}, {1.2, 3.2, 5.0}, {1.4, 2.6, 6.0},
+				{2.0, 3.5, 10.0},
+			}
 			var homo = NewConstDP(coords, constraints, options, offset.MaxSEDOffset)
 			homo.Simplify()
 		})

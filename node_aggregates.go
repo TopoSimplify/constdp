@@ -6,9 +6,9 @@ import (
 	"simplex/knn"
 	"simplex/node"
 	"simplex/merge"
+	"simplex/common"
 	"github.com/intdxdt/sset"
 	"github.com/intdxdt/rtree"
-	"simplex/common"
 )
 
 //Merge segment fragments where possible

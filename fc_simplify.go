@@ -4,18 +4,20 @@ import (
 	"simplex/lnr"
 	"simplex/node"
 	"simplex/opts"
+	"simplex/common"
 	"github.com/intdxdt/fan"
 	"github.com/intdxdt/sset"
 	"github.com/intdxdt/rtree"
-	"simplex/common"
 )
 
 //Simplify a feature class of linear geometries
-func SimplifyFeatureClass(
-	selfs []*ConstDP,
-	opts *opts.Opts,
-	deformablesFn ... func(n int),
-) {
+//optional callback for the number of deformables
+func SimplifyFeatureClass(selfs []*ConstDP, opts *opts.Opts, callback ... func(n int)) {
+	var deformableCallback = func(n int) {}
+	if len(callback) > 0 {
+		deformableCallback = callback[0]
+	}
+
 	var junctions = make(map[string]*sset.SSet, 0)
 
 	if opts.KeepSelfIntersects {
@@ -26,7 +28,7 @@ func SimplifyFeatureClass(
 		junctions = lnr.FeatureClassSelfIntersection(instances)
 	}
 	SimplifyDPs(selfs, junctions)
-	var const_bln = opts.AvoidNewSelfIntersects || opts.KeepSelfIntersects ||
+	var constBln = opts.AvoidNewSelfIntersects || opts.KeepSelfIntersects ||
 		opts.GeomRelation || opts.DirRelation || opts.DistRelation
 
 	var selections map[string]*node.Node
@@ -40,16 +42,14 @@ func SimplifyFeatureClass(
 			deformables = append(deformables, hull)
 			boxes = append(boxes, hull)
 		}
-		if const_bln {
+		if constBln {
 			node.Clear(&self.Hulls) // empty deque, this is for future splits
 		}
 	}
 	hulldb.Load(boxes)
 
-	for const_bln && len(deformables) > 0 {
-		if len(deformablesFn) > 0 {
-			deformablesFn[0](len(deformables))
-		}
+	for constBln && len(deformables) > 0 {
+		deformableCallback(len(deformables))
 		// 1. find deformable node
 		selections = findDeformableNodes(deformables, hulldb)
 		// 2. deform selected nodes
