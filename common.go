@@ -1,22 +1,12 @@
 package constdp
 
 import (
-	"simplex/lnr"
-	"simplex/ctx"
 	"github.com/intdxdt/geom"
 	"github.com/intdxdt/math"
 )
 
 const concurProcs = 8
 const rtreeBucketSize = 4
-
-func castAsContextGeom(o interface{}) *ctx.ContextGeometry {
-	return o.(*ctx.ContextGeometry)
-}
-
-func castConstDP(o lnr.Linegen) *ConstDP {
-	return o.(*ConstDP)
-}
 
 //hull point compare
 func PointIndexCmp(a interface{}, b interface{}) int {

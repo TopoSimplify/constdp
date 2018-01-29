@@ -27,7 +27,9 @@ func SimplifyFeatureClass(selfs []*ConstDP, opts *opts.Opts, callback ... func(n
 		}
 		junctions = lnr.FeatureClassSelfIntersection(instances)
 	}
+
 	SimplifyDPs(selfs, junctions)
+
 	var constBln = opts.AvoidNewSelfIntersects || opts.KeepSelfIntersects ||
 		opts.GeomRelation || opts.DirRelation || opts.DistRelation
 
@@ -69,14 +71,22 @@ func SimplifyDPs(selfs []*ConstDP, junctions map[string]*sset.SSet) {
 	var exit = make(chan struct{})
 	defer close(exit)
 
-	go func() {
-		for _, self := range selfs {
-			stream <- self
-		}
-		close(stream)
-	}()
+	go inputStreamSimplifyDP(stream, selfs)
+	var worker = processSimplifyDPs(junctions)
+	var out = fan.Stream(stream, worker, concurProcs, exit)
+	for range out {
+	}
+}
 
-	var worker = func(v interface{}) interface{} {
+func inputStreamSimplifyDP(stream chan interface{}, selfs []*ConstDP) {
+	for _, self := range selfs {
+		stream <- self
+	}
+	close(stream)
+}
+
+func processSimplifyDPs(junctions map[string]*sset.SSet) func(v interface{}) interface{} {
+	return func(v interface{}) interface{} {
 		var self = v.(*ConstDP)
 		var constVerts []int
 		if v, ok := junctions[self.Id()]; ok {
@@ -86,9 +96,5 @@ func SimplifyDPs(selfs []*ConstDP, junctions map[string]*sset.SSet) {
 		}
 		self.Simplify(constVerts)
 		return self
-	}
-
-	var out = fan.Stream(stream, worker, concurProcs, exit)
-	for range out {
 	}
 }

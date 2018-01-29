@@ -11,7 +11,6 @@ import (
 )
 
 //@formatter:off
-
 func cmpSlices(a, b []interface{}) bool {
 	bln := len(a) == len(b)
 	for i := range a {
@@ -40,10 +39,10 @@ func TestConstDP(t *testing.T) {
 				DistRelation:           false,
 			}
 
-			for i, td := range test_data {
+			for i, td := range testData {
 				var constraints = make([]geom.Geometry, 0)
 
-				for _, wkt := range dat_constraints {
+				for _, wkt := range datConstraints {
 					constraints = append(constraints, geom.NewPolygonFromWKT(wkt))
 				}
 
@@ -93,7 +92,7 @@ func TestConstSED(t *testing.T) {
 			}
 
 			var constraints = make([]geom.Geometry, 0)
-			for _, wkt := range dat_constraints {
+			for _, wkt := range datConstraints {
 				constraints = append(constraints, geom.NewPolygonFromWKT(wkt))
 			}
 

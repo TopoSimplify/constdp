@@ -12,9 +12,12 @@ import (
 )
 
 //Merge segment fragments where possible
-func (self *ConstDP) AggregateSimpleSegments(nodeDB *rtree.RTree,
-	constVertexSet *sset.SSet, scoreRelation func(float64) bool,
-	validateMerge func(node *node.Node, nodeDB *rtree.RTree) bool) {
+func (self *ConstDP) AggregateSimpleSegments(
+	nodeDB *rtree.RTree,
+	constVertexSet *sset.SSet,
+	scoreRelation func(float64) bool,
+	validateMerge func(*node.Node, *rtree.RTree) bool,
+) {
 
 	var fragmentSize = 1
 	var neighbours []*node.Node
@@ -30,8 +33,7 @@ func (self *ConstDP) AggregateSimpleSegments(nodeDB *rtree.RTree,
 		}
 
 		//make sure hull index is not part of vertex with degree > 2
-		if constVertexSet.Contains(hull.Range.I) ||
-			constVertexSet.Contains(hull.Range.J) {
+		if constVertexSet.Contains(hull.Range.I) || constVertexSet.Contains(hull.Range.J) {
 			continue
 		}
 

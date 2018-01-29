@@ -5,16 +5,16 @@ import (
 	"simplex/node"
 	"simplex/constrain"
 	"github.com/intdxdt/rtree"
+	"simplex/ctx"
 )
 
 func (self *ConstDP) ValidateMerge(hull *node.Node, hulldb *rtree.RTree) bool {
 	var bln = true
 	var sideEffects = make([]*node.Node, 0)
-	var options = self.Options()
 
 	// self intersection constraint
-	if options.AvoidNewSelfIntersects {
-		bln = constrain.BySelfIntersection(self.Options(), hull, hulldb, &sideEffects)
+	if self.Opts.AvoidNewSelfIntersects {
+		bln = constrain.BySelfIntersection(self.Opts, hull, hulldb, &sideEffects)
 	}
 
 	if len(sideEffects) != 0 || !bln {
@@ -30,29 +30,29 @@ func (self *ConstDP) ValidateMerge(hull *node.Node, hulldb *rtree.RTree) bool {
 // finds the collapsibility of hull with respect to context hull neighbours
 // if hull is deformable, its added to selections
 func (self *ConstDP) ValidateContextRelation(hull *node.Node, selections *[]*node.Node) bool {
-	if !self.checkContextRelations() {
+	if !(self.Opts.GeomRelation || self.Opts.DistRelation || self.Opts.DirRelation) {
 		return true
 	}
 
 	var bln = true
-	var options = self.Options()
+
 	// find context neighbours - if valid
-	var ctxs = knn.FindNeighbours(self.ContextDB, hull, options.MinDist)
+	var ctxs = knn.FindNeighbours(self.ContextDB, hull, self.Opts.MinDist)
 	for _, contxt := range ctxs {
 		if !bln {
 			break
 		}
 
-		var cg = castAsContextGeom(contxt)
-		if bln && options.GeomRelation {
+		var cg = (contxt).(*ctx.ContextGeometry)
+		if bln && self.Opts.GeomRelation {
 			bln = constrain.ByGeometricRelation(hull, cg)
 		}
 
-		if bln && options.DistRelation {
+		if bln && self.Opts.DistRelation {
 			bln = constrain.ByMinDistRelation(self.Options(), hull, cg)
 		}
 
-		if bln && options.DirRelation {
+		if bln && self.Opts.DirRelation {
 			bln = constrain.BySideRelation(hull, cg)
 		}
 	}
@@ -64,6 +64,3 @@ func (self *ConstDP) ValidateContextRelation(hull *node.Node, selections *[]*nod
 	return bln
 }
 
-func (self *ConstDP) checkContextRelations() bool {
-	return self.Opts.GeomRelation || self.Opts.DistRelation || self.Opts.DirRelation
-}

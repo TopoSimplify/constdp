@@ -10,9 +10,3 @@ func cleanUpDB(hulldb *rtree.RTree, selections map[string]*node.Node) {
         hulldb.Remove(n)
     }
 }
-
-func updateDB(hulldb *rtree.RTree, nodes []*node.Node) {
-    for _, n := range nodes {
-        hulldb.Insert(n)
-    }
-}
