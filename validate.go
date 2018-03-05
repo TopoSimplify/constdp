@@ -42,8 +42,7 @@ func (self *ConstDP) ValidateContextRelation(hull *node.Node, selections *[]*nod
 		if !bln {
 			break
 		}
-
-		var cg = (contxt).(*ctx.ContextGeometry)
+		var cg = contxt.(*ctx.ContextGeometry)
 		if bln && self.Opts.GeomRelation {
 			bln = constrain.ByGeometricRelation(hull, cg)
 		}
@@ -53,7 +52,7 @@ func (self *ConstDP) ValidateContextRelation(hull *node.Node, selections *[]*nod
 		}
 
 		if bln && self.Opts.DirRelation {
-			bln = constrain.BySideRelation(hull, cg)
+			bln = constrain.BySideRelation(self.Coordinates(), hull, cg)
 		}
 	}
 
