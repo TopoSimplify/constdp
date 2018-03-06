@@ -36,23 +36,22 @@ func (self *ConstDP) ValidateContextRelation(hull *node.Node, selections *[]*nod
 	var bln = true
 
 	// find context neighbours - if valid
-	var ctxs = knn.FindNeighbours(self.ContextDB, hull, self.Opts.MinDist)
-	for _, contxt := range ctxs {
-		if !bln {
-			break
-		}
-		var cg = contxt.(*ctx.ContextGeometry)
-		if bln && self.Opts.GeomRelation {
-			bln = constrain.ByGeometricRelation(hull, cg)
-		}
+	var ctxtgeoms = ctx.NewContexts()
+	var ctxNeighbs = knn.FindNeighbours(self.ContextDB, hull, self.Opts.MinDist)
+	for _ , neighbour := range ctxNeighbs{
+		ctxtgeoms.Push(neighbour.(*ctx.ContextGeometry))
+	}
 
-		if bln && self.Opts.DistRelation {
-			bln = constrain.ByMinDistRelation(self.Options(), hull, cg)
-		}
+	if bln && self.Opts.GeomRelation {
+		bln = constrain.ByGeometricRelation(hull, ctxtgeoms)
+	}
 
-		if bln && self.Opts.DirRelation {
-			bln = constrain.BySideRelation(hull, cg)
-		}
+	if bln && self.Opts.DistRelation {
+		bln = constrain.ByMinDistRelation(self.Options(), hull, ctxtgeoms)
+	}
+
+	if bln && self.Opts.DirRelation {
+		bln = constrain.BySideRelation(hull, ctxtgeoms)
 	}
 
 	if !bln {
