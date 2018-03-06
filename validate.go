@@ -1,11 +1,11 @@
 package constdp
 
 import (
+	"simplex/ctx"
 	"simplex/knn"
 	"simplex/node"
 	"simplex/constrain"
 	"github.com/intdxdt/rtree"
-	"simplex/ctx"
 )
 
 func (self *ConstDP) ValidateMerge(hull *node.Node, hulldb *rtree.RTree) bool {
@@ -52,7 +52,7 @@ func (self *ConstDP) ValidateContextRelation(hull *node.Node, selections *[]*nod
 		}
 
 		if bln && self.Opts.DirRelation {
-			bln = constrain.BySideRelation(self.Coordinates(), hull, cg)
+			bln = constrain.BySideRelation(hull, cg)
 		}
 	}
 
@@ -62,4 +62,3 @@ func (self *ConstDP) ValidateContextRelation(hull *node.Node, selections *[]*nod
 
 	return bln
 }
-
