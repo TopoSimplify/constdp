@@ -38,8 +38,7 @@ func TestConstDP(t *testing.T) {
 				DirRelation:            false,
 				DistRelation:           false,
 			}
-
-			for i, td := range testData {
+			for i, td := range testData{
 				var constraints = make([]geom.Geometry, 0)
 
 				for _, wkt := range datConstraints {
@@ -66,6 +65,10 @@ func TestConstDP(t *testing.T) {
 					fmt.Println(ptset.Values())
 					fmt.Println(td.idxs)
 					fmt.Println(td.pln)
+					fmt.Println(td.simple)
+					fmt.Println("new simple:\n")
+					fmt.Println(geom.NewLineString(simplx).WKT())
+
 					fmt.Println(td.relates)
 				}
 				g.Assert(ptset.Values()).Equal(td.idxs)

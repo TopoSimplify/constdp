@@ -33,7 +33,6 @@ func (self *ConstDP) ValidateContextRelation(hull *node.Node, selections *[]*nod
 	if !(self.Opts.GeomRelation || self.Opts.DistRelation || self.Opts.DirRelation) {
 		return true
 	}
-
 	var bln = true
 
 	// find context neighbours - if valid
