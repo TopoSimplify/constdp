@@ -83,8 +83,9 @@ func TestConstSED(t *testing.T) {
 
 	g.Describe("const sed", func() {
 		g.It("should test constraint sed algorithm", func() {
+			g.Timeout(1*time.Hour)
 			var options = &opts.Opts{
-				Threshold:              1.0,
+				Threshold:              0.0,
 				MinDist:                20.0,
 				RelaxDist:              30.0,
 				KeepSelfIntersects:     true,
@@ -95,17 +96,39 @@ func TestConstSED(t *testing.T) {
 			}
 
 			var constraints = make([]geom.Geometry, 0)
-			for _, wkt := range datConstraints {
-				constraints = append(constraints, geom.NewPolygonFromWKT(wkt))
-			}
+			//for _, wkt := range datConstraints {
+			//	constraints = append(constraints, geom.NewPolygonFromWKT(wkt))
+			//}
 
 			var coords = []*geom.Point{
 				{3.0, 1.6,  0.0}, {3.0, 2.0, 1.0}, {2.4, 2.8, 3.0},
 				{0.5, 3.0,  4.5}, {1.2, 3.2, 5.0}, {1.4, 2.6, 6.0},
 				{2.0, 3.5, 10.0},
 			}
-			var homo = NewConstDP(coords, constraints, options, offset.MaxSEDOffset)
-			homo.Simplify()
+			var inst = NewConstDP(coords, constraints, options, offset.MaxSEDOffset).Simplify()
+			var ptset = make([]int, 0)
+			for _, i := range inst.SimpleSet.Values(){
+				ptset = append(ptset, i.(int))
+			}
+			g.Assert(ptset).Equal([]int{0, 1, 2, 3, 4, 5, 6})
+	
+			inst.Opts.Threshold = 1.0
+			fmt.Println(inst.Opts)
+			inst.Simplify()
+			ptset = make([]int, 0)
+			for _, i := range inst.SimpleSet.Values(){
+				ptset = append(ptset, i.(int))
+			}
+			g.Assert(ptset).Equal([]int{0, 2, 3, 6})
+
+			inst.Opts.Threshold = 1.25
+			fmt.Println(inst.Opts)
+			inst.Simplify()
+			ptset = make([]int, 0)
+			for _, i := range inst.SimpleSet.Values(){
+				ptset = append(ptset, i.(int))
+			}
+			g.Assert(ptset).Equal([]int{0, 3, 6})
 		})
 	})
 }
