@@ -4,14 +4,13 @@ import (
 	"simplex/node"
 	"simplex/common"
 	"simplex/constrain"
-	"github.com/intdxdt/sset"
 	"github.com/intdxdt/rtree"
 )
 
-//Homotopic simplification at a given threshold
+//Line simplification at a given threshold
 func (self *ConstDP) Simplify(constVertices ...[]int) *ConstDP {
-	var constVertexSet *sset.SSet
-	var constVerts = []int{}
+	var constVertexSet []int
+	var constVerts []int
 
 	if len(constVertices) > 0 {
 		constVerts = constVertices[0]
@@ -22,8 +21,7 @@ func (self *ConstDP) Simplify(constVertices ...[]int) *ConstDP {
 
 	// constrain hulls to self intersects
 	self.Hulls, _, constVertexSet = constrain.ToSelfIntersects(
-		self.NodeQueue(), self.Polyline(), self.Options(),
-		constVerts, self.Score, self.ScoreRelation,
+		self.NodeQueue(), self.Polyline(), self.Options(), constVerts,
 	)
 	self.selfUpdate()
 
@@ -53,9 +51,7 @@ func (self *ConstDP) Simplify(constVertices ...[]int) *ConstDP {
 	}
 
 	self.AggregateSimpleSegments(
-		hulldb, constVertexSet,
-		self.ScoreRelation,
-		self.ValidateMerge,
+		hulldb, constVertexSet, self.ScoreRelation, self.ValidateMerge,
 	)
 
 	node.Clear(&self.Hulls)

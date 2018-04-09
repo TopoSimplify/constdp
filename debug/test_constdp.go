@@ -32,7 +32,7 @@ func main() {
 		Threshold:              50.0,
 		MinDist:                20.0,
 		RelaxDist:              30.0,
-		KeepSelfIntersects:     true,
+		PlanarSelf:             true,
 		AvoidNewSelfIntersects: true,
 		GeomRelation:           false,
 		DirRelation:            false,

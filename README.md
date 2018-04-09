@@ -3,4 +3,4 @@
 constraint douglas-peucker algorithm
 
 ### coverage 
-coverage: 99.6% of statements
+coverage: 99.2% of statements

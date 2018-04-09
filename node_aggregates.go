@@ -7,14 +7,13 @@ import (
 	"simplex/node"
 	"simplex/merge"
 	"simplex/common"
-	"github.com/intdxdt/sset"
 	"github.com/intdxdt/rtree"
+	"github.com/intdxdt/iter"
 )
 
 //Merge segment fragments where possible
 func (self *ConstDP) AggregateSimpleSegments(
-	nodeDB *rtree.RTree,
-	constVertexSet *sset.SSet,
+	nodeDB *rtree.RTree, constVertexSet []int,
 	scoreRelation func(float64) bool,
 	validateMerge func(*node.Node, *rtree.RTree) bool,
 ) {
@@ -33,9 +32,12 @@ func (self *ConstDP) AggregateSimpleSegments(
 		}
 
 		//make sure hull index is not part of vertex with degree > 2
-		if constVertexSet.Contains(hull.Range.I) || constVertexSet.Contains(hull.Range.J) {
+		if iter.SortedSearchInts(constVertexSet, hull.Range.I) && iter.SortedSearchInts(constVertexSet, hull.Range.J) {
 			continue
 		}
+		var withNext, withPrev = !iter.SortedSearchInts(constVertexSet, hull.Range.J),
+		!iter.SortedSearchInts(constVertexSet, hull.Range.I)
+
 
 		nodeDB.Remove(hull)
 
@@ -51,7 +53,7 @@ func (self *ConstDP) AggregateSimpleSegments(
 		var key [4]int
 		var mergePrev, mergeNxt *node.Node
 
-		if prev != nil {
+		if withPrev && prev != nil {
 			key = cacheKey(prev, hull)
 			if !cache[key] {
 				addToMergeCache(cache, &key)
@@ -61,7 +63,7 @@ func (self *ConstDP) AggregateSimpleSegments(
 			}
 		}
 
-		if nxt != nil {
+		if withNext && nxt != nil {
 			key = cacheKey(hull, nxt)
 			if !cache[key] {
 				addToMergeCache(cache, &key)

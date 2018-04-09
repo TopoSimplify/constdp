@@ -62,7 +62,7 @@ func TestConstDP_FC(t *testing.T) {
         Threshold:              300.0,
         MinDist:                20.0,
         RelaxDist:              30.0,
-        KeepSelfIntersects:     true,
+        PlanarSelf:             true,
         AvoidNewSelfIntersects: true,
         GeomRelation:           true,
         DirRelation:            true,

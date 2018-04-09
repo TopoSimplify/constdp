@@ -4,9 +4,7 @@ import (
 	"simplex/lnr"
 	"simplex/node"
 	"simplex/opts"
-	"simplex/common"
 	"github.com/intdxdt/fan"
-	"github.com/intdxdt/sset"
 	"github.com/intdxdt/rtree"
 )
 
@@ -18,19 +16,19 @@ func SimplifyFeatureClass(selfs []*ConstDP, opts *opts.Opts, callback ... func(n
 		deformableCallback = callback[0]
 	}
 
-	var junctions = make(map[string]*sset.SSet, 0)
+	var junctions = make(map[string][]int)
 
-	if opts.KeepSelfIntersects {
-		instances := make([]lnr.Linear, len(selfs))
-		for i, v := range selfs {
-			instances[i] = v
+	if opts.PlanarSelf {
+		instances := make([]*lnr.FC, len(selfs))
+		for i, sf := range selfs {
+			instances[i] = lnr.NewFC(sf.Coordinates(), sf.Id())
 		}
-		junctions = lnr.FeatureClassSelfIntersection(instances)
+		junctions = lnr.FCPlanarSelfIntersection(instances)
 	}
 
 	SimplifyDPs(selfs, junctions)
 
-	var constBln = opts.AvoidNewSelfIntersects || opts.KeepSelfIntersects ||
+	var constBln = opts.AvoidNewSelfIntersects || opts.PlanarSelf ||
 		opts.GeomRelation || opts.DirRelation || opts.DistRelation
 
 	var selections map[string]*node.Node
@@ -66,7 +64,7 @@ func SimplifyFeatureClass(selfs []*ConstDP, opts *opts.Opts, callback ... func(n
 	groupHullsByFC(hulldb)
 }
 
-func SimplifyDPs(selfs []*ConstDP, junctions map[string]*sset.SSet) {
+func SimplifyDPs(selfs []*ConstDP, junctions map[string][]int) {
 	var stream = make(chan interface{})
 	var exit = make(chan struct{})
 	defer close(exit)
@@ -85,12 +83,12 @@ func inputStreamSimplifyDP(stream chan interface{}, selfs []*ConstDP) {
 	close(stream)
 }
 
-func processSimplifyDPs(junctions map[string]*sset.SSet) func(v interface{}) interface{} {
+func processSimplifyDPs(junctions map[string][]int) func(v interface{}) interface{} {
 	return func(v interface{}) interface{} {
 		var self = v.(*ConstDP)
 		var constVerts []int
 		if v, ok := junctions[self.Id()]; ok {
-			constVerts = common.AsInts(v.Values())
+			constVerts = v
 		} else {
 			constVerts = make([]int, 0)
 		}
