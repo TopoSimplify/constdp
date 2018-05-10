@@ -1,13 +1,13 @@
 package constdp
 
 import (
-	"simplex/dp"
-	"simplex/ctx"
-	"simplex/lnr"
-	"simplex/pln"
-	"simplex/opts"
 	"github.com/intdxdt/geom"
 	"github.com/intdxdt/rtree"
+	"github.com/TopoSimplify/dp"
+	"github.com/TopoSimplify/ctx"
+	"github.com/TopoSimplify/lnr"
+	"github.com/TopoSimplify/pln"
+	"github.com/TopoSimplify/opts"
 )
 
 //Type DP

@@ -1,9 +1,9 @@
 package constdp
 
 import (
-	"simplex/node"
-	"simplex/common"
 	"github.com/intdxdt/rtree"
+	"github.com/TopoSimplify/node"
+	"github.com/TopoSimplify/common"
 )
 
 // Group hulls in hulldb by instance of ConstDP

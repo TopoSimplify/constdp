@@ -1,9 +1,9 @@
 package constdp
 
 import (
-	"simplex/node"
-	"simplex/common"
-	"simplex/constrain"
+	"github.com/TopoSimplify/node"
+	"github.com/TopoSimplify/common"
+	"github.com/TopoSimplify/constrain"
 	"github.com/intdxdt/rtree"
 )
 

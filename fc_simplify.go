@@ -1,11 +1,11 @@
 package constdp
 
 import (
-	"simplex/lnr"
-	"simplex/node"
-	"simplex/opts"
 	"github.com/intdxdt/fan"
 	"github.com/intdxdt/rtree"
+	"github.com/TopoSimplify/lnr"
+	"github.com/TopoSimplify/node"
+	"github.com/TopoSimplify/opts"
 )
 
 //Simplify a feature class of linear geometries

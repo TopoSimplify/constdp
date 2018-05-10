@@ -1,9 +1,9 @@
 package constdp
 
 import (
-	"simplex/dp"
-	"simplex/node"
-	"simplex/split"
+	"github.com/TopoSimplify/dp"
+	"github.com/TopoSimplify/node"
+	"github.com/TopoSimplify/split"
 	"github.com/intdxdt/fan"
 )
 

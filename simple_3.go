@@ -1,7 +1,7 @@
 package constdp
 
 import (
-	"simplex/node"
+	"github.com/TopoSimplify/node"
 	"github.com/intdxdt/rtree"
 )
 

@@ -1,11 +1,11 @@
 package constdp
 
 import (
-	"simplex/ctx"
-	"simplex/knn"
-	"simplex/node"
-	"simplex/constrain"
 	"github.com/intdxdt/rtree"
+	"github.com/TopoSimplify/ctx"
+	"github.com/TopoSimplify/knn"
+	"github.com/TopoSimplify/node"
+	"github.com/TopoSimplify/constrain"
 )
 
 func (self *ConstDP) ValidateMerge(hull *node.Node, hulldb *rtree.RTree) bool {

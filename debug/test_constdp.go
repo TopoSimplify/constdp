@@ -2,11 +2,11 @@ package main
 
 import (
 	"fmt"
-	"simplex/opts"
-	"simplex/offset"
-	"simplex/constdp"
-	"github.com/intdxdt/geom"
 	"bytes"
+	"github.com/intdxdt/geom"
+	"github.com/TopoSimplify/opts"
+	"github.com/TopoSimplify/offset"
+	"github.com/TopoSimplify/constdp"
 )
 
 type TestDat struct {

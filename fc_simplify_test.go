@@ -3,8 +3,8 @@ package constdp
 import (
     "time"
     "testing"
-    "simplex/opts"
-    "simplex/offset"
+    "github.com/TopoSimplify/opts"
+    "github.com/TopoSimplify/offset"
     "github.com/intdxdt/geom"
     "github.com/franela/goblin"
 )

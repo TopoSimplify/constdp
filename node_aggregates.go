@@ -2,11 +2,11 @@ package constdp
 
 import (
 	"sort"
-	"simplex/dp"
-	"simplex/knn"
-	"simplex/node"
-	"simplex/merge"
-	"simplex/common"
+	"github.com/TopoSimplify/dp"
+	"github.com/TopoSimplify/knn"
+	"github.com/TopoSimplify/node"
+	"github.com/TopoSimplify/merge"
+	"github.com/TopoSimplify/common"
 	"github.com/intdxdt/rtree"
 	"github.com/intdxdt/iter"
 )
