@@ -1,5 +1,5 @@
 # constdp
-constraint douglas-peucker algorithm
+Constrained Douglas-Peucker(dp) algorithm
 
 # coverage 
 coverage: 99.2% of statements
