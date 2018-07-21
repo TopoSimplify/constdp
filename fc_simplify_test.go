@@ -18,7 +18,7 @@ func TestConstDP_FC(t *testing.T) {
     }
     var constraints = make([]geom.Geometry, 0)
     for _, wkt := range wkts {
-        constraints = append(constraints, geom.NewGeometry(wkt))
+        constraints = append(constraints, geom.ReadGeometry(wkt))
     }
 
     var extractSimpleSegs = func(forest []*ConstDP) []*geom.LineString {
@@ -116,7 +116,7 @@ func TestConstDP_FC(t *testing.T) {
                 "LINESTRING ( 100 -100, -100 0, -100 100, -200 200, -200 400, -400 500, -500 400, -600 300, -500 100, -300 100, -200 400, -300 700, -200 800, -200 900, 0 800, 300 1100, 300 1300, 600 1400, 900 1500, 1100 1300, 1400 900, 1700 900, 1800 600, 1800 -200 )",
             }
             var constraints = make([]geom.Geometry, 0)
-            constraints = append(constraints, geom.NewPoint([]float64{1400, 1000}))
+            constraints = append(constraints, geom.CreatePoint([]float64{1400, 1000}))
             var plns = make([]*geom.LineString, 0)
             for _, wkt := range wkts {
                 plns = append(plns, geom.NewLineStringFromWKT(wkt))
@@ -126,8 +126,8 @@ func TestConstDP_FC(t *testing.T) {
             l0l1 := l0.Intersection(l1)[0]
             l1l2 := l1.Intersection(l2)[0]
 
-            g0g1 := geom.NewPointFromWKT("POINT ( 1300 700 )")
-            g1g2 := geom.NewPointFromWKT("POINT ( 300 1100 )")
+            g0g1 := geom.PointFromWKT("POINT ( 1300 700 )")
+            g1g2 := geom.PointFromWKT("POINT ( 300 1100 )")
 
             g.Assert(l0l1.Distance(g0g1)).Equal(0.0)
             g.Assert(l1l2.Distance(g1g2)).Equal(0.0)

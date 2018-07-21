@@ -21,7 +21,7 @@ func (self *ConstDP) AggregateSimpleSegments(
 	var fragmentSize = 1
 	var neighbours []*node.Node
 	var cache = make(map[[4]int]bool)
-	var hulls = common.NodesFromRtreeNodes(nodeDB.All())
+	var hulls = common.NodesFromObjects(nodeDB.All())
 	sort.Sort(node.Nodes(hulls))
 
 	for len(hulls) != 0 {
@@ -42,7 +42,7 @@ func (self *ConstDP) AggregateSimpleSegments(
 		nodeDB.Remove(hull)
 
 		// find context neighbours
-		neighbours = common.NodesFromBoxes(
+		neighbours = common.NodesFromObjects(
 			knn.FindNodeNeighbours(nodeDB, hull, knn.EpsilonDist),
 		)
 

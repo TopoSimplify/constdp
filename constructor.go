@@ -37,7 +37,7 @@ func NewConstDP(
 
 //creates constraint db from geometries
 func (self *ConstDP) BuildContextDB(geoms []geom.Geometry) *ConstDP {
-	var lst = make([]rtree.BoxObj, 0)
+	var lst = make([]rtree.Obj, 0)
 	for _, g := range geoms {
 		lst = append(lst, ctx.New(g, 0, -1).AsContextNeighbour())
 	}

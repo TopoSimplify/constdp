@@ -27,7 +27,7 @@ func (self *ConstDP) Simplify(constVertices ...[]int) *ConstDP {
 
 	var selections map[string]*node.Node
 	var hulldb = rtree.NewRTree(rtreeBucketSize)
-	var boxes = make([]rtree.BoxObj, 0)
+	var boxes = make([]rtree.Obj, 0)
 
 	var deformables = make([]*node.Node, 0)
 	for _, hull := range self.Hulls {
@@ -57,7 +57,7 @@ func (self *ConstDP) Simplify(constVertices ...[]int) *ConstDP {
 	node.Clear(&self.Hulls)
 	self.SimpleSet.Empty()
 
-	for _, h := range common.NodesFromRtreeNodes(hulldb.All()) {
+	for _, h := range common.NodesFromObjects(hulldb.All()) {
 		self.Hulls = append(self.Hulls, h)
 		self.SimpleSet.Extend(h.Range.I, h.Range.J)
 	}

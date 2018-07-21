@@ -33,7 +33,7 @@ func SimplifyFeatureClass(selfs []*ConstDP, opts *opts.Opts, callback ... func(n
 
 	var selections map[string]*node.Node
 	var hulldb = rtree.NewRTree(rtreeBucketSize)
-	var boxes = make([]rtree.BoxObj, 0)
+	var boxes = make([]rtree.Obj, 0)
 	var deformables = make([]*node.Node, 0)
 
 	for _, self := range selfs {

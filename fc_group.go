@@ -12,7 +12,7 @@ func groupHullsByFC(hulldb *rtree.RTree) {
 	var selfs = []*ConstDP{}
 	var smap = make(map[string][]*node.Node)
 
-	for _, h := range common.NodesFromRtreeNodes(hulldb.All()) {
+	for _, h := range common.NodesFromObjects(hulldb.All()) {
 		var lst []*node.Node
 		var self = h.Instance.(*ConstDP)
 		var id = self.Id()

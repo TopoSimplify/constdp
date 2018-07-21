@@ -6,7 +6,7 @@ import (
 )
 
 func updateDB(hulldb *rtree.RTree, nodes []*node.Node) {
-	var boxes = make([]rtree.BoxObj, len(nodes), len(nodes))
+	var boxes = make([]rtree.Obj, len(nodes), len(nodes))
 	for i, n := range nodes {
 		boxes[i] = n
 	}

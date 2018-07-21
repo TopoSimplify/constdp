@@ -37,7 +37,7 @@ func inputStreamFindDeform(stream chan interface{}, hulls []*node.Node) {
 
 func processFindDeformables(hulldb *rtree.RTree) func(v interface{}) interface{} {
 	return func(v interface{}) interface{} {
-		var selections = make([]*node.Node, 0)
+		var selections []*node.Node
 		var hull = v.(*node.Node)
 		var self = hull.Instance.(*ConstDP)
 
@@ -47,7 +47,7 @@ func processFindDeformables(hulldb *rtree.RTree) func(v interface{}) interface{}
 		}
 
 		//if hull geometry is line then points are collinear
-		if _, ok := hull.Geom.(*geom.LineString); ok {
+		if _, ok := hull.Geometry.(*geom.LineString); ok {
 			return selections
 		}
 
