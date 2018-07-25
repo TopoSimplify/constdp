@@ -31,16 +31,18 @@ func SimplifyFeatureClass(selfs []*ConstDP, opts *opts.Opts, callback ... func(n
 	var constBln = opts.AvoidNewSelfIntersects || opts.PlanarSelf ||
 		opts.GeomRelation || opts.DirRelation || opts.DistRelation
 
-	var selections map[string]*node.Node
 	var hulldb = rtree.NewRTree(rtreeBucketSize)
-	var boxes = make([]rtree.Obj, 0)
-	var deformables = make([]*node.Node, 0)
+	var selections map[string]*rtree.Obj
+	var boxes []*rtree.Obj
+	var deformables []*node.Node
+	var id = -1
 
 	for _, self := range selfs {
 		self.selfUpdate()
 		for _, hull := range self.Hulls {
+			id++
 			deformables = append(deformables, hull)
-			boxes = append(boxes, hull)
+			boxes = append(boxes, rtree.Object(id, hull.Bounds(), hull))
 		}
 		if constBln {
 			node.Clear(&self.Hulls) // empty deque, this is for future splits
@@ -72,8 +74,7 @@ func SimplifyDPs(selfs []*ConstDP, junctions map[string][]int) {
 	go inputStreamSimplifyDP(stream, selfs)
 	var worker = processSimplifyDPs(junctions)
 	var out = fan.Stream(stream, worker, concurProcs, exit)
-	for range out {
-	}
+	for range out {}
 }
 
 func inputStreamSimplifyDP(stream chan interface{}, selfs []*ConstDP) {

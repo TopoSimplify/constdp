@@ -19,7 +19,7 @@ type ConstDP struct {
 //Creates a new constrained DP Simplification instance
 //	dp decomposition of linear geometries
 func NewConstDP(
-	coordinates []*geom.Point,
+	coordinates []geom.Point,
 	constraints []geom.Geometry,
 	options *opts.Opts,
 	offsetScore lnr.ScoreFn,
@@ -37,9 +37,10 @@ func NewConstDP(
 
 //creates constraint db from geometries
 func (self *ConstDP) BuildContextDB(geoms []geom.Geometry) *ConstDP {
-	var lst = make([]rtree.Obj, 0)
-	for _, g := range geoms {
-		lst = append(lst, ctx.New(g, 0, -1).AsContextNeighbour())
+	var lst = make([]*rtree.Obj, 0)
+	for i := range geoms {
+		cg := ctx.New(geoms[i], 0, -1).AsContextNeighbour()
+		lst = append(lst, rtree.Object(i, cg.Bounds(), cg))
 	}
 	self.ContextDB.Clear().Load(lst)
 	return self

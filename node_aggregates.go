@@ -6,7 +6,6 @@ import (
 	"github.com/TopoSimplify/knn"
 	"github.com/TopoSimplify/node"
 	"github.com/TopoSimplify/merge"
-	"github.com/TopoSimplify/common"
 	"github.com/intdxdt/rtree"
 	"github.com/intdxdt/iter"
 )
@@ -19,14 +18,16 @@ func (self *ConstDP) AggregateSimpleSegments(
 ) {
 
 	var fragmentSize = 1
-	var neighbours []*node.Node
+	var neighbours []*rtree.Obj
 	var cache = make(map[[4]int]bool)
-	var hulls = common.NodesFromObjects(nodeDB.All())
-	sort.Sort(node.Nodes(hulls))
+	//var objects = common.NodesFromObjects(nodeDB.All())
+	var objects = nodeDB.All()
+	sort.Sort(node.NodeObjects(objects))
 
-	for len(hulls) != 0 {
-		hull := hulls[0]
-		hulls = hulls[1:]
+	for len(objects) != 0 {
+		obj := objects[0]
+		hull := obj.Object.(*node.Node)
+		objects = objects[1:]
 		if hull.Range.Size() != fragmentSize {
 			continue
 		}
@@ -36,50 +37,50 @@ func (self *ConstDP) AggregateSimpleSegments(
 			continue
 		}
 		var withNext, withPrev = !iter.SortedSearchInts(constVertexSet, hull.Range.J),
-		!iter.SortedSearchInts(constVertexSet, hull.Range.I)
+			!iter.SortedSearchInts(constVertexSet, hull.Range.I)
 
-
-		nodeDB.Remove(hull)
-
-		// find context neighbours
-		neighbours = common.NodesFromObjects(
-			knn.FindNodeNeighbours(nodeDB, hull, knn.EpsilonDist),
-		)
+		nodeDB.RemoveObj(obj)
 
 		// find context neighbours
-		var prev, nxt = node.Neighbours(hull, neighbours)
+		//neighbours = common.NodesFromObjects(knn.FindNodeNeighbours(nodeDB, hull, knn.EpsilonDist))
+		neighbours = knn.FindNodeNeighbours(nodeDB, hull, knn.EpsilonDist)
+
+		// find context neighbours
+		var prev, nxt = node.Neighbours(obj, neighbours)
 
 		// find mergeable neighbours contiguous
 		var key [4]int
-		var mergePrev, mergeNxt *node.Node
+		var mergePrev, mergeNxt *rtree.Obj
 
 		if withPrev && prev != nil {
-			key = cacheKey(prev, hull)
+			key = cacheKey(prev.Object.(*node.Node), hull)
 			if !cache[key] {
 				addToMergeCache(cache, &key)
-				mergePrev = merge.ContiguousFragmentsAtThreshold(
-					self.Score, prev, hull, scoreRelation, dp.NodeGeometry,
+				o := merge.ContiguousFragmentsAtThreshold(
+					self.Score, prev.Object.(*node.Node), hull, scoreRelation, dp.NodeGeometry,
 				)
+				mergePrev = rtree.Object(prev.Id, o.Bounds(), o)
 			}
 		}
 
 		if withNext && nxt != nil {
-			key = cacheKey(hull, nxt)
+			key = cacheKey(hull, nxt.Object.(*node.Node))
 			if !cache[key] {
 				addToMergeCache(cache, &key)
-				mergeNxt = merge.ContiguousFragmentsAtThreshold(
-					self.Score, hull, nxt, scoreRelation, dp.NodeGeometry,
+				o := merge.ContiguousFragmentsAtThreshold(
+					self.Score, hull, nxt.Object.(*node.Node), scoreRelation, dp.NodeGeometry,
 				)
+				mergeNxt = rtree.Object(nxt.Id, o.Bounds(), o)
 			}
 		}
 
 		var merged bool
 		//nxt, prev
 		if !merged && mergeNxt != nil {
-			nodeDB.Remove(nxt)
-			if validateMerge(mergeNxt, nodeDB) {
-				if hulls[0] == nxt {
-					hulls = hulls[1:]
+			nodeDB.RemoveObj(nxt)
+			if validateMerge(mergeNxt.Object.(*node.Node), nodeDB) {
+				if objects[0] == nxt {
+					objects = objects[1:]
 				}
 				nodeDB.Insert(mergeNxt)
 				merged = true
@@ -90,9 +91,9 @@ func (self *ConstDP) AggregateSimpleSegments(
 		}
 
 		if !merged && mergePrev != nil {
-			nodeDB.Remove(prev)
+			nodeDB.RemoveObj(prev)
 			//prev cannot exist since moving from left --- right
-			if validateMerge(mergePrev, nodeDB) {
+			if validateMerge(mergePrev.Object.(*node.Node), nodeDB) {
 				nodeDB.Insert(mergePrev)
 				merged = true
 			} else {
@@ -102,7 +103,7 @@ func (self *ConstDP) AggregateSimpleSegments(
 		}
 
 		if !merged {
-			nodeDB.Insert(hull)
+			nodeDB.Insert(obj)
 		}
 	}
 }

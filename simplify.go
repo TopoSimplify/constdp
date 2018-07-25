@@ -27,7 +27,7 @@ func (self *ConstDP) Simplify(constVertices ...[]int) *ConstDP {
 
 	var selections map[string]*node.Node
 	var hulldb = rtree.NewRTree(rtreeBucketSize)
-	var boxes = make([]rtree.Obj, 0)
+	var boxes = make([]*rtree.Obj, 0)
 
 	var deformables = make([]*node.Node, 0)
 	for _, hull := range self.Hulls {
