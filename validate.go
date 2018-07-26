@@ -1,14 +1,14 @@
 package constdp
 
 import (
-	"github.com/intdxdt/rtree"
 	"github.com/TopoSimplify/ctx"
 	"github.com/TopoSimplify/knn"
 	"github.com/TopoSimplify/node"
 	"github.com/TopoSimplify/constrain"
+	"github.com/TopoSimplify/hdb"
 )
 
-func (self *ConstDP) ValidateMerge(hull *node.Node, hulldb *rtree.RTree) bool {
+func (self *ConstDP) ValidateMerge(hull *node.Node, hulldb *hdb.Hdb) bool {
 	var bln = true
 	var sideEffects = make([]*node.Node, 0)
 
@@ -36,11 +36,11 @@ func (self *ConstDP) ValidateContextRelation(hull *node.Node, selections *[]*nod
 	var bln = true
 
 	// find context neighbours - if valid
-	var boxObjs = knn.FindNeighbours(self.ContextDB, hull, self.Opts.MinDist)
+	var boxObjs = knn.FindNeighbours(self.ContextDB, hull.Geom, self.Opts.MinDist)
 
 	var neighbours = make([]*ctx.ContextGeometry, len(boxObjs))
-	for i , o := range boxObjs{
-		neighbours[i] = o.(*ctx.ContextGeometry)
+	for i, o := range boxObjs {
+		neighbours[i] = o.Geom.(*ctx.ContextGeometry)
 	}
 	var ctxtgeoms = (&ctx.ContextGeometries{}).SetData(neighbours)
 

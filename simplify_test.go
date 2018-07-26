@@ -76,7 +76,7 @@ func TestConstDP(t *testing.T) {
 
 				var ptset = dp.Simplify().SimpleSet
 
-				var simplx = make([]*geom.Point, 0)
+				var simplx = make([]geom.Point, 0)
 				for _, v := range ptset.Values() {
 					simplx = append(simplx, coords[v.(int)])
 				}
@@ -124,7 +124,7 @@ func TestConstSED(t *testing.T) {
 			//	constraints = append(constraints, geom.NewPolygonFromWKT(wkt))
 			//}
 
-			var coords = []*geom.Point{
+			var coords = []geom.Point{
 				{3.0, 1.6, 0.0}, {3.0, 2.0, 1.0}, {2.4, 2.8, 3.0},
 				{0.5, 3.0, 4.5}, {1.2, 3.2, 5.0}, {1.4, 2.6, 6.0},
 				{2.0, 3.5, 10.0},
@@ -137,7 +137,6 @@ func TestConstSED(t *testing.T) {
 			g.Assert(ptset).Equal([]int{0, 1, 2, 3, 4, 5, 6})
 
 			inst.Opts.Threshold = 1.0
-			fmt.Println(inst.Opts)
 			inst.Simplify()
 			ptset = make([]int, 0)
 			for _, i := range inst.SimpleSet.Values() {
@@ -146,7 +145,6 @@ func TestConstSED(t *testing.T) {
 			g.Assert(ptset).Equal([]int{0, 2, 3, 6})
 
 			inst.Opts.Threshold = 1.25
-			fmt.Println(inst.Opts)
 			inst.Simplify()
 			ptset = make([]int, 0)
 			for _, i := range inst.SimpleSet.Values() {

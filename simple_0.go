@@ -1,14 +1,14 @@
 package constdp
 
 import (
-	"github.com/TopoSimplify/node"
-	"github.com/TopoSimplify/constrain"
 	"github.com/intdxdt/fan"
 	"github.com/intdxdt/geom"
-	"github.com/intdxdt/rtree"
+	"github.com/TopoSimplify/hdb"
+	"github.com/TopoSimplify/node"
+	"github.com/TopoSimplify/constrain"
 )
 
-func findDeformableNodes(hulls []*node.Node, hulldb *rtree.RTree) map[string]*node.Node {
+func findDeformableNodes(hulls []*node.Node, hulldb *hdb.Hdb) map[string]*node.Node {
 	var stream = make(chan interface{}, concurProcs)
 	var exit = make(chan struct{})
 	defer close(exit)
@@ -35,7 +35,7 @@ func inputStreamFindDeform(stream chan interface{}, hulls []*node.Node) {
 	close(stream)
 }
 
-func processFindDeformables(hulldb *rtree.RTree) func(v interface{}) interface{} {
+func processFindDeformables(hulldb *hdb.Hdb) func(v interface{}) interface{} {
 	return func(v interface{}) interface{} {
 		var selections []*node.Node
 		var hull = v.(*node.Node)
@@ -47,7 +47,7 @@ func processFindDeformables(hulldb *rtree.RTree) func(v interface{}) interface{}
 		}
 
 		//if hull geometry is line then points are collinear
-		if _, ok := hull.Geometry.(*geom.LineString); ok {
+		if _, ok := hull.Geom.(*geom.LineString); ok {
 			return selections
 		}
 

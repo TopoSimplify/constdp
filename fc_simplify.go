@@ -2,10 +2,10 @@ package constdp
 
 import (
 	"github.com/intdxdt/fan"
-	"github.com/intdxdt/rtree"
 	"github.com/TopoSimplify/lnr"
 	"github.com/TopoSimplify/node"
 	"github.com/TopoSimplify/opts"
+	"github.com/TopoSimplify/hdb"
 )
 
 //Simplify a feature class of linear geometries
@@ -31,24 +31,21 @@ func SimplifyFeatureClass(selfs []*ConstDP, opts *opts.Opts, callback ... func(n
 	var constBln = opts.AvoidNewSelfIntersects || opts.PlanarSelf ||
 		opts.GeomRelation || opts.DirRelation || opts.DistRelation
 
-	var hulldb = rtree.NewRTree(rtreeBucketSize)
-	var selections map[string]*rtree.Obj
-	var boxes []*rtree.Obj
+	var selections map[string]*node.Node
+	var hulldb = hdb.NewHdb(rtreeBucketSize)
 	var deformables []*node.Node
-	var id = -1
 
 	for _, self := range selfs {
 		self.selfUpdate()
-		for _, hull := range self.Hulls {
-			id++
-			deformables = append(deformables, hull)
-			boxes = append(boxes, rtree.Object(id, hull.Bounds(), hull))
+		for i := range self.Hulls {
+			deformables = append(deformables, self.Hulls[i])
 		}
+		hulldb.Load(self.Hulls)
 		if constBln {
 			node.Clear(&self.Hulls) // empty deque, this is for future splits
 		}
 	}
-	hulldb.Load(boxes)
+	//hulldb.Load(boxes)
 
 	for constBln && len(deformables) > 0 {
 		deformableCallback(len(deformables))
@@ -59,7 +56,7 @@ func SimplifyFeatureClass(selfs []*ConstDP, opts *opts.Opts, callback ... func(n
 		// 3. remove selected nodes from db
 		cleanUpDB(hulldb, selections)
 		// 4. add new deformations to db
-		updateDB(hulldb, deformables)
+		hulldb.Load(deformables)
 		// 5. repeat until there are no deformables
 	}
 
@@ -74,7 +71,8 @@ func SimplifyDPs(selfs []*ConstDP, junctions map[string][]int) {
 	go inputStreamSimplifyDP(stream, selfs)
 	var worker = processSimplifyDPs(junctions)
 	var out = fan.Stream(stream, worker, concurProcs, exit)
-	for range out {}
+	for range out {
+	}
 }
 
 func inputStreamSimplifyDP(stream chan interface{}, selfs []*ConstDP) {

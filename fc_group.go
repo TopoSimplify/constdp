@@ -1,23 +1,22 @@
 package constdp
 
 import (
-	"github.com/intdxdt/rtree"
 	"github.com/TopoSimplify/node"
-	"github.com/TopoSimplify/common"
+	"github.com/TopoSimplify/hdb"
 )
 
 // Group hulls in hulldb by instance of ConstDP
-func groupHullsByFC(hulldb *rtree.RTree) {
+func groupHullsByFC(hulldb *hdb.Hdb) {
 	var ok bool
 	var selfs = []*ConstDP{}
 	var smap = make(map[string][]*node.Node)
-
-	for _, h := range common.NodesFromObjects(hulldb.All()) {
+	var nodes = hulldb.All()
+	for _, h := range nodes {
 		var lst []*node.Node
 		var self = h.Instance.(*ConstDP)
 		var id = self.Id()
 		if lst, ok = smap[id]; !ok {
-			lst = make([]*node.Node, 0)
+			lst = []*node.Node{}
 		}
 		lst = append(lst, h)
 		smap[id] = lst

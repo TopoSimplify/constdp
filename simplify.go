@@ -2,9 +2,8 @@ package constdp
 
 import (
 	"github.com/TopoSimplify/node"
-	"github.com/TopoSimplify/common"
 	"github.com/TopoSimplify/constrain"
-	"github.com/intdxdt/rtree"
+	"github.com/TopoSimplify/hdb"
 )
 
 //Line simplification at a given threshold
@@ -26,38 +25,35 @@ func (self *ConstDP) Simplify(constVertices ...[]int) *ConstDP {
 	self.selfUpdate()
 
 	var selections map[string]*node.Node
-	var hulldb = rtree.NewRTree(rtreeBucketSize)
-	var boxes = make([]*rtree.Obj, 0)
+	var db = hdb.NewHdb(rtreeBucketSize)
 
-	var deformables = make([]*node.Node, 0)
-	for _, hull := range self.Hulls {
-		deformables = append(deformables, hull)
-		boxes = append(boxes, hull)
-	}
-	node.Clear(&self.Hulls) // empty deque, this is for future splits
-
-	hulldb.Load(boxes)
+	var deformables = make([]*node.Node, len(self.Hulls))
+	copy(deformables, self.Hulls)
+	// empty deque, this is for future splits
+	node.Clear(&self.Hulls)
+	db.Load(deformables)
 
 	for len(deformables) > 0 {
 		// 0. find deformable node
-		selections = findDeformableNodes(deformables, hulldb)
+		selections = findDeformableNodes(deformables, db)
 		// 1. deform selected nodes
 		deformables = deformNodes(selections)
 		// 2. remove selected nodes from db
-		cleanUpDB(hulldb, selections)
+		cleanUpDB(db, selections)
 		// 3. add new deformations to db
-		updateDB(hulldb, deformables)
+		db.Load(deformables)
 		// 4. repeat until there are no deformables
 	}
 
 	self.AggregateSimpleSegments(
-		hulldb, constVertexSet, self.ScoreRelation, self.ValidateMerge,
+		db, constVertexSet, self.ScoreRelation, self.ValidateMerge,
 	)
 
 	node.Clear(&self.Hulls)
 	self.SimpleSet.Empty()
 
-	for _, h := range common.NodesFromObjects(hulldb.All()) {
+	var nodes = db.All()
+	for _, h := range nodes {
 		self.Hulls = append(self.Hulls, h)
 		self.SimpleSet.Extend(h.Range.I, h.Range.J)
 	}

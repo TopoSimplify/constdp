@@ -1,11 +1,12 @@
 package constdp
 
 import (
-    "github.com/intdxdt/rtree"
+    "github.com/TopoSimplify/hdb"
+    "github.com/TopoSimplify/node"
 )
 
-func cleanUpDB(hulldb *rtree.RTree, selections map[string]*rtree.Obj) {
+func cleanUpDB(hulldb *hdb.Hdb, selections map[string]*node.Node) {
     for i := range selections {
-        hulldb.RemoveObj(selections[i])
+        hulldb.Remove(selections[i])
     }
 }
