@@ -9,6 +9,7 @@ import (
 	"github.com/intdxdt/geom"
 	"github.com/franela/goblin"
 	"bytes"
+	"github.com/intdxdt/iter"
 )
 
 //@formatter:off
@@ -23,13 +24,13 @@ func cmpSlices(a, b []interface{}) bool {
 	return bln
 }
 
-func printArray(a []interface{}) string{
-	var buf  bytes.Buffer
+func printArray(a []interface{}) string {
+	var buf bytes.Buffer
 	buf.WriteString("[")
 	for i, v := range a {
 		if i < len(a)-1 {
 			buf.WriteString(fmt.Sprintf("%v, ", v))
-		}else {
+		} else {
 			buf.WriteString(fmt.Sprintf("%v", v))
 		}
 	}
@@ -38,7 +39,8 @@ func printArray(a []interface{}) string{
 }
 
 func TestConstDP(t *testing.T) {
-	g := goblin.Goblin(t)
+	var id = iter.NewIgen()
+	var g = goblin.Goblin(t)
 
 	g.Describe("const dp", func() {
 		g.It("should test constraint dp algorithm", func() {
@@ -74,19 +76,20 @@ func TestConstDP(t *testing.T) {
 				var coords = geom.NewLineStringFromWKT(td.pln).Coordinates()
 				var dp = NewConstDP(coords, constraints, options, offset.MaxOffset)
 
-				var ptset = dp.Simplify().SimpleSet
+				var ptset = dp.Simplify(id).SimpleSet
 
 				var simplx = make([]geom.Point, 0)
 				for _, v := range ptset.Values() {
 					simplx = append(simplx, coords[v.(int)])
 				}
 
+
 				//fmt.Println(i,td.relates, td.pln)
 				if !cmpSlices(ptset.Values(), td.idxs) {
 					fmt.Println("debug:", i)
-					fmt.Println("original:",td.idxs)
-					fmt.Println("expected:",ptset.Values())
-					fmt.Println("expected:",printArray(ptset.Values()))
+					fmt.Println("original:", td.idxs)
+					fmt.Println("expected:", ptset.Values())
+					fmt.Println("expected:", printArray(ptset.Values()))
 					fmt.Println(td.pln)
 					fmt.Println(td.simple)
 					fmt.Println("new simple:")
@@ -103,7 +106,8 @@ func TestConstDP(t *testing.T) {
 }
 
 func TestConstSED(t *testing.T) {
-	g := goblin.Goblin(t)
+	var g = goblin.Goblin(t)
+	var id = iter.NewIgen()
 
 	g.Describe("const sed", func() {
 		g.It("should test constraint sed algorithm", func() {
@@ -129,7 +133,7 @@ func TestConstSED(t *testing.T) {
 				{0.5, 3.0, 4.5}, {1.2, 3.2, 5.0}, {1.4, 2.6, 6.0},
 				{2.0, 3.5, 10.0},
 			}
-			var inst = NewConstDP(coords, constraints, options, offset.MaxSEDOffset).Simplify()
+			var inst = NewConstDP(coords, constraints, options, offset.MaxSEDOffset).Simplify(id)
 			var ptset = make([]int, 0)
 			for _, i := range inst.SimpleSet.Values() {
 				ptset = append(ptset, i.(int))
@@ -137,7 +141,7 @@ func TestConstSED(t *testing.T) {
 			g.Assert(ptset).Equal([]int{0, 1, 2, 3, 4, 5, 6})
 
 			inst.Opts.Threshold = 1.0
-			inst.Simplify()
+			inst.Simplify(id)
 			ptset = make([]int, 0)
 			for _, i := range inst.SimpleSet.Values() {
 				ptset = append(ptset, i.(int))
@@ -145,7 +149,7 @@ func TestConstSED(t *testing.T) {
 			g.Assert(ptset).Equal([]int{0, 2, 3, 6})
 
 			inst.Opts.Threshold = 1.25
-			inst.Simplify()
+			inst.Simplify(id)
 			ptset = make([]int, 0)
 			for _, i := range inst.SimpleSet.Values() {
 				ptset = append(ptset, i.(int))

@@ -8,21 +8,19 @@ import (
 	"github.com/TopoSimplify/hdb"
 	"github.com/TopoSimplify/node"
 	"github.com/TopoSimplify/merge"
-)
+	)
 
 //Merge segment fragments where possible
 func (self *ConstDP) AggregateSimpleSegments(
-	db *hdb.Hdb, constVertexSet []int,
-	scoreRelation func(float64) bool,
-	validateMerge func(*node.Node, *hdb.Hdb) bool,
-) {
+	id *iter.Igen, db *hdb.Hdb, constVertexSet []int,
+	scoreRelation func(float64) bool, validateMerge func(*node.Node, *hdb.Hdb) bool) {
 
 	var fragmentSize = 1
 	var neighbours []*node.Node
 	var cache = make(map[[4]int]bool)
 	//var objects = common.NodesFromObjects(db.All())
 	var objects = db.All()
-	sort.Sort(node.Nodes(objects))
+	sort.Sort(node.NodePtrs(objects))
 
 	for len(objects) != 0 {
 		hull := objects[0]
@@ -50,14 +48,15 @@ func (self *ConstDP) AggregateSimpleSegments(
 
 		// find mergeable neighbours contiguous
 		var key [4]int
-		var mergePrev, mergeNxt *node.Node
+		var mergePrev, mergeNxt node.Node
+		var mergeprevBln, mergenxtBln bool
 
 		if withPrev && prev != nil {
 			key = cacheKey(prev, hull)
 			if !cache[key] {
 				addToMergeCache(cache, &key)
-				mergePrev = merge.ContiguousFragmentsAtThreshold(
-					self.Score, prev, hull, scoreRelation, dp.NodeGeometry,
+				mergeprevBln, mergePrev = merge.ContiguousFragmentsAtThreshold(
+					id, self.Score, prev, hull, scoreRelation, dp.NodeGeometry,
 				)
 			}
 		}
@@ -66,43 +65,46 @@ func (self *ConstDP) AggregateSimpleSegments(
 			key = cacheKey(hull, nxt)
 			if !cache[key] {
 				addToMergeCache(cache, &key)
-				mergeNxt = merge.ContiguousFragmentsAtThreshold(
-					self.Score, hull, nxt, scoreRelation, dp.NodeGeometry,
+				mergenxtBln, mergeNxt = merge.ContiguousFragmentsAtThreshold(
+					id, self.Score, hull, nxt, scoreRelation, dp.NodeGeometry,
 				)
 			}
 		}
 
+		var insertList []node.Node
 		var merged bool
 		//nxt, prev
-		if !merged && mergeNxt != nil {
+		if !merged && mergenxtBln {
 			db.Remove(nxt)
-			if validateMerge(mergeNxt, db) {
+			if validateMerge(&mergeNxt, db) {
 				if objects[0] == nxt {
 					objects = objects[1:]
 				}
-				db.Insert(mergeNxt)
+				insertList = append(insertList, mergeNxt)
 				merged = true
 			} else {
 				merged = false
-				db.Insert(nxt)
+				insertList = append(insertList, *nxt)
 			}
 		}
 
-		if !merged && mergePrev != nil {
+		if !merged && mergeprevBln {
 			db.Remove(prev)
 			//prev cannot exist since moving from left --- right
-			if validateMerge(mergePrev, db) {
-				db.Insert(mergePrev)
+			if validateMerge(&mergePrev, db) {
+				insertList = append(insertList, mergePrev)
 				merged = true
 			} else {
 				merged = false
-				db.Insert(prev)
+				insertList = append(insertList, *prev)
 			}
 		}
 
 		if !merged {
-			db.Insert(hull)
+			insertList = append(insertList, *hull)
 		}
+
+		db.Load(insertList)
 	}
 }
 

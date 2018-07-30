@@ -1,13 +1,14 @@
 package constdp
 
 import (
+	"github.com/intdxdt/iter"
+	"github.com/TopoSimplify/hdb"
 	"github.com/TopoSimplify/node"
 	"github.com/TopoSimplify/constrain"
-	"github.com/TopoSimplify/hdb"
 )
 
 //Line simplification at a given threshold
-func (self *ConstDP) Simplify(constVertices ...[]int) *ConstDP {
+func (self *ConstDP) Simplify(id *iter.Igen, constVertices ...[]int) *ConstDP {
 	var constVertexSet []int
 	var constVerts []int
 
@@ -16,28 +17,30 @@ func (self *ConstDP) Simplify(constVertices ...[]int) *ConstDP {
 	}
 
 	self.SimpleSet.Empty()
-	self.Hulls = self.Decompose()
+	self.Hulls = self.Decompose(id)
 
 	// constrain hulls to self intersects
 	self.Hulls, _, constVertexSet = constrain.ToSelfIntersects(
-		self.NodeQueue(), self.Polyline(), self.Options(), constVerts,
+		id, self.Hulls, self.Polyline(), self.Options(), constVerts,
 	)
 	self.selfUpdate()
 
-	var selections map[string]*node.Node
-	var db = hdb.NewHdb(rtreeBucketSize)
+	var selections map[int]*node.Node
+	var db = hdb.NewHdb()
 
-	var deformables = make([]*node.Node, len(self.Hulls))
-	copy(deformables, self.Hulls)
+	var deformables = make([]node.Node, 0, len(self.Hulls))
+	for i := range self.Hulls {
+		deformables = append(deformables, self.Hulls[i])
+	}
 	// empty deque, this is for future splits
 	node.Clear(&self.Hulls)
 	db.Load(deformables)
 
 	for len(deformables) > 0 {
 		// 0. find deformable node
-		selections = findDeformableNodes(deformables, db)
+		selections = findDeformableNodes( deformables, db)
 		// 1. deform selected nodes
-		deformables = deformNodes(selections)
+		deformables = deformNodes(id, selections)
 		// 2. remove selected nodes from db
 		cleanUpDB(db, selections)
 		// 3. add new deformations to db
@@ -46,16 +49,19 @@ func (self *ConstDP) Simplify(constVertices ...[]int) *ConstDP {
 	}
 
 	self.AggregateSimpleSegments(
-		db, constVertexSet, self.ScoreRelation, self.ValidateMerge,
+		id, db, constVertexSet, self.ScoreRelation, self.ValidateMerge,
 	)
 
 	node.Clear(&self.Hulls)
 	self.SimpleSet.Empty()
 
+	var hull *node.Node
 	var nodes = db.All()
-	for _, h := range nodes {
-		self.Hulls = append(self.Hulls, h)
-		self.SimpleSet.Extend(h.Range.I, h.Range.J)
+	for i := range nodes {
+		hull = nodes[i]
+		self.Hulls = append(self.Hulls, *hull)
+		self.SimpleSet.Extend(hull.Range.I, hull.Range.J)
 	}
+
 	return self
 }

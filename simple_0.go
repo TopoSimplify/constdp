@@ -8,7 +8,7 @@ import (
 	"github.com/TopoSimplify/constrain"
 )
 
-func findDeformableNodes(hulls []*node.Node, hulldb *hdb.Hdb) map[string]*node.Node {
+func findDeformableNodes(hulls []node.Node, hulldb *hdb.Hdb) map[int]*node.Node {
 	var stream = make(chan interface{}, concurProcs)
 	var exit = make(chan struct{})
 	defer close(exit)
@@ -18,19 +18,19 @@ func findDeformableNodes(hulls []*node.Node, hulldb *hdb.Hdb) map[string]*node.N
 	var worker = processFindDeformables(hulldb)
 	var out = fan.Stream(stream, worker, concurProcs, exit)
 
-	var results = make(map[string]*node.Node)
+	var results = make(map[int]*node.Node)
 	for sel := range out {
 		selections := sel.([]*node.Node)
 		for _, n := range selections {
-			results[n.Id()] = n
+			results[n.Id] = n
 		}
 	}
 	return results
 }
 
-func inputStreamFindDeform(stream chan interface{}, hulls []*node.Node) {
-	for _, n := range hulls {
-		stream <- n
+func inputStreamFindDeform(stream chan interface{}, hulls []node.Node) {
+	for i := range hulls {
+		stream <- &hulls[i]
 	}
 	close(stream)
 }

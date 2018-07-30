@@ -1,41 +1,44 @@
 package constdp
 
 import (
+	"github.com/intdxdt/fan"
+	"github.com/intdxdt/iter"
 	"github.com/TopoSimplify/dp"
 	"github.com/TopoSimplify/node"
 	"github.com/TopoSimplify/split"
-	"github.com/intdxdt/fan"
 )
 
-func deformNodes(nodes map[string]*node.Node) []*node.Node {
+func deformNodes(id *iter.Igen, nodes map[int]*node.Node) []node.Node {
 	var stream = make(chan interface{}, 4*concurProcs)
 	var exit = make(chan struct{})
 	defer close(exit)
 
 	go streamDeformNodes(stream, nodes)
-	var out = fan.Stream(stream, processDeformNodes, concurProcs, exit)
+	var out = fan.Stream(stream, processDeformNodes(id), concurProcs, exit)
 
-	var results = make([]*node.Node, 0, len(nodes)*2)
+	var results = make([]node.Node, 0, len(nodes)*2)
 	for sel := range out {
-		splits := sel.([]*node.Node)
+		splits := sel.([]node.Node)
 		results = append(results, splits...)
 	}
 	return results
 }
 
-func streamDeformNodes(stream chan interface{}, nodes map[string]*node.Node) {
-	for _, o := range nodes {
-		stream <- o
+func streamDeformNodes(stream chan interface{}, nodes map[int]*node.Node) {
+	for i := range nodes {
+		stream <- nodes[i]
 	}
 	close(stream)
 }
 
-func processDeformNodes(v interface{}) interface{} {
-	var hull = v.(*node.Node)
-	var self = hull.Instance.(*ConstDP)
-	if hull.Range.Size() > 1 {
-		var ha, hb = split.AtScoreSelection(hull, self.Score, dp.NodeGeometry)
-		return []*node.Node{ha, hb}
+func processDeformNodes(id *iter.Igen) func(v interface{}) interface{} {
+	return func(v interface{}) interface{} {
+		var hull = v.(*node.Node)
+		var self = hull.Instance.(*ConstDP)
+		if hull.Range.Size() > 1 {
+			var ha, hb = split.AtScoreSelection(id, hull, self.Score, dp.NodeGeometry)
+			return []node.Node{ha, hb}
+		}
+		return []node.Node{*hull}
 	}
-	return []*node.Node{hull}
 }

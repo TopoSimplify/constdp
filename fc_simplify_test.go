@@ -7,10 +7,12 @@ import (
 	"github.com/franela/goblin"
 	"github.com/TopoSimplify/opts"
 	"github.com/TopoSimplify/offset"
+	"github.com/intdxdt/iter"
 )
 
 func TestConstDP_FC(t *testing.T) {
-	g := goblin.Goblin(t)
+	var g = goblin.Goblin(t)
+	var id = iter.NewIgen()
 
 	var wkts = []string{
 		"POLYGON (( 435.6413255044321 1244.880520473631, 435.6413255044321 1313.5981136783437, 529.8098791553348 1313.5981136783437, 529.8098791553348 1244.880520473631, 435.6413255044321 1244.880520473631 ))",
@@ -40,7 +42,7 @@ func TestConstDP_FC(t *testing.T) {
 			forest = append(forest, dp)
 		}
 
-		SimplifyFeatureClass(forest, opts)
+		SimplifyFeatureClass(id, forest, opts)
 		return extractSimpleSegs(forest)
 	}
 
@@ -52,7 +54,7 @@ func TestConstDP_FC(t *testing.T) {
 		}
 
 		for _, tree := range forest {
-			tree.Simplify()
+			tree.Simplify(id)
 		}
 
 		return extractSimpleSegs(forest)
@@ -138,7 +140,7 @@ func TestConstDP_FC(t *testing.T) {
 				forest = append(forest, dp)
 			}
 
-			SimplifyFeatureClass(forest, options)
+			SimplifyFeatureClass(id, forest, options)
 			gs := extractSimpleSegs(forest)
 
 			g0, g1, g2 := gs[0], gs[1], gs[2]

@@ -5,7 +5,7 @@ import (
     "github.com/TopoSimplify/node"
 )
 
-func cleanUpDB(hulldb *hdb.Hdb, selections map[string]*node.Node) {
+func cleanUpDB(hulldb *hdb.Hdb, selections map[int]*node.Node) {
     for i := range selections {
         hulldb.Remove(selections[i])
     }

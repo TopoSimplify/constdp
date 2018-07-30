@@ -39,15 +39,14 @@ func NewConstDP(
 
 //creates constraint db from geometries
 func (self *ConstDP) BuildContextDB(geoms []geom.Geometry) *ConstDP {
-	var lst = make([]*node.Node, 0)
+	var lst = make([]node.Node, 0, len(geoms))
 	for i := range geoms {
 		cg := ctx.New(geoms[i], 0, -1).AsContextNeighbour()
-		nd := &node.Node{
+		lst = append(lst, node.Node{
 			MBR:      cg.Bounds(),
 			Geom:     cg,
 			Instance: self,
-		}
-		lst = append(lst, nd)
+		})
 	}
 	self.ContextDB.Clear().Load(lst)
 	return self
