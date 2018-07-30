@@ -6,6 +6,7 @@ import (
 	"github.com/TopoSimplify/opts"
 	"github.com/TopoSimplify/offset"
 	"github.com/TopoSimplify/constdp"
+	"github.com/intdxdt/iter"
 )
 
 var const_wkts []string
@@ -35,6 +36,7 @@ func init() {
 }
 
 func main() {
+	var id  = iter.NewIgen()
 	options := &opts.Opts{
 		Threshold:              50.0,
 		MinDist:                20.0,
@@ -56,9 +58,9 @@ func main() {
 
 	var coords = geom.NewLineStringFromWKT(wkt).Coordinates()
 	var homo   = constdp.NewConstDP(coords, constraints, options, offset.MaxOffset)
-	var ptset  = homo.Simplify().SimpleSet
+	var ptset  = homo.Simplify(id).SimpleSet
 
-	var simplx = make([]*geom.Point, 0)
+	var simplx = make([]geom.Point, 0)
 	for _, i := range ptset.Values() {
 		simplx = append(simplx, coords[i.(int)])
 	}
