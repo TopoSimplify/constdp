@@ -3,12 +3,12 @@ package constdp
 import (
 	"sort"
 	"github.com/intdxdt/iter"
-	"github.com/TopoSimplify/dp"
-	"github.com/TopoSimplify/knn"
+		"github.com/TopoSimplify/knn"
 	"github.com/TopoSimplify/hdb"
 	"github.com/TopoSimplify/node"
 	"github.com/TopoSimplify/merge"
-	)
+	"github.com/TopoSimplify/common"
+)
 
 //Merge segment fragments where possible
 func (self *ConstDP) AggregateSimpleSegments(
@@ -56,7 +56,7 @@ func (self *ConstDP) AggregateSimpleSegments(
 			if !cache[key] {
 				addToMergeCache(cache, &key)
 				mergeprevBln, mergePrev = merge.ContiguousFragmentsAtThreshold(
-					id, self.Score, prev, hull, scoreRelation, dp.NodeGeometry,
+					id, self.Score, prev, hull, scoreRelation, common.Geometry,
 				)
 			}
 		}
@@ -66,7 +66,7 @@ func (self *ConstDP) AggregateSimpleSegments(
 			if !cache[key] {
 				addToMergeCache(cache, &key)
 				mergenxtBln, mergeNxt = merge.ContiguousFragmentsAtThreshold(
-					id, self.Score, hull, nxt, scoreRelation, dp.NodeGeometry,
+					id, self.Score, hull, nxt, scoreRelation, common.Geometry,
 				)
 			}
 		}

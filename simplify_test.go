@@ -3,13 +3,13 @@ package constdp
 import (
 	"fmt"
 	"time"
+	"bytes"
 	"testing"
-	"github.com/TopoSimplify/opts"
-	"github.com/TopoSimplify/offset"
+	"github.com/intdxdt/iter"
 	"github.com/intdxdt/geom"
 	"github.com/franela/goblin"
-	"bytes"
-	"github.com/intdxdt/iter"
+	"github.com/TopoSimplify/opts"
+	"github.com/TopoSimplify/offset"
 )
 
 //@formatter:off
@@ -73,16 +73,17 @@ func TestConstDP(t *testing.T) {
 				options.DirRelation = td.relates.dir
 				options.DistRelation = td.relates.dist
 
-				var coords = geom.NewLineStringFromWKT(td.pln).Coordinates()
+				var coords = geom.NewLineStringFromWKT(td.pln).Coordinates
 				var dp = NewConstDP(coords, constraints, options, offset.MaxOffset)
 
 				var ptset = dp.Simplify(id).SimpleSet
 
-				var simplx = make([]geom.Point, 0)
+				var simplx = dp.Coordinates()
+				var indices = make([]int, 0, ptset.Size())
 				for _, v := range ptset.Values() {
-					simplx = append(simplx, coords[v.(int)])
+					indices = append(indices, v.(int))
 				}
-
+				simplx.Idxs = indices
 
 				//fmt.Println(i,td.relates, td.pln)
 				if !cmpSlices(ptset.Values(), td.idxs) {
@@ -128,11 +129,10 @@ func TestConstSED(t *testing.T) {
 			//	constraints = append(constraints, geom.NewPolygonFromWKT(wkt))
 			//}
 
-			var coords = []geom.Point{
-				{3.0, 1.6, 0.0}, {3.0, 2.0, 1.0}, {2.4, 2.8, 3.0},
-				{0.5, 3.0, 4.5}, {1.2, 3.2, 5.0}, {1.4, 2.6, 6.0},
-				{2.0, 3.5, 10.0},
-			}
+			var coords = geom.Coordinates([]geom.Point{
+				{3.0, 1.6, 0.0}, {3.0, 2.0, 1.0}, {2.4, 2.8, 3.0}, {0.5, 3.0, 4.5},
+				{1.2, 3.2, 5.0}, {1.4, 2.6, 6.0}, {2.0, 3.5, 10.0},
+			})
 			var inst = NewConstDP(coords, constraints, options, offset.MaxSEDOffset).Simplify(id)
 			var ptset = make([]int, 0)
 			for _, i := range inst.SimpleSet.Values() {

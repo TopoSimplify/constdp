@@ -3,9 +3,9 @@ package constdp
 import (
 	"github.com/intdxdt/fan"
 	"github.com/intdxdt/iter"
-	"github.com/TopoSimplify/dp"
 	"github.com/TopoSimplify/node"
 	"github.com/TopoSimplify/split"
+	"github.com/TopoSimplify/common"
 )
 
 func deformNodes(id *iter.Igen, nodes map[int]*node.Node) []node.Node {
@@ -36,7 +36,7 @@ func processDeformNodes(id *iter.Igen) func(v interface{}) interface{} {
 		var hull = v.(*node.Node)
 		var self = hull.Instance.(*ConstDP)
 		if hull.Range.Size() > 1 {
-			var ha, hb = split.AtScoreSelection(id, hull, self.Score, dp.NodeGeometry)
+			var ha, hb = split.AtScoreSelection(id, hull, self.Score, common.Geometry)
 			return []node.Node{ha, hb}
 		}
 		return []node.Node{*hull}

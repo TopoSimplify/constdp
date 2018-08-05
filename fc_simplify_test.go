@@ -26,9 +26,10 @@ func TestConstDP_FC(t *testing.T) {
 	var extractSimpleSegs = func(forest []*ConstDP) []*geom.LineString {
 		var simpleLns = []*geom.LineString{}
 		for _, tree := range forest {
-			var coords = make([]geom.Point, 0)
-			for _, i := range tree.SimpleSet.Values() {
-				coords = append(coords, tree.Pln.Coordinates[i.(int)])
+			var coords = tree.Coordinates()
+			coords.Idxs = make([]int, 0, tree.SimpleSet.Size())
+			for _, o := range tree.SimpleSet.Values() {
+				coords.Idxs = append(coords.Idxs, o.(int))
 			}
 			simpleLns = append(simpleLns, geom.NewLineString(coords))
 		}
@@ -38,7 +39,7 @@ func TestConstDP_FC(t *testing.T) {
 	var simplifyForest = func(lns []*geom.LineString, opts *opts.Opts) []*geom.LineString {
 		var forest = []*ConstDP{}
 		for _, l := range lns {
-			dp := NewConstDP(l.Coordinates(), constraints, opts, offset.MaxOffset)
+			dp := NewConstDP(l.Coordinates, constraints, opts, offset.MaxOffset)
 			forest = append(forest, dp)
 		}
 
@@ -49,7 +50,7 @@ func TestConstDP_FC(t *testing.T) {
 	var simplifyInIsolation = func(lns []*geom.LineString, opts *opts.Opts) []*geom.LineString {
 		forest := []*ConstDP{}
 		for _, l := range lns {
-			dp := NewConstDP(l.Coordinates(), constraints, opts, offset.MaxOffset)
+			dp := NewConstDP(l.Coordinates, constraints, opts, offset.MaxOffset)
 			forest = append(forest, dp)
 		}
 
@@ -136,7 +137,7 @@ func TestConstDP_FC(t *testing.T) {
 			//gs := simplify_forest(plns, options)
 			var forest = []*ConstDP{}
 			for _, l := range plns {
-				dp := NewConstDP(l.Coordinates(), constraints, options, offset.MaxOffset)
+				dp := NewConstDP(l.Coordinates, constraints, options, offset.MaxOffset)
 				forest = append(forest, dp)
 			}
 
