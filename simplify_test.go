@@ -65,9 +65,6 @@ func TestConstDP(t *testing.T) {
 				for _, wkt := range datConstraints {
 					constraints = append(constraints, geom.NewPolygonFromWKT(wkt))
 				}
-				if i == 8 {
-					fmt.Println("debug...")
-				}
 
 				options.GeomRelation = td.relates.geom
 				options.DirRelation = td.relates.dir
@@ -75,7 +72,6 @@ func TestConstDP(t *testing.T) {
 
 				var coords = geom.NewLineStringFromWKT(td.pln).Coordinates
 				var dp = NewConstDP(coords, constraints, options, offset.MaxOffset)
-
 				var ptset = dp.Simplify(id).SimpleSet
 
 				var simplx = dp.Coordinates()

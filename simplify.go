@@ -5,7 +5,9 @@ import (
 	"github.com/TopoSimplify/hdb"
 	"github.com/TopoSimplify/node"
 	"github.com/TopoSimplify/constrain"
-)
+		)
+
+
 
 //Line simplification at a given threshold
 func (self *ConstDP) Simplify(id *iter.Igen, constVertices ...[]int) *ConstDP {
@@ -25,10 +27,10 @@ func (self *ConstDP) Simplify(id *iter.Igen, constVertices ...[]int) *ConstDP {
 	)
 	self.selfUpdate()
 
-	var selections map[int]*node.Node
 	var db = hdb.NewHdb()
-
+	var selections map[int]*node.Node
 	var deformables = make([]node.Node, 0, len(self.Hulls))
+
 	for i := range self.Hulls {
 		deformables = append(deformables, self.Hulls[i])
 	}
@@ -38,7 +40,7 @@ func (self *ConstDP) Simplify(id *iter.Igen, constVertices ...[]int) *ConstDP {
 
 	for len(deformables) > 0 {
 		// 0. find deformable node
-		selections = findDeformableNodes( deformables, db)
+		selections = findDeformableNodes(deformables, db)
 		// 1. deform selected nodes
 		deformables = deformNodes(id, selections)
 		// 2. remove selected nodes from db
