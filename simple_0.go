@@ -7,40 +7,40 @@ import (
 	"github.com/TopoSimplify/node"
 	"github.com/TopoSimplify/constrain"
 	)
+//
+//func findDeformableNodes___(hulls []node.Node, hulldb *hdb.Hdb) map[int]*node.Node {
+//	var selections []*node.Node
+//	for i := range hulls {
+//		var hull = &hulls[i]
+//		var self = hull.Instance.(*ConstDP)
+//
+//		//if hull is segment
+//		if hull.Range.Size() == 1 {
+//			continue
+//		}
+//
+//		//if hull geometry is line then points are collinear
+//		if _, ok := hull.Geom.(*geom.LineString); ok {
+//			continue
+//		}
+//
+//		// self intersection constraint
+//		if self.Opts.AvoidNewSelfIntersects {
+//			constrain.ByFeatureClassIntersection(self.Opts, hull, hulldb, &selections)
+//		}
+//
+//		// context_geom geometry constraint
+//		self.ValidateContextRelation(hull, &selections)
+//
+//	}
+//	var results = make(map[int]*node.Node)
+//	for _, n := range selections {
+//		results[n.Id] = n
+//	}
+//	return results
+//}
 
 func findDeformableNodes(hulls []node.Node, hulldb *hdb.Hdb) map[int]*node.Node {
-	var selections []*node.Node
-	for i := range hulls {
-		var hull = &hulls[i]
-		var self = hull.Instance.(*ConstDP)
-
-		//if hull is segment
-		if hull.Range.Size() == 1 {
-			continue
-		}
-
-		//if hull geometry is line then points are collinear
-		if _, ok := hull.Geom.(*geom.LineString); ok {
-			continue
-		}
-
-		// self intersection constraint
-		if self.Opts.AvoidNewSelfIntersects {
-			constrain.ByFeatureClassIntersection(self.Opts, hull, hulldb, &selections)
-		}
-
-		// context_geom geometry constraint
-		self.ValidateContextRelation(hull, &selections)
-
-	}
-	var results = make(map[int]*node.Node)
-	for _, n := range selections {
-		results[n.Id] = n
-	}
-	return results
-}
-
-func findDeformableNodes__(hulls []node.Node, hulldb *hdb.Hdb) map[int]*node.Node {
 	var stream = make(chan interface{}, concurProcs)
 	var exit = make(chan struct{})
 	defer close(exit)
