@@ -1,7 +1,7 @@
 package constdp
 
 import (
-	"github.com/intdxdt/fan"
+	"sync"
 	"github.com/intdxdt/iter"
 	"github.com/TopoSimplify/lnr"
 	"github.com/TopoSimplify/hdb"
@@ -11,7 +11,7 @@ import (
 
 //Simplify a feature class of linear geometries
 //optional callback for the number of deformables
-func SimplifyFeatureClass(id *iter.Igen,selfs []*ConstDP, opts *opts.Opts, callback ... func(n int)) {
+func SimplifyFeatureClass(id *iter.Igen, selfs []*ConstDP, opts *opts.Opts, callback ... func(n int)) {
 	var deformableCallback = func(n int) {}
 	if len(callback) > 0 {
 		deformableCallback = callback[0]
@@ -51,7 +51,7 @@ func SimplifyFeatureClass(id *iter.Igen,selfs []*ConstDP, opts *opts.Opts, callb
 	for constBln && len(deformables) > 0 {
 		deformableCallback(len(deformables))
 		// 1. find deformable node
-		selections = findDeformableNodes( deformables, hulldb)
+		selections = findDeformableNodes(deformables, hulldb)
 		// 2. deform selected nodes
 		deformables = deformNodes(id, selections)
 		// 3. remove selected nodes from db
@@ -65,33 +65,46 @@ func SimplifyFeatureClass(id *iter.Igen,selfs []*ConstDP, opts *opts.Opts, callb
 }
 
 func SimplifyDPs(id *iter.Igen, selfs []*ConstDP, junctions map[string][]int) {
-	var stream = make(chan interface{})
-	var exit = make(chan struct{})
-	defer close(exit)
+	var wg sync.WaitGroup
+	wg.Add(concurProcs)
 
-	go inputStreamSimplifyDP(stream, selfs)
-	var worker = processSimplifyDPs(id, junctions)
-	var out = fan.Stream(stream, worker, concurProcs, exit)
-	for range out {}
-}
+	var stream = make(chan *ConstDP)
+	var out = make(chan *ConstDP, 2*concurProcs)
 
-func inputStreamSimplifyDP(stream chan interface{}, selfs []*ConstDP) {
-	for _, self := range selfs {
-		stream <- self
-	}
-	close(stream)
-}
-
-func processSimplifyDPs(id *iter.Igen, junctions map[string][]int) func(v interface{}) interface{} {
-	return func(v interface{}) interface{} {
-		var self = v.(*ConstDP)
-		var constVerts []int
-		if v, ok := junctions[self.Id()]; ok {
-			constVerts = v
-		} else {
-			constVerts = make([]int, 0)
+	go func() {
+		for s := range selfs {
+			stream <- selfs[s]
 		}
-		self.Simplify(id, constVerts)
-		return self
+		close(stream)
+	}()
+
+	//assume only one worker reading from input chan
+	var fn = func(idx int) {
+		defer wg.Done()
+		for self := range stream {
+			var constVerts []int
+			if v, ok := junctions[self.Id()]; ok {
+				constVerts = v
+			} else {
+				constVerts = make([]int, 0)
+			}
+
+			self.Simplify(id, constVerts)
+			out <- self
+		}
 	}
+
+	//now expand one worker into clones of workers
+	go func() {
+		for i := 0; i < concurProcs; i++ {
+			go fn(i)
+		}
+	}()
+
+	go func() {
+		wg.Wait()
+		close(out)
+	}()
+
+	for range out {}
 }

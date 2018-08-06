@@ -5,9 +5,7 @@ import (
 	"github.com/TopoSimplify/hdb"
 	"github.com/TopoSimplify/node"
 	"github.com/TopoSimplify/constrain"
-		)
-
-
+)
 
 //Line simplification at a given threshold
 func (self *ConstDP) Simplify(id *iter.Igen, constVertices ...[]int) *ConstDP {
