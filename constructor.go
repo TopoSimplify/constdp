@@ -32,7 +32,7 @@ func NewConstDP(
 	instance.BuildContextDB(constraints) //prepare databases
 
 	if coordinates.Len() > 1 {
-		instance.Pln = pln.New(coordinates)
+		instance.Pln = pln.CreatePolyline(coordinates)
 	}
 	return instance
 }
