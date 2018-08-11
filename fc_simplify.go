@@ -7,7 +7,7 @@ import (
 	"github.com/TopoSimplify/hdb"
 	"github.com/TopoSimplify/node"
 	"github.com/TopoSimplify/opts"
-)
+	)
 
 //Simplify a feature class of linear geometries
 //optional callback for the number of deformables

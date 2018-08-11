@@ -5,7 +5,7 @@ import (
 	"github.com/TopoSimplify/hdb"
 	"github.com/TopoSimplify/node"
 	"github.com/TopoSimplify/constrain"
-)
+	)
 
 //Line simplification at a given threshold
 func (self *ConstDP) Simplify(id *iter.Igen, constVertices ...[]int) *ConstDP {
@@ -48,8 +48,10 @@ func (self *ConstDP) Simplify(id *iter.Igen, constVertices ...[]int) *ConstDP {
 		// 4. repeat until there are no deformables
 	}
 
+
 	self.AggregateSimpleSegments(
-		id, db, constVertexSet, self.ScoreRelation, self.ValidateMerge,
+		id, db, constVertexSet,
+		self.ScoreRelation, self.ValidateMerge,
 	)
 
 	node.Clear(&self.Hulls)
