@@ -3,9 +3,11 @@ package constdp
 import (
 	"github.com/intdxdt/geom"
 	"github.com/intdxdt/math"
+	"github.com/TopoSimplify/node"
+	"sort"
 )
-
-const ConcurProcs = 7
+const CacheKeySize = 6
+const ConcurProcs  = 8
 
 //hull point compare
 func PointIndexCmp(a interface{}, b interface{}) int {
@@ -17,4 +19,14 @@ func PointIndexCmp(a interface{}, b interface{}) int {
 		return -1
 	}
 	return 1
+}
+
+func CacheKey(a, b *node.Node) [CacheKeySize]int {
+	var o = [CacheKeySize]int{
+		a.Range.I, a.Range.J,
+		b.Range.I, b.Range.J,
+		a.Instance.Id(), b.Instance.Id(),
+	}
+	sort.Ints(o[:])
+	return o
 }

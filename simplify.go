@@ -50,8 +50,7 @@ func (self *ConstDP) Simplify(id *iter.Igen, constVertices ...[]int) *ConstDP {
 
 
 	self.AggregateSimpleSegments(
-		id, db, constVertexSet,
-		self.ScoreRelation, self.ValidateMerge,
+		id, db, constVertexSet, self.ScoreRelation, self.ValidateMerge,
 	)
 
 	node.Clear(&self.Hulls)

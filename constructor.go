@@ -11,7 +11,7 @@ import (
 	"github.com/TopoSimplify/node"
 )
 
-//Type DP
+//Type ConstDP
 type ConstDP struct {
 	*dp.DouglasPeucker
 	ContextDB *hdb.Hdb
@@ -20,22 +20,20 @@ type ConstDP struct {
 //Creates a new constrained DP Simplification instance
 //	dp decomposition of linear geometries
 func NewConstDP(
-	id int ,
-	coordinates geom.Coords,
-	constraints []geom.Geometry,
-	options *opts.Opts,
-	offsetScore lnr.ScoreFn,
-) *ConstDP {
-	var instance = &ConstDP{
+	id int, coordinates geom.Coords,
+	constraints []geom.Geometry, options *opts.Opts,
+	offsetScore lnr.ScoreFn) *ConstDP {
+
+	var instance = ConstDP{
 		DouglasPeucker: dp.New(id, coordinates, options, offsetScore),
 		ContextDB:      hdb.NewHdb(),
 	}
-	instance.BuildContextDB(constraints) //prepare databases
+	instance.BuildContextDB(constraints)
 
 	if coordinates.Len() > 1 {
 		instance.Pln = pln.CreatePolyline(coordinates)
 	}
-	return instance
+	return &instance
 }
 
 //creates constraint db from geometries

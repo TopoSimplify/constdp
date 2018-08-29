@@ -4,17 +4,18 @@ import (
 	"github.com/TopoSimplify/ctx"
 	"github.com/TopoSimplify/knn"
 	"github.com/TopoSimplify/node"
-	"github.com/TopoSimplify/constrain"
 	"github.com/TopoSimplify/hdb"
+	"github.com/TopoSimplify/constrain"
 )
 
 func (self *ConstDP) ValidateMerge(hull *node.Node, hulldb *hdb.Hdb) bool {
 	var bln = true
-	var sideEffects = make([]*node.Node, 0)
-
+	var sideEffects []*node.Node
 	// self intersection constraint
 	if self.Opts.AvoidNewSelfIntersects {
-		bln = constrain.BySelfIntersection(self.Opts, hull, hulldb, &sideEffects)
+		bln = constrain.BySelfIntersection(
+			self.Opts, hull, hulldb, &sideEffects,
+		)
 	}
 
 	if len(sideEffects) != 0 || !bln {
