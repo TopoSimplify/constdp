@@ -9,12 +9,12 @@ import (
 )
 
 func deformNodes(id *iter.Igen, nodes map[int]*node.Node) []node.Node {
-	var stream = make(chan interface{}, 4*concurProcs)
+	var stream = make(chan interface{}, 4*ConcurProcs)
 	var exit = make(chan struct{})
 	defer close(exit)
 
 	go streamDeformNodes(stream, nodes)
-	var out = fan.Stream(stream, processDeformNodes(id), concurProcs, exit)
+	var out = fan.Stream(stream, processDeformNodes(id), ConcurProcs, exit)
 
 	var results = make([]node.Node, 0, len(nodes)*2)
 	for sel := range out {

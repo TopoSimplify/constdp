@@ -9,7 +9,7 @@ import (
 func groupHullsByFC(hulldb *hdb.Hdb) {
 	var ok bool
 	var selfs = []*ConstDP{}
-	var smap = make(map[string][]node.Node)
+	var smap = make(map[int][]node.Node)
 	var nodes = hulldb.All()
 
 	for _, h := range nodes {

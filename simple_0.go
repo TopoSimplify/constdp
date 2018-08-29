@@ -8,15 +8,14 @@ import (
 	"github.com/TopoSimplify/constrain"
 )
 
-
 func findDeformableNodes(hulls []node.Node, hulldb *hdb.Hdb) map[int]*node.Node {
-	return processConstSimplification(hulls, hulldb, concurProcs)
+	return processConstSimplification(hulls, hulldb, ConcurProcs)
 }
-
 
 //process
 func processConstSimplification(nodeHulls []node.Node, db *hdb.Hdb, concurrency int) map[int]*node.Node {
 	var wg sync.WaitGroup
+	//var cache = newCacheMap(len(nodeHulls))
 	var nodes = make([]*node.Node, len(nodeHulls))
 	for i := range nodeHulls {
 		nodes[i] = &nodeHulls[i]
@@ -56,6 +55,12 @@ func processConstSimplification(nodeHulls []node.Node, db *hdb.Hdb, concurrency 
 			// context_geom geometry constraint
 			self.ValidateContextRelation(hull, &selections)
 			if len(selections) > 0 {
+				//for _, o := range selections {
+				//	var key = cacheKey(hull, o)
+				//	if !cache.HasKey(&key) {
+				//		cache.Set(&key)
+				//	}
+				//}
 				//out <- worker(in[i], db)
 				out <- selections
 			}

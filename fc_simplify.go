@@ -7,17 +7,17 @@ import (
 	"github.com/TopoSimplify/hdb"
 	"github.com/TopoSimplify/node"
 	"github.com/TopoSimplify/opts"
-	)
+)
 
 //Simplify a feature class of linear geometries
 //optional callback for the number of deformables
 func SimplifyFeatureClass(id *iter.Igen, selfs []*ConstDP, opts *opts.Opts, callback ... func(n int)) {
-	var deformableCallback = func(n int) {}
+	var deformableCallback = func(_ int) {}
 	if len(callback) > 0 {
 		deformableCallback = callback[0]
 	}
 
-	var junctions = make(map[string][]int)
+	var junctions = make(map[int][]int)
 
 	if opts.PlanarSelf {
 		instances := make([]*lnr.FC, len(selfs))
@@ -33,7 +33,7 @@ func SimplifyFeatureClass(id *iter.Igen, selfs []*ConstDP, opts *opts.Opts, call
 		opts.GeomRelation || opts.DirRelation || opts.DistRelation
 
 	var selections map[int]*node.Node
-	var hulldb = hdb.NewHdb(rtreeBucketSize)
+	var hulldb = hdb.NewHdb()
 	var deformables []node.Node
 
 	for _, self := range selfs {
@@ -64,12 +64,12 @@ func SimplifyFeatureClass(id *iter.Igen, selfs []*ConstDP, opts *opts.Opts, call
 	groupHullsByFC(hulldb)
 }
 
-func SimplifyDPs(id *iter.Igen, selfs []*ConstDP, junctions map[string][]int) {
+func SimplifyDPs(id *iter.Igen, selfs []*ConstDP, junctions map[int][]int) {
 	var wg sync.WaitGroup
-	wg.Add(concurProcs)
+	wg.Add(ConcurProcs)
 
 	var stream = make(chan *ConstDP)
-	var out = make(chan *ConstDP, 2*concurProcs)
+	var out = make(chan *ConstDP, 2*ConcurProcs)
 
 	go func() {
 		for s := range selfs {
@@ -96,7 +96,7 @@ func SimplifyDPs(id *iter.Igen, selfs []*ConstDP, junctions map[string][]int) {
 
 	//now expand one worker into clones of workers
 	go func() {
-		for i := 0; i < concurProcs; i++ {
+		for i := 0; i < ConcurProcs; i++ {
 			go fn(i)
 		}
 	}()
@@ -106,5 +106,6 @@ func SimplifyDPs(id *iter.Igen, selfs []*ConstDP, junctions map[string][]int) {
 		close(out)
 	}()
 
-	for range out {}
+	for range out {
+	}
 }

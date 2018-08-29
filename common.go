@@ -5,8 +5,7 @@ import (
 	"github.com/intdxdt/math"
 )
 
-const concurProcs = 8
-const rtreeBucketSize = 4
+const ConcurProcs = 7
 
 //hull point compare
 func PointIndexCmp(a interface{}, b interface{}) int {

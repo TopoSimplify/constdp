@@ -20,14 +20,15 @@ type ConstDP struct {
 //Creates a new constrained DP Simplification instance
 //	dp decomposition of linear geometries
 func NewConstDP(
+	id int ,
 	coordinates geom.Coords,
 	constraints []geom.Geometry,
 	options *opts.Opts,
 	offsetScore lnr.ScoreFn,
 ) *ConstDP {
 	var instance = &ConstDP{
-		DouglasPeucker: dp.New(coordinates, options, offsetScore),
-		ContextDB:      hdb.NewHdb(rtreeBucketSize),
+		DouglasPeucker: dp.New(id, coordinates, options, offsetScore),
+		ContextDB:      hdb.NewHdb(),
 	}
 	instance.BuildContextDB(constraints) //prepare databases
 

@@ -71,7 +71,7 @@ func TestConstDP(t *testing.T) {
 				options.DistRelation = td.relates.dist
 
 				var coords = geom.NewLineStringFromWKT(td.pln).Coordinates
-				var dp = NewConstDP(coords, constraints, options, offset.MaxOffset)
+				var dp = NewConstDP(id.Next(),coords, constraints, options, offset.MaxOffset)
 				var ptset = dp.Simplify(id).SimpleSet
 
 				var simplx = dp.Coordinates()
@@ -129,7 +129,7 @@ func TestConstSED(t *testing.T) {
 				{3.0, 1.6, 0.0}, {3.0, 2.0, 1.0}, {2.4, 2.8, 3.0}, {0.5, 3.0, 4.5},
 				{1.2, 3.2, 5.0}, {1.4, 2.6, 6.0}, {2.0, 3.5, 10.0},
 			})
-			var inst = NewConstDP(coords, constraints, options, offset.MaxSEDOffset).Simplify(id)
+			var inst = NewConstDP(id.Next(),coords, constraints, options, offset.MaxSEDOffset).Simplify(id)
 			var ptset = make([]int, 0)
 			for _, i := range inst.SimpleSet.Values() {
 				ptset = append(ptset, i.(int))
