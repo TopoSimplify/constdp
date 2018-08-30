@@ -7,7 +7,7 @@ import (
 	"sort"
 )
 const CacheKeySize = 6
-const ConcurProcs  = 8
+const ConcurProcs  = 7
 
 //hull point compare
 func PointIndexCmp(a interface{}, b interface{}) int {

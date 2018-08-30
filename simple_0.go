@@ -8,12 +8,11 @@ import (
 	"github.com/TopoSimplify/constrain"
 )
 
-func findDeformableNodes(hulls []node.Node, hulldb *hdb.Hdb) map[int]*node.Node {
+func findDeformableNodes(hulls []node.Node, hulldb *hdb.Hdb) map[*node.Node]struct{} {
 	return processConstSimplification(hulls, hulldb, ConcurProcs)
 }
 
-//process
-func processConstSimplification(nodeHulls []node.Node, db *hdb.Hdb, concurrency int) map[int]*node.Node {
+func processConstSimplification(nodeHulls []node.Node, db *hdb.Hdb, concurrency int) map[*node.Node]struct{} {
 	var wg sync.WaitGroup
 	var nodes = make([]*node.Node, len(nodeHulls))
 	for i := range nodeHulls {
@@ -21,35 +20,44 @@ func processConstSimplification(nodeHulls []node.Node, db *hdb.Hdb, concurrency 
 	}
 
 	var hulls = chunkTasks(nodes, concurrency)
-	//set up number of of clones to wait for
+
 	wg.Add(len(hulls))
 
-	var out = make(chan []*node.Node, 2*concurrency)
+	var out = make(chan *node.Node, 2*concurrency)
 
 	var fn = func(in []*node.Node) {
 		defer wg.Done()
 
+		var selections []*node.Node
+
 		for i := range in {
+			var bln = true
 			var hull = in[i]
-			var selections []*node.Node
 			var self = hull.Instance.(*ConstDP)
-			//if hull is segment
-			if hull.Range.Size() == 1 {
+
+			if hull.Range.Size() == 1 { //segment
 				continue
 			}
+
 			//if hull geometry is line then points are collinear
 			if _, ok := hull.Geom.(*geom.LineString); ok {
 				continue
 			}
+
 			// self intersection constraint
 			if self.Opts.AvoidNewSelfIntersects {
-				constrain.ByFeatureClassIntersection(self.Opts, hull, db, &selections)
+				bln = constrain.ByFeatureClassIntersection(self.Opts, hull, db, &selections)
 			}
-			// context_geom geometry constraint
-			self.ValidateContextRelation(hull, &selections)
-			if len(selections) > 0 {
-				out <- selections
+
+			// short circuit, if invalid, skip context validation
+			if bln {
+				bln = self.ValidateContextRelation(hull, &selections)
 			}
+
+			for _, o := range selections {
+				out <- o
+			}
+			selections = selections[:0]
 		}
 	}
 
@@ -64,11 +72,9 @@ func processConstSimplification(nodeHulls []node.Node, db *hdb.Hdb, concurrency 
 		close(out)
 	}()
 
-	var results = make(map[int]*node.Node)
-	for selections := range out {
-		for _, n := range selections {
-			results[n.Id] = n
-		}
+	var results = make(map[*node.Node]struct{})
+	for o := range out {
+		results[o] = struct{}{}
 	}
 	return results
 }
@@ -88,7 +94,11 @@ func chunkTasks(vals []*node.Node, concurrency int) [][]*node.Node {
 		if stop > n {
 			stop = n
 		}
-		chunks = append(chunks, vals[idx:stop])
+		var task []*node.Node
+		for _, o := range vals[idx:stop] {
+			task = append(task, o)
+		}
+		chunks = append(chunks, task)
 		idx = stop
 	}
 	return chunks

@@ -31,10 +31,11 @@ func (self *ConstDP) ValidateMerge(hull *node.Node, hulldb *hdb.Hdb) bool {
 // finds the collapsibility of hull with respect to context hull neighbours
 // if hull is deformable, its added to selections
 func (self *ConstDP) ValidateContextRelation(hull *node.Node, selections *[]*node.Node) bool {
-	if !(self.Opts.GeomRelation || self.Opts.DistRelation || self.Opts.DirRelation) {
-		return true
-	}
 	var bln = true
+
+	if !(self.Opts.GeomRelation || self.Opts.DistRelation || self.Opts.DirRelation) {
+		return bln
+	}
 
 	// find context neighbours - if valid
 	var boxObjs = knn.FindNeighbours(self.ContextDB, hull.Geom, self.Opts.MinDist)
@@ -43,6 +44,7 @@ func (self *ConstDP) ValidateContextRelation(hull *node.Node, selections *[]*nod
 	for i, o := range boxObjs {
 		neighbours[i] = o.Geom.(*ctx.ContextGeometry)
 	}
+	//TODO: optimized  async.Pool
 	var ctxtgeoms = (&ctx.ContextGeometries{}).SetData(neighbours)
 
 	if bln && self.Opts.GeomRelation {

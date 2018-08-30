@@ -29,39 +29,43 @@ func SimplifyFeatureClass(id *iter.Igen, selfs []*ConstDP, opts *opts.Opts, call
 
 	SimplifyDPs(id, selfs, junctions)
 
-	var constBln = opts.AvoidNewSelfIntersects || opts.PlanarSelf ||
-		opts.GeomRelation || opts.DirRelation || opts.DistRelation
+	var constrained = opts.AvoidNewSelfIntersects ||
+		opts.PlanarSelf ||
+		opts.GeomRelation ||
+		opts.DirRelation ||
+		opts.DistRelation
 
-	var selections map[int]*node.Node
-	var hulldb = hdb.NewHdb()
-	var deformables []node.Node
+	if constrained {
+		var selections map[*node.Node]struct{}
+		var hulldb = hdb.NewHdb()
+		var deformables []node.Node
 
-	for _, self := range selfs {
-		self.selfUpdate()
-		for i := range self.Hulls {
-			deformables = append(deformables, self.Hulls[i])
-		}
-
-		if constBln {
+		for _, self := range selfs {
+			for i := range self.Hulls {
+				deformables = append(deformables, self.Hulls[i])
+			}
 			node.Clear(&self.Hulls) // empty deque, this is for future splits
 		}
-	}
-	hulldb.Load(deformables)
-
-	for constBln && len(deformables) > 0 {
-		deformableCallback(len(deformables))
-		// 1. find deformable node
-		selections = findDeformableNodes(deformables, hulldb)
-		// 2. deform selected nodes
-		deformables = deformNodes(id, selections)
-		// 3. remove selected nodes from db
-		cleanUpDB(hulldb, selections)
-		// 4. add new deformations to db
 		hulldb.Load(deformables)
-		// 5. repeat until there are no deformables
-	}
 
-	groupHullsByFC(hulldb)
+		for len(deformables) > 0 {
+			deformableCallback(len(deformables))
+			// 0. find deformable node
+			selections = findDeformableNodes(deformables, hulldb)
+			// 1. deform selected nodes
+			if len(selections) > 0 {
+				deformables = deformNodes(id, selections)
+				// 2. remove selected nodes from db
+				cleanUpDB(hulldb, selections)
+				// 3. add new deformations to db
+				hulldb.Load(deformables)
+				// 4. repeat until there are no deformables
+			} else {
+				deformables = deformables[:0]
+			}
+		}
+		groupHullsByFC(hulldb)
+	}
 }
 
 func SimplifyDPs(id *iter.Igen, selfs []*ConstDP, junctions map[int][]int) {

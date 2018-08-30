@@ -8,7 +8,24 @@ import (
 	"github.com/TopoSimplify/common"
 )
 
-func deformNodes(id *iter.Igen, nodes map[int]*node.Node) []node.Node {
+func deformNodes(id *iter.Igen, nodes map[*node.Node]struct{}) []node.Node {
+	var results = make([]node.Node, 0, len(nodes)*2)
+	var self *ConstDP
+	var ha, hb node.Node
+	for hull := range nodes {
+		self = hull.Instance.(*ConstDP)
+		if hull.Range.Size() > 1 {
+			ha, hb = split.AtScoreSelection(id, hull, self.Score, common.Geometry)
+			results = append(results, ha, hb)
+			hull.Instance.State().MarkDirty() //after split mark instance as dirty
+		} else {
+			results = append(results, *hull)
+		}
+	}
+	return results
+}
+
+func deformNodes_(id *iter.Igen, nodes map[*node.Node]struct{}) []node.Node {
 	var stream = make(chan interface{}, 4*ConcurProcs)
 	var exit = make(chan struct{})
 	defer close(exit)
@@ -24,9 +41,9 @@ func deformNodes(id *iter.Igen, nodes map[int]*node.Node) []node.Node {
 	return results
 }
 
-func streamDeformNodes(stream chan interface{}, nodes map[int]*node.Node) {
-	for i := range nodes {
-		stream <- nodes[i]
+func streamDeformNodes(stream chan interface{}, nodes map[*node.Node]struct{}) {
+	for o := range nodes {
+		stream <- o
 	}
 	close(stream)
 }
