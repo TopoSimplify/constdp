@@ -92,7 +92,6 @@ func SimplifyDPs(id *iter.Igen, selfs []*ConstDP, junctions map[int][]int) {
 			} else {
 				constVerts = make([]int, 0)
 			}
-
 			self.Simplify(id, constVerts)
 			out <- self
 		}

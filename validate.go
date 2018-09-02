@@ -38,14 +38,16 @@ func (self *ConstDP) ValidateContextRelation(hull *node.Node, selections *[]*nod
 	}
 
 	// find context neighbours - if valid
-	var boxObjs = knn.FindNeighbours(self.ContextDB, hull.Geom, self.Opts.MinDist)
+	var boxObjs = knn.ContextNeighbours(self.ContextDB, hull.Geom, self.Opts.MinDist)
 
 	var neighbours = make([]*ctx.ContextGeometry, len(boxObjs))
 	for i, o := range boxObjs {
 		neighbours[i] = o.Geom.(*ctx.ContextGeometry)
 	}
 	//TODO: optimized  async.Pool
-	var ctxtgeoms = (&ctx.ContextGeometries{}).SetData(neighbours)
+	var ctxtgeoms = ctx.ContextsPool.Get().(*ctx.ContextGeometries)
+	ctxtgeoms.SetData(neighbours)
+	//var ctxtgeoms = (&ctx.ContextGeometries{}).SetData(neighbours)
 
 	if bln && self.Opts.GeomRelation {
 		bln = constrain.ByGeometricRelation(hull, ctxtgeoms)

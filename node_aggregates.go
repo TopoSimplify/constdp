@@ -42,7 +42,7 @@ func (self *ConstDP) AggregateSimpleSegments(
 
 		// find context neighbours
 		//neighbours = common.NodesFromObjects(knn.FindNodeNeighbours(db, hull, knn.EpsilonDist))
-		neighbours = knn.FindNodeNeighbours(db, hull, knn.EpsilonDist)
+		neighbours = knn.NodeNeighbours(db, hull, knn.EpsilonDist)
 
 		// find context neighbours
 		var prev, nxt = node.Neighbours(hull, neighbours)
