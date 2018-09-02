@@ -65,5 +65,7 @@ func (self *ConstDP) ValidateContextRelation(hull *node.Node, selections *[]*nod
 		*selections = append(*selections, hull)
 	}
 
+	ctx.ContextsPool.Put(ctxtgeoms)
+
 	return bln
 }
