@@ -44,10 +44,8 @@ func (self *ConstDP) ValidateContextRelation(hull *node.Node, selections *[]*nod
 	for i, o := range boxObjs {
 		neighbours[i] = o.Geom.(*ctx.ContextGeometry)
 	}
-	//TODO: optimized  async.Pool
-	var ctxtgeoms = ctx.ContextsPool.Get().(*ctx.ContextGeometries)
-	ctxtgeoms.SetData(neighbours)
-	//var ctxtgeoms = (&ctx.ContextGeometries{}).SetData(neighbours)
+
+	var ctxtgeoms = (&ctx.ContextGeometries{}).SetData(neighbours)
 
 	if bln && self.Opts.GeomRelation {
 		bln = constrain.ByGeometricRelation(hull, ctxtgeoms)
@@ -64,8 +62,6 @@ func (self *ConstDP) ValidateContextRelation(hull *node.Node, selections *[]*nod
 	if !bln {
 		*selections = append(*selections, hull)
 	}
-
-	ctx.ContextsPool.Put(ctxtgeoms)
 
 	return bln
 }
