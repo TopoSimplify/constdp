@@ -39,7 +39,7 @@ func TestConstDP_FC(t *testing.T) {
 	var simplifyForest = func(lns []*geom.LineString, opts *opts.Opts) []*geom.LineString {
 		var forest []*ConstDP
 		for _, l := range lns {
-			dp := NewConstDP(id.Next(), l.Coordinates, constraints, opts, offset.MaxOffset)
+			dp := NewConstDP(id.Next(), l.Coordinates, constraints, opts, offset.MaxOffset, offset.SquareMaxOffset)
 			forest = append(forest, dp)
 		}
 
@@ -50,7 +50,7 @@ func TestConstDP_FC(t *testing.T) {
 	var simplifyInIsolation = func(lns []*geom.LineString, opts *opts.Opts) []*geom.LineString {
 		var forest []*ConstDP
 		for _, l := range lns {
-			dp := NewConstDP(id.Next(), l.Coordinates, constraints, opts, offset.MaxOffset)
+			dp := NewConstDP(id.Next(), l.Coordinates, constraints, opts,  offset.MaxOffset, offset.SquareMaxOffset)
 			forest = append(forest, dp)
 		}
 
