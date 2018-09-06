@@ -13,7 +13,6 @@ import (
 //Merge segment fragments where possible
 func (self *ConstDP) AggregateSimpleSegments(
 	id *iter.Igen, db *hdb.Hdb, constVertexSet []int,
-	scoreRelation func(float64) bool,
 	validateMerge func(*node.Node, *hdb.Hdb) bool,
 ) {
 	var fragmentSize = 1
@@ -22,6 +21,14 @@ func (self *ConstDP) AggregateSimpleSegments(
 	var objects = db.All()
 	var hull *node.Node
 	sort.Sort(node.NodePtrs(objects))
+
+	var score = self.Score
+	var relation = self.ScoreRelation
+
+	if self.SquareScore != nil {
+		score = self.SquareScore
+		relation = self.SquareScoreRelation
+	}
 
 	for len(objects) != 0 {
 		hull = objects[0]
@@ -57,7 +64,7 @@ func (self *ConstDP) AggregateSimpleSegments(
 			if !cache[key] {
 				cache[key] = true
 				mergeprevBln, mergePrev = merge.ContiguousFragmentsAtThreshold(
-					id, self.Score, prev, hull, scoreRelation, common.Geometry,
+					id, score, prev, hull, relation, common.Geometry,
 				)
 			}
 		}
@@ -67,7 +74,7 @@ func (self *ConstDP) AggregateSimpleSegments(
 			if !cache[key] {
 				cache[key] = true
 				mergenxtBln, mergeNxt = merge.ContiguousFragmentsAtThreshold(
-					id, self.Score, hull, nxt, scoreRelation, common.Geometry,
+					id, score, hull, nxt, relation, common.Geometry,
 				)
 			}
 		}

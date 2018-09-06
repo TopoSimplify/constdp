@@ -9,13 +9,19 @@ import (
 )
 
 func deformNodes(id *iter.Igen, nodes map[*node.Node]struct{}) []node.Node {
-	var results = make([]node.Node, 0, len(nodes)*2)
 	var self *ConstDP
 	var ha, hb node.Node
+	var results = make([]node.Node, 0, len(nodes)*2)
+
 	for hull := range nodes {
 		self = hull.Instance.(*ConstDP)
+		var scoreFn = self.Score
+		if self.SquareScore != nil {
+			scoreFn = self.SquareScore
+		}
+
 		if hull.Range.Size() > 1 {
-			ha, hb = split.AtScoreSelection(id, hull, self.Score, common.Geometry)
+			ha, hb = split.AtScoreSelection(id, hull, scoreFn, common.Geometry)
 			results = append(results, ha, hb)
 			hull.Instance.State().MarkDirty() //after split mark instance as dirty
 		} else {

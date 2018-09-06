@@ -137,7 +137,7 @@ func TestConstDP_FC(t *testing.T) {
 			//gs := simplify_forest(plns, options)
 			var forest []*ConstDP
 			for _, l := range plns {
-				dp := NewConstDP(id.Next(),l.Coordinates, constraints, options, offset.MaxOffset)
+				dp := NewConstDP(id.Next(),l.Coordinates, constraints, options, offset.MaxOffset, offset.SquareMaxOffset)
 				forest = append(forest, dp)
 			}
 
