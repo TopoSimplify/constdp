@@ -2,9 +2,9 @@ package constdp
 
 import (
 	"sync"
+	"github.com/intdxdt/geom"
 	"github.com/TopoSimplify/node"
 	"github.com/TopoSimplify/hdb"
-	"github.com/intdxdt/geom"
 	"github.com/TopoSimplify/constrain"
 )
 
@@ -103,3 +103,31 @@ func chunkTasks(vals []*node.Node, concurrency int) [][]*node.Node {
 	}
 	return chunks
 }
+
+
+
+func chunkInstances(vals []*ConstDP, concurrency int) [][]*ConstDP {
+	var n = len(vals)
+	var chunkSize = n / concurrency
+	if chunkSize == 0 {
+		chunkSize = 1
+	}
+	var idx = 0
+	var chunks = make([][]*ConstDP, 0, concurrency+3)
+
+	for idx < n {
+		var stop = idx + chunkSize
+		//if stop > n || (stop < n && stop+chunkSize > n) {
+		if stop > n {
+			stop = n
+		}
+		var task []*ConstDP
+		for _, o := range vals[idx:stop] {
+			task = append(task, o)
+		}
+		chunks = append(chunks, task)
+		idx = stop
+	}
+	return chunks
+}
+

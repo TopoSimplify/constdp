@@ -27,7 +27,7 @@ func SimplifyFeatureClass(id *iter.Igen, selfs []*ConstDP, opts *opts.Opts, call
 		junctions = lnr.FCPlanarSelfIntersection(instances)
 	}
 
-	SimplifyDPs(id, selfs, junctions)
+	SimplifyInstances(id, selfs, junctions)
 
 	var constrained = opts.AvoidNewSelfIntersects ||
 		opts.PlanarSelf ||
@@ -68,7 +68,7 @@ func SimplifyFeatureClass(id *iter.Igen, selfs []*ConstDP, opts *opts.Opts, call
 	}
 }
 
-func SimplifyDPs(id *iter.Igen, selfs []*ConstDP, junctions map[int][]int) {
+func SimplifyInstances(id *iter.Igen, selfs []*ConstDP, junctions map[int][]int) {
 	var wg sync.WaitGroup
 	wg.Add(ConcurProcs)
 
@@ -82,22 +82,16 @@ func SimplifyDPs(id *iter.Igen, selfs []*ConstDP, junctions map[int][]int) {
 		close(stream)
 	}()
 
-	//assume only one worker reading from input chan
+
 	var fn = func(idx int) {
 		defer wg.Done()
 		for self := range stream {
-			var constVerts []int
-			if v, ok := junctions[self.Id()]; ok {
-				constVerts = v
-			} else {
-				constVerts = make([]int, 0)
-			}
-			self.Simplify(id, constVerts)
+			self.Simplify(id, junctions[self.Id()])
 			out <- self
 		}
 	}
 
-	//now expand one worker into clones of workers
+
 	go func() {
 		for i := 0; i < ConcurProcs; i++ {
 			go fn(i)
