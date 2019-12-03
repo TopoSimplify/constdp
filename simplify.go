@@ -1,10 +1,10 @@
 package constdp
 
 import (
-	"github.com/intdxdt/iter"
+	"github.com/TopoSimplify/constrain"
 	"github.com/TopoSimplify/hdb"
 	"github.com/TopoSimplify/node"
-	"github.com/TopoSimplify/constrain"
+	"github.com/intdxdt/iter"
 )
 
 //Line simplification at a given threshold
@@ -55,7 +55,7 @@ func (self *ConstDP) Simplify(id *iter.Igen, constVertices ...[]int) *ConstDP {
 	}
 
 	self.AggregateSimpleSegments(
-		id, db, constVertexSet,  self.ValidateMerge,
+		id, db, constVertexSet, self.ValidateMerge,
 	)
 
 	node.Clear(&self.Hulls)

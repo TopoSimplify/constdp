@@ -1,8 +1,8 @@
 package constdp
 
 import (
-	"github.com/TopoSimplify/node"
 	"github.com/TopoSimplify/hdb"
+	"github.com/TopoSimplify/node"
 )
 
 // Group hulls in hulldb by instance of ConstDP

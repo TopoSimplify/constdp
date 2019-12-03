@@ -168,7 +168,7 @@ func TestConstSED(t *testing.T) {
 				DirRelation:            true,
 			}
 
-			var constraints = make([]geom.Geometry, 0)
+			var constraints []geom.Geometry
 			//for _, wkt := range datConstraints {
 			//	constraints = append(constraints, geom.NewPolygonFromWKT(wkt))
 			//}

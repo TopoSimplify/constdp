@@ -1,11 +1,11 @@
 package constdp
 
 import (
+	"github.com/TopoSimplify/constrain"
 	"github.com/TopoSimplify/ctx"
+	"github.com/TopoSimplify/hdb"
 	"github.com/TopoSimplify/knn"
 	"github.com/TopoSimplify/node"
-	"github.com/TopoSimplify/hdb"
-	"github.com/TopoSimplify/constrain"
 )
 
 func (self *ConstDP) ValidateMerge(hull *node.Node, hulldb *hdb.Hdb) bool {

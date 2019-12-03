@@ -1,11 +1,11 @@
 package constdp
 
 import (
-	"sync"
-	"github.com/intdxdt/geom"
-	"github.com/TopoSimplify/node"
-	"github.com/TopoSimplify/hdb"
 	"github.com/TopoSimplify/constrain"
+	"github.com/TopoSimplify/hdb"
+	"github.com/TopoSimplify/node"
+	"github.com/intdxdt/geom"
+	"sync"
 )
 
 func findDeformableNodes(hulls []node.Node, hulldb *hdb.Hdb) map[*node.Node]struct{} {
@@ -104,8 +104,6 @@ func chunkTasks(vals []*node.Node, concurrency int) [][]*node.Node {
 	return chunks
 }
 
-
-
 func chunkInstances(vals []*ConstDP, concurrency int) [][]*ConstDP {
 	var n = len(vals)
 	var chunkSize = n / concurrency
@@ -130,4 +128,3 @@ func chunkInstances(vals []*ConstDP, concurrency int) [][]*ConstDP {
 	}
 	return chunks
 }
-

@@ -1,9 +1,9 @@
 package constdp
 
 import (
-	"testing"
-	"github.com/intdxdt/geom"
 	"github.com/franela/goblin"
+	"github.com/intdxdt/geom"
+	"testing"
 )
 
 type TestDat struct {

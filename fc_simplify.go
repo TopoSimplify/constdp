@@ -1,17 +1,17 @@
 package constdp
 
 import (
-	"sync"
-	"github.com/intdxdt/iter"
-	"github.com/TopoSimplify/lnr"
 	"github.com/TopoSimplify/hdb"
+	"github.com/TopoSimplify/lnr"
 	"github.com/TopoSimplify/node"
 	"github.com/TopoSimplify/opts"
+	"github.com/intdxdt/iter"
+	"sync"
 )
 
 //Simplify a feature class of linear geometries
 //optional callback for the number of deformables
-func SimplifyFeatureClass(id *iter.Igen, selfs []*ConstDP, opts *opts.Opts, callback ... func(n int)) {
+func SimplifyFeatureClass(id *iter.Igen, selfs []*ConstDP, opts *opts.Opts, callback ...func(n int)) {
 	var deformableCallback = func(_ int) {}
 	if len(callback) > 0 {
 		deformableCallback = callback[0]
@@ -82,7 +82,6 @@ func SimplifyInstances(id *iter.Igen, selfs []*ConstDP, junctions map[int][]int)
 		close(stream)
 	}()
 
-
 	var fn = func(idx int) {
 		defer wg.Done()
 		for self := range stream {
@@ -90,7 +89,6 @@ func SimplifyInstances(id *iter.Igen, selfs []*ConstDP, junctions map[int][]int)
 			out <- self
 		}
 	}
-
 
 	go func() {
 		for i := 0; i < ConcurProcs; i++ {

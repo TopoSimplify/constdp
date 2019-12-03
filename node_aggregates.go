@@ -1,13 +1,13 @@
 package constdp
 
 import (
-	"sort"
-	"github.com/intdxdt/iter"
-	"github.com/TopoSimplify/knn"
-	"github.com/TopoSimplify/hdb"
-	"github.com/TopoSimplify/node"
-	"github.com/TopoSimplify/merge"
 	"github.com/TopoSimplify/common"
+	"github.com/TopoSimplify/hdb"
+	"github.com/TopoSimplify/knn"
+	"github.com/TopoSimplify/merge"
+	"github.com/TopoSimplify/node"
+	"github.com/intdxdt/iter"
+	"sort"
 )
 
 //Merge segment fragments where possible

@@ -1,13 +1,14 @@
 package constdp
 
 import (
+	"github.com/TopoSimplify/node"
 	"github.com/intdxdt/geom"
 	"github.com/intdxdt/math"
-	"github.com/TopoSimplify/node"
 	"sort"
 )
+
 const CacheKeySize = 6
-const ConcurProcs  = 8
+const ConcurProcs = 8
 
 //hull point compare
 func PointIndexCmp(a interface{}, b interface{}) int {

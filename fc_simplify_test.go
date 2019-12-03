@@ -1,13 +1,13 @@
 package constdp
 
 import (
-	"time"
-	"testing"
-	"github.com/intdxdt/iter"
-	"github.com/intdxdt/geom"
-	"github.com/franela/goblin"
-	"github.com/TopoSimplify/opts"
 	"github.com/TopoSimplify/offset"
+	"github.com/TopoSimplify/opts"
+	"github.com/franela/goblin"
+	"github.com/intdxdt/geom"
+	"github.com/intdxdt/iter"
+	"testing"
+	"time"
 )
 
 func TestConstDP_FC(t *testing.T) {
@@ -50,7 +50,7 @@ func TestConstDP_FC(t *testing.T) {
 	var simplifyInIsolation = func(lns []*geom.LineString, opts *opts.Opts) []*geom.LineString {
 		var forest []*ConstDP
 		for _, l := range lns {
-			dp := NewConstDP(id.Next(), l.Coordinates, constraints, opts,  offset.MaxOffset, offset.SquareMaxOffset)
+			dp := NewConstDP(id.Next(), l.Coordinates, constraints, opts, offset.MaxOffset, offset.SquareMaxOffset)
 			forest = append(forest, dp)
 		}
 
@@ -137,7 +137,7 @@ func TestConstDP_FC(t *testing.T) {
 			//gs := simplify_forest(plns, options)
 			var forest []*ConstDP
 			for _, l := range plns {
-				dp := NewConstDP(id.Next(),l.Coordinates, constraints, options, offset.MaxOffset, offset.SquareMaxOffset)
+				dp := NewConstDP(id.Next(), l.Coordinates, constraints, options, offset.MaxOffset, offset.SquareMaxOffset)
 				forest = append(forest, dp)
 			}
 

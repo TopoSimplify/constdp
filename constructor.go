@@ -1,14 +1,14 @@
 package constdp
 
 import (
-	"github.com/intdxdt/geom"
-	"github.com/TopoSimplify/dp"
 	"github.com/TopoSimplify/ctx"
-	"github.com/TopoSimplify/lnr"
-	"github.com/TopoSimplify/pln"
-	"github.com/TopoSimplify/opts"
+	"github.com/TopoSimplify/dp"
 	"github.com/TopoSimplify/hdb"
+	"github.com/TopoSimplify/lnr"
 	"github.com/TopoSimplify/node"
+	"github.com/TopoSimplify/opts"
+	"github.com/TopoSimplify/pln"
+	"github.com/intdxdt/geom"
 )
 
 //Type ConstDP

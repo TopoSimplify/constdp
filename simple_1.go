@@ -1,11 +1,11 @@
 package constdp
 
 import (
-	"github.com/intdxdt/fan"
-	"github.com/intdxdt/iter"
+	"github.com/TopoSimplify/common"
 	"github.com/TopoSimplify/node"
 	"github.com/TopoSimplify/split"
-	"github.com/TopoSimplify/common"
+	"github.com/intdxdt/fan"
+	"github.com/intdxdt/iter"
 )
 
 func deformNodes(id *iter.Igen, nodes map[*node.Node]struct{}) []node.Node {

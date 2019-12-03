@@ -1,11 +1,11 @@
 package constdp
 
 import (
-	"github.com/intdxdt/iter"
-	"github.com/TopoSimplify/node"
 	"github.com/TopoSimplify/common"
 	"github.com/TopoSimplify/decompose"
+	"github.com/TopoSimplify/node"
 	"github.com/TopoSimplify/offset"
+	"github.com/intdxdt/iter"
 )
 
 func (self *ConstDP) Decompose(id *iter.Igen) []node.Node {
