@@ -18,10 +18,10 @@ require (
 	github.com/TopoSimplify/node v1.0.0
 	github.com/TopoSimplify/offset v0.0.0-20191215171217-3e0ac486281e
 	github.com/TopoSimplify/opts v1.0.0
-	github.com/TopoSimplify/pln v1.0.0
+	github.com/TopoSimplify/pln v1.0.1
 	github.com/TopoSimplify/relate v0.0.0-20180808093300-f72c9ff672a3 // indirect
 	github.com/TopoSimplify/split v0.0.0-20200114181942-f77b6d238c74
-	github.com/franela/goblin v0.0.0-20210113153425-413781f5e6c8 // indirect
+	github.com/franela/goblin v0.0.0-20210113153425-413781f5e6c8
 	github.com/intdxdt/fan v0.0.0-20200301234418-474f7d883d4b
 	github.com/intdxdt/geom v1.0.1
 	github.com/intdxdt/iter v1.0.0

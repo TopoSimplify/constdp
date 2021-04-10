@@ -10,8 +10,6 @@ github.com/TopoSimplify/decompose v0.0.0-20210327232840-b280c199bd06 h1:j7TZK+2o
 github.com/TopoSimplify/decompose v0.0.0-20210327232840-b280c199bd06/go.mod h1:lpYGOt0MBmxLxV+MTognNpsbrYqzfkrpVJJKeFsIoTc=
 github.com/TopoSimplify/deform v0.0.0-20180905234736-6fe7894314fc h1:c0AC+jNC2O1ju3F1JLF626ztYMcMWfXahstlDjxJiBg=
 github.com/TopoSimplify/deform v0.0.0-20180905234736-6fe7894314fc/go.mod h1:EP/i2w7JvGZVYmEWD5GuHysFemDZeP7j6cJWRsVjDKE=
-github.com/TopoSimplify/dp v0.0.0-20200102075515-5677cf610281 h1:aT27peUstzxi7ZaSBrMn4yWVBFaafnj1/gIKzDtAEAY=
-github.com/TopoSimplify/dp v0.0.0-20200102075515-5677cf610281/go.mod h1:9J6mcocnG0vC3s6+xRV1/y7hkVQmylsp2qmE858IMA4=
 github.com/TopoSimplify/dp v1.0.1 h1:DLOfs4Z0dglFiwhOehIoYuP+hSxHVcfoQJ4E4dPsmoE=
 github.com/TopoSimplify/dp v1.0.1/go.mod h1:56ihjqiI6omID0mjq512z0McD228quvYssDhM7tgtK4=
 github.com/TopoSimplify/hdb v1.0.0 h1:lsUeuLygVxOPDFMrF4QhAHMD8JzUGqcWCSbulkROeME=
@@ -31,8 +29,9 @@ github.com/TopoSimplify/offset v0.0.0-20191215171217-3e0ac486281e/go.mod h1:ycTJ
 github.com/TopoSimplify/opts v0.0.0-20180605085736-6e7d8005f4ea/go.mod h1:uEygpy2a/gtBpAEVftY38Lv8RRfnykTPvZmcF2/sVyU=
 github.com/TopoSimplify/opts v1.0.0 h1:jEhoMGXmKUWxYvz1pncerTWsXZHY6/GqJe1N1zGILi4=
 github.com/TopoSimplify/opts v1.0.0/go.mod h1:B0XEi6G5RsGyiIvKGAkQch7fR4DNZwAuVertBkw+G90=
-github.com/TopoSimplify/pln v1.0.0 h1:WyXCriRKF/OPKw3iayFaXTrs56RImss19myJMyHnJCA=
 github.com/TopoSimplify/pln v1.0.0/go.mod h1:ReqEEOLsQrfqWIKospBvADZBopjZN1DiUHfJptSfN+Q=
+github.com/TopoSimplify/pln v1.0.1 h1:r+r/LqfLPwrIACe0ogouyjc3xQ+R+qKHSPE6ibWKnbo=
+github.com/TopoSimplify/pln v1.0.1/go.mod h1:4rvu0KWfKrekSyvaeweto0FHbxTCq4PXe1axC03V8qI=
 github.com/TopoSimplify/relate v0.0.0-20180808093300-f72c9ff672a3 h1:lhbt/FeIVuW5tQrFAYzvWAIOSKNQytnv2XtIgXW7lkg=
 github.com/TopoSimplify/relate v0.0.0-20180808093300-f72c9ff672a3/go.mod h1:ovpaHPBQDxYI4sfjl9Y+yF5MUX3/wiCCD9g/BJXD0Gg=
 github.com/TopoSimplify/rng v1.0.0 h1:L4bOLvJCmcun/0adx6E3bcPueG9vB6KSBwjIO9LkSNw=
@@ -49,6 +48,7 @@ github.com/intdxdt/algor v0.0.0-20171018025553-b04f84e486fd h1:9rgSasT7VYtzw93yu
 github.com/intdxdt/algor v0.0.0-20171018025553-b04f84e486fd/go.mod h1:/39eqNevzE7YbmgY5FZTOcaBcGkM63zGC6QBX8Fq9uQ=
 github.com/intdxdt/cmp v0.0.0-20171102110413-58dfeb370ea5 h1:MUMTPeXxc2eWV8qQPGG+7EXdBCWbcsvvWXF/WKleCUE=
 github.com/intdxdt/cmp v0.0.0-20171102110413-58dfeb370ea5/go.mod h1:2hCobpYhPtwa+ghiz9vRqIkJlqj7dAns+cGe7UWgwMs=
+github.com/intdxdt/dbits v0.0.0-20171026062838-f7e9caad92f4 h1:JtTERsC6K14AQmJmveJBi8iaLzxmGzgKmQjwYKgue6I=
 github.com/intdxdt/dbits v0.0.0-20171026062838-f7e9caad92f4/go.mod h1:GLKbRshq9XwOsyiyfx2vRXbKAeDBwo8uNb6pLPDipr4=
 github.com/intdxdt/deque v0.0.0-20171102130235-3e5a69a6fa23 h1:ChKHUyJTApiarUtYElkiJakZ7Iti3kwcaiuTWxrhNC8=
 github.com/intdxdt/deque v0.0.0-20171102130235-3e5a69a6fa23/go.mod h1:f2J/pg9EV+3GhlZRVkosvb5YAMD8T1O61aR5UhRLi+E=
@@ -75,6 +75,7 @@ github.com/intdxdt/sset v0.0.0-20180716051722-847da91b3696 h1:fYSHxilOQX5Ve9eY2P
 github.com/intdxdt/sset v0.0.0-20180716051722-847da91b3696/go.mod h1:s0NtqRFqmW43rcs8a032FPA7HEMXo8jNat4LnJ8uxrk=
 github.com/intdxdt/subsset v0.0.0-20180704174917-aa7d221d338e h1:rF7UiMv1pm55Qk96A+bw+Wl3JzEP7YwqhvFDMlrxXtU=
 github.com/intdxdt/subsset v0.0.0-20180704174917-aa7d221d338e/go.mod h1:QdZzTonceNYzTjAL+ZnWFfzZc1q6fDq+2Q2vtGN3wcQ=
+github.com/intdxdt/twiddle v0.0.0-20180605015803-8a5d3aeb2e67 h1:H6F6uuWZ3AhBasAAnyRfXQrO82EqKmsPR8c0oxS73fQ=
 github.com/intdxdt/twiddle v0.0.0-20180605015803-8a5d3aeb2e67/go.mod h1:aos2CXzSXDP82nQmZbxyi3w7TAdnhNZ2kLRm3pI5SjI=
 github.com/intdxdt/vect v0.0.0-20191214134333-3fe6478de6f9 h1:CIE8t3REDjNvNXcI0F0LGBNAPWKmZcoa9lnLIXrNJ+c=
 github.com/intdxdt/vect v0.0.0-20191214134333-3fe6478de6f9/go.mod h1:lNiorpH/r7eobvyoFqRYUGM+VF1aYZ166a1Wtq/yjHg=
