@@ -12,6 +12,8 @@ github.com/TopoSimplify/deform v0.0.0-20180905234736-6fe7894314fc h1:c0AC+jNC2O1
 github.com/TopoSimplify/deform v0.0.0-20180905234736-6fe7894314fc/go.mod h1:EP/i2w7JvGZVYmEWD5GuHysFemDZeP7j6cJWRsVjDKE=
 github.com/TopoSimplify/dp v1.0.1 h1:DLOfs4Z0dglFiwhOehIoYuP+hSxHVcfoQJ4E4dPsmoE=
 github.com/TopoSimplify/dp v1.0.1/go.mod h1:56ihjqiI6omID0mjq512z0McD228quvYssDhM7tgtK4=
+github.com/TopoSimplify/geometry v0.0.2 h1:5KrLM567/f9Z28nkfiZCpgM9cR8h3VBFAyAVZIro7Xw=
+github.com/TopoSimplify/geometry v0.0.2/go.mod h1:KzAh9TXAdLMcWtaNvpkQ3zQQ1R3+qry/YIj2Hu2Nq5Y=
 github.com/TopoSimplify/hdb v1.0.0 h1:lsUeuLygVxOPDFMrF4QhAHMD8JzUGqcWCSbulkROeME=
 github.com/TopoSimplify/hdb v1.0.0/go.mod h1:MB4BMYpjC0aq4pryYkFL6SXppkTiZ0n44//KZbLzWno=
 github.com/TopoSimplify/homotopy v0.0.0-20180829041249-ecc681c8cadf h1:wuZfID0IQ+ZlbT0rrvxWbEtBbrxjnaSdI4nS+tvfiE8=
@@ -44,6 +46,7 @@ github.com/franela/goblin v0.0.0-20200404164657-567a4070c437/go.mod h1:VzmDKDJVZ
 github.com/franela/goblin v0.0.0-20200409142057-1def193310bb/go.mod h1:VzmDKDJVZI3aJmnRI9VjAn9nJ8qPPsN1fqzr9dqInIo=
 github.com/franela/goblin v0.0.0-20210113153425-413781f5e6c8 h1:QVPknD9yAYAmmmERIxdPFY6yf8d7xqoieNs/1C9ieCk=
 github.com/franela/goblin v0.0.0-20210113153425-413781f5e6c8/go.mod h1:VzmDKDJVZI3aJmnRI9VjAn9nJ8qPPsN1fqzr9dqInIo=
+github.com/franela/goblin v0.0.0-20210519012713-85d372ac71e2/go.mod h1:VzmDKDJVZI3aJmnRI9VjAn9nJ8qPPsN1fqzr9dqInIo=
 github.com/intdxdt/algor v0.0.0-20171018025553-b04f84e486fd h1:9rgSasT7VYtzw93yu6gGbTW+JBiWJcoaCiZ1Y+wWQC8=
 github.com/intdxdt/algor v0.0.0-20171018025553-b04f84e486fd/go.mod h1:/39eqNevzE7YbmgY5FZTOcaBcGkM63zGC6QBX8Fq9uQ=
 github.com/intdxdt/cmp v0.0.0-20171102110413-58dfeb370ea5 h1:MUMTPeXxc2eWV8qQPGG+7EXdBCWbcsvvWXF/WKleCUE=
@@ -56,6 +59,8 @@ github.com/intdxdt/fan v0.0.0-20200301234418-474f7d883d4b h1:9t57O5X2hmFYE8BDd1o
 github.com/intdxdt/fan v0.0.0-20200301234418-474f7d883d4b/go.mod h1:eSZCT12vwNXuuTKDWzul/wFU89P9od1vutVjGi2Idco=
 github.com/intdxdt/geom v1.0.1 h1:jrkcsJugfFHzye0e0CCWMC2XDFK1eu+GKto73AxFOCw=
 github.com/intdxdt/geom v1.0.1/go.mod h1:YZ7A2h4AXPegZKzl3Ds7scfAmC/c3ZjLaqN+S3o9F60=
+github.com/intdxdt/geom v1.0.2 h1:ONOaR+Rivtk4xaC/0cPIGMMY6rSDVrC/Le3sg07qCdE=
+github.com/intdxdt/geom v1.0.2/go.mod h1:YZ7A2h4AXPegZKzl3Ds7scfAmC/c3ZjLaqN+S3o9F60=
 github.com/intdxdt/heap v0.0.0-20180830201411-bfa61463ae8b h1:bhxl74DHXv67coECwjBhxYaR7AyLz/dp4iCZBMelgQE=
 github.com/intdxdt/heap v0.0.0-20180830201411-bfa61463ae8b/go.mod h1:rftfIJ/6uLm3AYAFvmGu4Z017rZVaOrQ2Qsnjl2wKNs=
 github.com/intdxdt/iter v1.0.0 h1:hONzsCLtn2LMUarvWP7Znvqv4gZUq2gKNGS+QlgrREA=

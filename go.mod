@@ -10,6 +10,7 @@ require (
 	github.com/TopoSimplify/decompose v0.0.0-20210327232840-b280c199bd06
 	github.com/TopoSimplify/deform v0.0.0-20180905234736-6fe7894314fc // indirect
 	github.com/TopoSimplify/dp v1.0.1
+	github.com/TopoSimplify/geometry v0.0.2 // indirect
 	github.com/TopoSimplify/hdb v1.0.0
 	github.com/TopoSimplify/homotopy v0.0.0-20180829041249-ecc681c8cadf // indirect
 	github.com/TopoSimplify/knn v0.0.0-20200112084540-5fed9f206057
@@ -21,9 +22,9 @@ require (
 	github.com/TopoSimplify/pln v1.0.1
 	github.com/TopoSimplify/relate v0.0.0-20180808093300-f72c9ff672a3 // indirect
 	github.com/TopoSimplify/split v0.0.0-20200114181942-f77b6d238c74
-	github.com/franela/goblin v0.0.0-20210113153425-413781f5e6c8
+	github.com/franela/goblin v0.0.0-20210519012713-85d372ac71e2
 	github.com/intdxdt/fan v0.0.0-20200301234418-474f7d883d4b
-	github.com/intdxdt/geom v1.0.1
+	github.com/intdxdt/geom v1.0.2
 	github.com/intdxdt/iter v1.0.0
 	github.com/intdxdt/math v1.0.0
 )
