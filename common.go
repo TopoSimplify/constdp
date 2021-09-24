@@ -31,3 +31,9 @@ func CacheKey(a, b *node.Node) [CacheKeySize]int {
 	sort.Ints(o[:])
 	return o
 }
+
+func checkError(err error) {
+	if err != nil {
+		panic(err)
+	}
+}

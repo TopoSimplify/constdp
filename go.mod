@@ -10,7 +10,7 @@ require (
 	github.com/TopoSimplify/decompose v0.0.0-20210327232840-b280c199bd06
 	github.com/TopoSimplify/deform v0.0.0-20180905234736-6fe7894314fc // indirect
 	github.com/TopoSimplify/dp v1.0.1
-	github.com/TopoSimplify/geometry v0.0.2 // indirect
+	github.com/TopoSimplify/geometry v0.0.5 // indirect
 	github.com/TopoSimplify/hdb v1.0.0
 	github.com/TopoSimplify/homotopy v0.0.0-20180829041249-ecc681c8cadf // indirect
 	github.com/TopoSimplify/knn v0.0.0-20200112084540-5fed9f206057

@@ -14,6 +14,12 @@ github.com/TopoSimplify/dp v1.0.1 h1:DLOfs4Z0dglFiwhOehIoYuP+hSxHVcfoQJ4E4dPsmoE
 github.com/TopoSimplify/dp v1.0.1/go.mod h1:56ihjqiI6omID0mjq512z0McD228quvYssDhM7tgtK4=
 github.com/TopoSimplify/geometry v0.0.2 h1:5KrLM567/f9Z28nkfiZCpgM9cR8h3VBFAyAVZIro7Xw=
 github.com/TopoSimplify/geometry v0.0.2/go.mod h1:KzAh9TXAdLMcWtaNvpkQ3zQQ1R3+qry/YIj2Hu2Nq5Y=
+github.com/TopoSimplify/geometry v0.0.3 h1:meTzKeavyjkTEe5jouhskjaWvXLD3CklXLtV0M5VNqQ=
+github.com/TopoSimplify/geometry v0.0.3/go.mod h1:gsHuv5HgK+0AmS/hizPb/eGyF8t69EbFBtPAGv64EcY=
+github.com/TopoSimplify/geometry v0.0.4 h1:hZUhuwt/lSmYHDJZwTYuvRa7xax/keLxrUOkUbTnLHE=
+github.com/TopoSimplify/geometry v0.0.4/go.mod h1:6ncphQd75gcbdteAkamPHhByfJM7fK1uPqifY6Kc7Lo=
+github.com/TopoSimplify/geometry v0.0.5 h1:f1H0oL54T+3LvMUkzyS5dztb8A2tRHfYpO+xx/Ds7UQ=
+github.com/TopoSimplify/geometry v0.0.5/go.mod h1:6ncphQd75gcbdteAkamPHhByfJM7fK1uPqifY6Kc7Lo=
 github.com/TopoSimplify/hdb v1.0.0 h1:lsUeuLygVxOPDFMrF4QhAHMD8JzUGqcWCSbulkROeME=
 github.com/TopoSimplify/hdb v1.0.0/go.mod h1:MB4BMYpjC0aq4pryYkFL6SXppkTiZ0n44//KZbLzWno=
 github.com/TopoSimplify/homotopy v0.0.0-20180829041249-ecc681c8cadf h1:wuZfID0IQ+ZlbT0rrvxWbEtBbrxjnaSdI4nS+tvfiE8=
@@ -44,8 +50,10 @@ github.com/TopoSimplify/state v0.0.0-20191217030640-e06ef7ee1bbf h1:J8bGwcWr1eJ5
 github.com/TopoSimplify/state v0.0.0-20191217030640-e06ef7ee1bbf/go.mod h1:Ypy+bICuC3E2H64hKCVTppRhlfQTHsyC4Q2sl6iEjrM=
 github.com/franela/goblin v0.0.0-20200404164657-567a4070c437/go.mod h1:VzmDKDJVZI3aJmnRI9VjAn9nJ8qPPsN1fqzr9dqInIo=
 github.com/franela/goblin v0.0.0-20200409142057-1def193310bb/go.mod h1:VzmDKDJVZI3aJmnRI9VjAn9nJ8qPPsN1fqzr9dqInIo=
+github.com/franela/goblin v0.0.0-20201006155558-6240afcb2eb7/go.mod h1:VzmDKDJVZI3aJmnRI9VjAn9nJ8qPPsN1fqzr9dqInIo=
 github.com/franela/goblin v0.0.0-20210113153425-413781f5e6c8 h1:QVPknD9yAYAmmmERIxdPFY6yf8d7xqoieNs/1C9ieCk=
 github.com/franela/goblin v0.0.0-20210113153425-413781f5e6c8/go.mod h1:VzmDKDJVZI3aJmnRI9VjAn9nJ8qPPsN1fqzr9dqInIo=
+github.com/franela/goblin v0.0.0-20210519012713-85d372ac71e2 h1:cZqz+yOJ/R64LcKjNQOdARott/jP7BnUQ9Ah7KaZCvw=
 github.com/franela/goblin v0.0.0-20210519012713-85d372ac71e2/go.mod h1:VzmDKDJVZI3aJmnRI9VjAn9nJ8qPPsN1fqzr9dqInIo=
 github.com/intdxdt/algor v0.0.0-20171018025553-b04f84e486fd h1:9rgSasT7VYtzw93yu6gGbTW+JBiWJcoaCiZ1Y+wWQC8=
 github.com/intdxdt/algor v0.0.0-20171018025553-b04f84e486fd/go.mod h1:/39eqNevzE7YbmgY5FZTOcaBcGkM63zGC6QBX8Fq9uQ=
@@ -57,6 +65,8 @@ github.com/intdxdt/deque v0.0.0-20171102130235-3e5a69a6fa23 h1:ChKHUyJTApiarUtYE
 github.com/intdxdt/deque v0.0.0-20171102130235-3e5a69a6fa23/go.mod h1:f2J/pg9EV+3GhlZRVkosvb5YAMD8T1O61aR5UhRLi+E=
 github.com/intdxdt/fan v0.0.0-20200301234418-474f7d883d4b h1:9t57O5X2hmFYE8BDd1orAylz3u0jMzSKiZvsBW2V9GE=
 github.com/intdxdt/fan v0.0.0-20200301234418-474f7d883d4b/go.mod h1:eSZCT12vwNXuuTKDWzul/wFU89P9od1vutVjGi2Idco=
+github.com/intdxdt/fileutil v0.0.1 h1:GRrun1n7BGFT4MRY/F1Sh65TE8vXYAyUzhPfxv4/usE=
+github.com/intdxdt/fileutil v0.0.1/go.mod h1:riFb61/YntqmZWMTp8BXTw9OM5hTQhWD9PSVc4jZfa0=
 github.com/intdxdt/geom v1.0.1 h1:jrkcsJugfFHzye0e0CCWMC2XDFK1eu+GKto73AxFOCw=
 github.com/intdxdt/geom v1.0.1/go.mod h1:YZ7A2h4AXPegZKzl3Ds7scfAmC/c3ZjLaqN+S3o9F60=
 github.com/intdxdt/geom v1.0.2 h1:ONOaR+Rivtk4xaC/0cPIGMMY6rSDVrC/Le3sg07qCdE=
@@ -84,3 +94,5 @@ github.com/intdxdt/twiddle v0.0.0-20180605015803-8a5d3aeb2e67 h1:H6F6uuWZ3AhBasA
 github.com/intdxdt/twiddle v0.0.0-20180605015803-8a5d3aeb2e67/go.mod h1:aos2CXzSXDP82nQmZbxyi3w7TAdnhNZ2kLRm3pI5SjI=
 github.com/intdxdt/vect v0.0.0-20191214134333-3fe6478de6f9 h1:CIE8t3REDjNvNXcI0F0LGBNAPWKmZcoa9lnLIXrNJ+c=
 github.com/intdxdt/vect v0.0.0-20191214134333-3fe6478de6f9/go.mod h1:lNiorpH/r7eobvyoFqRYUGM+VF1aYZ166a1Wtq/yjHg=
+github.com/paulmach/go.geojson v1.4.0 h1:5x5moCkCtDo5x8af62P9IOAYGQcYHtxz2QJ3x1DoCgY=
+github.com/paulmach/go.geojson v1.4.0/go.mod h1:YaKx1hKpWF+T2oj2lFJPsW/t1Q5e1jQI61eoQSTwpIs=

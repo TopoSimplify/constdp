@@ -1,6 +1,7 @@
 package constdp
 
 import (
+	"github.com/TopoSimplify/geometry"
 	"github.com/TopoSimplify/offset"
 	"github.com/TopoSimplify/opts"
 	"github.com/franela/goblin"
@@ -18,10 +19,11 @@ func TestConstDP_FC(t *testing.T) {
 		"POLYGON (( 435.6413255044321 1244.880520473631, 435.6413255044321 1313.5981136783437, 529.8098791553348 1313.5981136783437, 529.8098791553348 1244.880520473631, 435.6413255044321 1244.880520473631 ))",
 		"POLYGON (( 700 827.4847691561165, 700 900, 763.9587152602818 900, 763.9587152602818 827.4847691561165, 700 827.4847691561165 ))",
 	}
-	var constraints = make([]geom.Geometry, 0)
-	for _, wkt := range wkts {
-		constraints = append(constraints, geom.ReadGeometry(wkt))
-	}
+	var constraints  = parseConstraintFeatures(wkts)
+	//for _, wkt := range wkts {
+	//	var g  = geom.ReadGeometry(wkt)
+	//	constraints = append(constraints, g)
+	//}
 
 	var extractSimpleSegs = func(forest []*ConstDP) []*geom.LineString {
 		var simpleLns = []*geom.LineString{}
@@ -117,7 +119,7 @@ func TestConstDP_FC(t *testing.T) {
 				"LINESTRING ( 100 200, 0 300, 100 500, 100 700, 300 800, 300 1100, 333.48668893714955 1263.8423649803672, 400 1300, 800 1100, 1100 1100, 1100 900, 1200 900, 1300 700, 1600 700, 1500 500, 1700 400, 1630.634600565117 122.53840226046754, 1600 0, 1100 -200, 600 -200 )",
 				"LINESTRING ( 100 -100, -100 0, -100 100, -200 200, -200 400, -400 500, -500 400, -600 300, -500 100, -300 100, -200 400, -300 700, -200 800, -200 900, 0 800, 300 1100, 300 1300, 600 1400, 900 1500, 1100 1300, 1400 900, 1700 900, 1800 600, 1800 -200 )",
 			}
-			var constraints []geom.Geometry
+			var constraints []geometry.IGeometries
 			constraints = append(constraints, geom.CreatePoint([]float64{1400, 1000}))
 			var plns = make([]*geom.LineString, 0)
 			for _, wkt := range wkts {
